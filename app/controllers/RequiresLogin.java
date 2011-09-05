@@ -31,6 +31,8 @@ import play.templates.JavaExtensions;
  * @author mustpax
  */
 public class RequiresLogin extends Controller {
+    private static final String REDIRECT_URL = "url";
+
     public static final ServiceInfo DROPBOX = new ServiceInfo("https://api.dropbox.com/0/oauth/request_token",
                                                               "https://api.dropbox.com/0/oauth/access_token",
                                                               "https://www.dropbox.com/0/oauth/authorize",
@@ -121,7 +123,7 @@ public class RequiresLogin extends Controller {
     static void checkAccess() throws Throwable {
         if (! isLoggedIn()) {
             if ("GET".equals(request.method)) {
-            	flash.put("url", request.url);
+            	flash.put(REDIRECT_URL, request.url);
             }
 
             login();
@@ -157,7 +159,7 @@ public class RequiresLogin extends Controller {
 			Logger.info("User visited login url, but already logged in.");
 			redirectToOriginalURL();
 		} else {
-			flash.keep("url");
+			flash.keep(REDIRECT_URL);
 			render();
 		}
 	}
@@ -167,17 +169,20 @@ public class RequiresLogin extends Controller {
 	}
 
     public static void auth() throws Exception {
-    	flash.keep();
-    	String token = session.get("token");
-    	String secret = session.get("secret");
-    	if (token != null && secret != null) {
+    	flash.keep(REDIRECT_URL);
+    	if (flash.contains("verifier")) {
+	    	String token = session.get("token");
+	    	String secret = session.get("secret");
             OAuth.Response oauthResponse = OAuth.service(DROPBOX).retrieveAccessToken(token, secret);
             if (oauthResponse.error == null) {
                 session.put("token", oauthResponse.token);
-                session.put("secret", oauthResponse.token);
+                session.put("secret", oauthResponse.secret);
                 session.put("login", "true");
+                redirectToOriginalURL();
             } else {
-                Logger.error("Error connecting to twitter: " + oauthResponse.error);
+                Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
+                session.remove("token", "secret");
+                forbidden("Could not authenticate with Dropbox.");
             }
         } else {
 	        OAuth oauth = OAuth.service(DROPBOX);
@@ -185,23 +190,23 @@ public class RequiresLogin extends Controller {
 	        if (oauthResponse.error == null) {
 	        	session.put("token", oauthResponse.token);
 	        	session.put("secret", oauthResponse.secret);
-	        	redirect(oauth.redirectUrl(oauthResponse.token) + "&oauth_callback=" + URLEncoder.encode("http://localhost:9000/", "UTF-8"));
+	        	flash.put("verifier", "true");
+	        	redirect(oauth.redirectUrl(oauthResponse.token) + "&oauth_callback=" + URLEncoder.encode("http://localhost:9000/auth", "UTF-8"));
 	        } else {
-	            Logger.error("Error connecting to twitter: " + oauthResponse.error);
+	            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
 	        }
         }
-        redirectToOriginalURL();
     }
     
     public static void logout() {
-    	session.remove("username");
-    	redirect("/");
+    	session.remove("token", "secret", "login");
+    	login();
     }
     
     static void redirectToOriginalURL() {
-        String url = flash.get("url");
+        String url = flash.get(REDIRECT_URL);
         if(url == null) {
-            url = "https://" + request.domain + "/";
+            url = "/";
         }
         redirect(url);
     }
