@@ -62,63 +62,6 @@ public class RequiresLogin extends Controller {
     												  request.url), ":"));
     }
 
-    public static final String ERROR_EMAIL = Play.configuration.getProperty("sortinghat.erroremail", null);
-    
-    @Catch(Exception.class)
-    static void logError(Throwable e) {
-        if (ERROR_EMAIL == null) {
-            return;
-        }
-
-        Logger.error(e, "Sending Gack to %s", ERROR_EMAIL);
-        try {
-            SimpleEmail email = new SimpleEmail();
-            Date date = new Date();
-            email.setFrom("sortinghat@heroku.com");
-            email.addTo(ERROR_EMAIL);
-            email.setSubject(String.format("Error at %s logged: %s", date, e.getClass()));
-            StringBuilder body = new StringBuilder();
-            body.append("Date:\t").append(date).append("\n\n");
-            body.append("Session:\t").append(session.get("username")).append("\n\n");
-            body.append("Message:\t").append(e.getMessage()).append("\n\n");
-            body.append("Class:\t").append(e.getClass()).append("\n\n");
-            body.append("Exception trace: ").append(getSTString(e)).append("\n\n");
-            Throwable cause = e.getCause();
-            while (cause != null) {
-	            body.append("New cause\n\n");
-	            body.append("Message:\t").append(cause.getMessage()).append("\n\n");
-	            body.append("Class:\t").append(cause.getClass()).append("\n\n");
-	            body.append("Exception trace: ").append(getSTString(cause)).append("\n\n");
-	            cause = cause.getCause();
-            }
-            addHttpHeaders(body);
-            email.setMsg(body.toString());
-            Mail.send(email);
-        } catch (EmailException emailEx) {
-            Logger.error(emailEx, "Failed to send error email to %s. This is really bad :(", ERROR_EMAIL);
-        }
-    }
-    
-    private static void addHttpHeaders(StringBuilder sb) {
-        sb.append("HTTP Headers:\n");
-        for (Header h: request.headers.values()) {
-            sb.append("Header: ").append(h.name).append("\n");
-            sb.append("Value: ");
-            for (String val: h.values) {
-                sb.append(val).append(",");
-            }
-            sb.append("\n");
-        }
-        sb.append("\n");
-    }
-
-    private static String getSTString(Throwable t) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        t.printStackTrace(pw);
-        return sw.toString();
-    }
-
     @Before(unless={"login", "auth", "logout"})
     static void checkAccess() throws Throwable {
         if (! isLoggedIn()) {
