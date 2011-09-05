@@ -10,11 +10,12 @@ import java.util.Date;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 
+import dropbox.Dropbox;
+
 import play.Logger;
 import play.Play;
 import play.libs.Mail;
 import play.libs.OAuth;
-import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Catch;
 import play.mvc.Controller;
@@ -33,11 +34,6 @@ import play.templates.JavaExtensions;
 public class RequiresLogin extends Controller {
     private static final String REDIRECT_URL = "url";
 
-    public static final ServiceInfo DROPBOX = new ServiceInfo("https://api.dropbox.com/0/oauth/request_token",
-                                                              "https://api.dropbox.com/0/oauth/access_token",
-                                                              "https://www.dropbox.com/0/oauth/authorize",
-                                                              "tkre6hm3z1cvknj", "2hqpa142727u3lr");
-    
     public static final String SESSION_USER = "userid";
     
     @Before(priority=10)
@@ -116,7 +112,7 @@ public class RequiresLogin extends Controller {
     	if (flash.contains("verifier")) {
 	    	String token = session.get("token");
 	    	String secret = session.get("secret");
-            OAuth.Response oauthResponse = OAuth.service(DROPBOX).retrieveAccessToken(token, secret);
+            OAuth.Response oauthResponse = OAuth.service(Dropbox.OAUTH).retrieveAccessToken(token, secret);
             if (oauthResponse.error == null) {
                 session.put("token", oauthResponse.token);
                 session.put("secret", oauthResponse.secret);
@@ -128,7 +124,7 @@ public class RequiresLogin extends Controller {
                 forbidden("Could not authenticate with Dropbox.");
             }
         } else {
-	        OAuth oauth = OAuth.service(DROPBOX);
+	        OAuth oauth = OAuth.service(Dropbox.OAUTH);
 	        OAuth.Response oauthResponse = oauth.retrieveRequestToken();
 	        if (oauthResponse.error == null) {
 	        	session.put("token", oauthResponse.token);
@@ -137,6 +133,7 @@ public class RequiresLogin extends Controller {
 	        	redirect(oauth.redirectUrl(oauthResponse.token) + "&oauth_callback=" + URLEncoder.encode("http://localhost:9000/auth", "UTF-8"));
 	        } else {
 	            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
+	            error("Error connecting to Dropbox.");
 	        }
         }
     }
