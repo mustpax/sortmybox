@@ -1,5 +1,10 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-<h1>Your files</h1>
-${resp}
+<h1>User</h1>
+<ul>
+<li>${user.uid}
+<li>${user.name}
+<li>${user.email}
+</ul>
+

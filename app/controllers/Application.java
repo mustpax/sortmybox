@@ -1,15 +1,9 @@
 package controllers;
 
-import play.*;
-import play.libs.WS;
-import play.libs.WS.WSRequest;
-import play.mvc.*;
-
-import java.util.*;
-
+import play.mvc.Controller;
+import play.mvc.With;
 import dropbox.Dropbox;
-
-import models.*;
+import dropbox.gson.DbxUser;
 
 /**
  * @author mustpax
@@ -19,8 +13,8 @@ public class Application extends Controller {
     public static void index() {
         String token = session.get("token");
         String secret = session.get("secret");
-        WSRequest ws = WS.url("https://api.dropbox.com/0/account/info").oauth(Dropbox.OAUTH, token, secret);
-        String resp = ws.get().getString();
-        render(resp);
+        Dropbox d = new Dropbox(token, secret);
+        DbxUser user = d.getUser();
+        render(user);
     }
 }
