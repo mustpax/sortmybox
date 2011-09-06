@@ -2,6 +2,8 @@ package dropbox;
 
 import java.util.Set;
 
+import oauth.signpost.OAuth;
+
 import play.Logger;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.WS;
@@ -16,9 +18,9 @@ import dropbox.gson.DbxUser;
 
 public class Dropbox {
     public static final ServiceInfo OAUTH = new ServiceInfo("https://api.dropbox.com/0/oauth/request_token",
-      "https://api.dropbox.com/0/oauth/access_token",
-      "https://www.dropbox.com/0/oauth/authorize",
-      "tkre6hm3z1cvknj", "2hqpa142727u3lr");
+													        "https://api.dropbox.com/0/oauth/access_token",
+													        "https://www.dropbox.com/0/oauth/authorize",
+													        "tkre6hm3z1cvknj", "2hqpa142727u3lr");
     
     private String token;
     private String secret;
@@ -65,7 +67,7 @@ public class Dropbox {
 	        }
 	        return ret;
         } else {
-            Logger.error(resp.getJson().getAsJsonObject().get("error").getAsString());
+            Logger.error("Failed listing '%s'. %s", path, getError(resp));
             return null;
         }
     }
@@ -79,16 +81,21 @@ public class Dropbox {
             throw new IllegalArgumentException("To and from paths should start with /");
         }
         
-        
-        WSRequest ws = WS.url(String.format("https://api.dropbox.com/0/fileops/move?from_path=%s&to_path=%s&root=dropbox", encodeParam(from), encodeParam(to)))
+        WSRequest ws = WS.url(String.format("https://api.dropbox.com/0/fileops/move?from_path=%s&to_path=%s&root=dropbox",
+                                            encodeParam(from),
+                                            encodeParam(to)))
 				         .oauth(Dropbox.OAUTH, token, secret);
         HttpResponse resp = ws.post();
         if (resp.success()) {
-            Logger.info("Successfully moved files.");
+            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
 	        return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
         }
-        Logger.warn("Failed to move files. %s", resp.getJson().getAsJsonObject().get("error").getAsString());
+        Logger.warn("Failed to move files. Error: %s", getError(resp));
         return null;
+    }
+    
+    private static String getError(HttpResponse resp) {
+         return resp.getJson().getAsJsonObject().get("error").getAsString();
     }
     
     /**
@@ -101,6 +108,6 @@ public class Dropbox {
     }
 
     private static String encodeParam(String param) {
-        return WS.encode(param.toLowerCase()).replaceAll("\\+", "%20");
+        return OAuth.percentEncode(param.toLowerCase());
     }
  } 
