@@ -72,6 +72,6 @@ public class Dropbox {
     }
 
     public static String encodeParam(String param) {
-        return WS.encode(param).replaceAll("\\+", "%20");
+        return WS.encode(param.toLowerCase()).replaceAll("\\+", "%20");
     }
  } 
