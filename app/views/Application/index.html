@@ -8,3 +8,10 @@
 <li>${user.email}
 </ul>
 
+<h1>Files</h1>
+<ul>
+#{list files, as:'file'}
+    <li>${file}
+#{/list}
+</ul>
+

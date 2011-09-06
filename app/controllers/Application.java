@@ -1,5 +1,9 @@
 package controllers;
 
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import play.mvc.Controller;
 import play.mvc.With;
 import dropbox.Dropbox;
@@ -15,6 +19,7 @@ public class Application extends Controller {
         String secret = session.get("secret");
         Dropbox d = new Dropbox(token, secret);
         DbxUser user = d.getUser();
-        render(user);
+        Set<String> files = d.listDir("/");
+        render(user, files);
     }
 }
