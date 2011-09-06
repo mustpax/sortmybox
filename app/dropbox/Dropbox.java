@@ -33,6 +33,12 @@ public class Dropbox {
         return new Gson().fromJson(ws.get().getJson(), DbxUser.class);
     }
     
+    /**
+     * Get all files, excluding directories, inside the given directory.
+     * 
+     * @param path path to the directory to check with the leading /
+     * @return set of files (not directories) inside the directory
+     */
     public Set<String> listDir(String path) {
         if (path == null) {
             throw new NullPointerException("Path missing.");
@@ -53,13 +59,36 @@ public class Dropbox {
 
 	        Set<String> ret = Sets.newHashSet();
 	        for (DbxMetadata entry: metadata.contents) {
-	            ret.add(entry.path);
+	            if (! entry.isDir) {
+	                ret.add(entry.path);
+	            }
 	        }
-        return ret;
+	        return ret;
         } else {
             Logger.error(resp.getJson().getAsJsonObject().get("error").getAsString());
             return null;
         }
+    }
+    
+    public DbxMetadata move(String from, String to) {
+        if (from == null || to == null) {
+            throw new NullPointerException("To and from paths cannot be null.");
+        }
+
+        if ((from.charAt(0) != '/') || (to.charAt(0) != '/')) {
+            throw new IllegalArgumentException("To and from paths should start with /");
+        }
+        
+        
+        WSRequest ws = WS.url(String.format("https://api.dropbox.com/0/fileops/move?from_path=%s&to_path=%s&root=dropbox", encodeParam(from), encodeParam(to)))
+				         .oauth(Dropbox.OAUTH, token, secret);
+        HttpResponse resp = ws.post();
+        if (resp.success()) {
+            Logger.info("Successfully moved files.");
+	        return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+        }
+        Logger.warn("Failed to move files. %s", resp.getJson().getAsJsonObject().get("error").getAsString());
+        return null;
     }
     
     /**
@@ -67,11 +96,11 @@ public class Dropbox {
      * file paths. So we have to use %20 instead of + and not 
      * escape "/" seperators
      */
-    public static String encodePath(String param) {
+    private static String encodePath(String param) {
         return encodeParam(param).replaceAll("%2F", "/");
     }
 
-    public static String encodeParam(String param) {
+    private static String encodeParam(String param) {
         return WS.encode(param.toLowerCase()).replaceAll("\\+", "%20");
     }
  } 

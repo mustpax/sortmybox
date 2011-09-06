@@ -14,12 +14,20 @@ import dropbox.gson.DbxUser;
  */
 @With(RequiresLogin.class)
 public class Application extends Controller {
+    public static String FOLDER = "/Sortbox";
+
     public static void index() {
         String token = session.get("token");
         String secret = session.get("secret");
         Dropbox d = new Dropbox(token, secret);
         DbxUser user = d.getUser();
-        Set<String> files = d.listDir("/");
+        Set<String> files = d.listDir(FOLDER);
+        d.move("/test ?", "/test &");
         render(user, files);
+    }
+    
+    public static void process() {
+        checkAuthenticity();
+        index();
     }
 }
