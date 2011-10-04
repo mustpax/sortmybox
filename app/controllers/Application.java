@@ -12,7 +12,6 @@ import dropbox.gson.DbxUser;
 /**
  * @author mustpax
  */
-@With(RequiresLogin.class)
 public class Application extends Controller {
     public static String FOLDER = "/Sortbox";
 
@@ -29,5 +28,9 @@ public class Application extends Controller {
     public static void process() {
         checkAuthenticity();
         index();
+    }
+
+    public static void proto() {
+        render();
     }
 }
