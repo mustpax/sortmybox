@@ -1,21 +1,22 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-<h1>User</h1>
-<ul>
-<li>${user.uid}
-<li>${user.name}
-<li>${user.email}
-</ul>
+<div class="container">
+    <h1>User</h1>
+    <ul>
+        <li>${user.uid}
+        <li>${user.name}
+        <li>${user.email}
+    </ul>
 
-#{form @process(), method:'POST'}
+    #{form @process(), method:'POST'}
     <input type="submit" value="Update">
-#{/form}
+    #{/form}
 
-<h1>Files</h1>
-<ul>
-#{list files, as:'file'}
-    <li>${file}
-#{/list}
-</ul>
-
+    <h1>Files</h1>
+    <ul>
+        #{list files, as:'file'}
+        <li>${file}
+        #{/list}
+    </ul>
+</div>
