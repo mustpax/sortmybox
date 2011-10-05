@@ -3,4 +3,5 @@
 require:
     - play
     - play -> secure
+    - play -> gae 1.4
     - com.google.guava -> guava r09
