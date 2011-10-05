@@ -21,7 +21,6 @@ public class Application extends Controller {
         Dropbox d = new Dropbox(token, secret);
         DbxUser user = d.getUser();
         Set<String> files = d.listDir(FOLDER);
-        d.move("/test ?", "/test &");
         render(user, files);
     }
     
