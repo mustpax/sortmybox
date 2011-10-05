@@ -130,7 +130,11 @@ public class RequiresLogin extends Controller {
 	        	session.put("token", oauthResponse.token);
 	        	session.put("secret", oauthResponse.secret);
 	        	flash.put("verifier", "true");
-	        	redirect(oauth.redirectUrl(oauthResponse.token) + "&oauth_callback=" + URLEncoder.encode("http://localhost:9000/auth", "UTF-8"));
+	        	redirect(oauth.redirectUrl(oauthResponse.token) +
+                         "&oauth_callback=" +
+                         URLEncoder.encode(Play.mode.isDev() ? 
+                                           "http://localhost:9000/auth" : 
+                                           "http://sort-box.appspot.com/auth", "UTF-8"));
 	        } else {
 	            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
 	            error("Error connecting to Dropbox.");
