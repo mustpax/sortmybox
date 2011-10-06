@@ -1,20 +1,75 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-<h1>User</h1>
-<ul>
-    <li>${user.uid}
-    <li>${user.name}
-    <li>${user.email}
-</ul>
+<!-- Main hero unit for a primary marketing message or call to action -->
+<div class="hero-unit">
+  <h1>Sorting rules</h1>
+  <p>Add or edit sorting rules. Rules are applied top to bottom. Rule evaluation stops at first match.</p>
+  <table>
+    <tr>
+      <th></th>
+      <th>When</th>
+      <th>To</th>
+      <th>Move file to</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>
+        <select>
+          <option>Name contains</option>
+          <option>Name equals</option>
+          <option>Name regex</option>
+          <option selected="yes">Extension equals</option>
+        </select>
+      </td>
+      <td><input type="text" value="pdf"></td>
+      <td><input type="text" value="/target"></td>
+      <td><a class="btn">Del</a></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>
+        <select>
+          <option>Name contains</option>
+          <option>Name equals</option>
+          <option>Name regex</option>
+          <option>Extension equals</option>
+        </select>
+      </td>
+      <td><input type="text"></td>
+      <td><input type="text"></td>
+      <td><a class="btn">Add</a></td>
+    </tr>
+  </table>
+  <p>
+    <a class="btn primary large">Run rules now</a>
+    <small>Last ran 3 minutes ago</small>
+  </p>
+</div>
 
-#{form @process(), method:'POST'}
-<input type="submit" value="Update">
-#{/form}
+<!-- Example row of columns -->
+<div class="row">
+  <div class="span8">
+    <h2>User</h2>
+    <ul>
+      <li>${user.uid}
+      <li>${user.name}
+      <li>${user.email}
+    </ul>
+  </div>
+  
+  <div class="span8">
+    <h2>Files</h2>
+    <ul>
+        #{list files, as:'file'}
+        <li>${file}
+        #{/list}
+    </ul>
 
-<h1>Files</h1>
-<ul>
-    #{list files, as:'file'}
-    <li>${file}
-    #{/list}
-</ul>
+    #{form @process(), method:'POST'}
+    <input type="submit" value="Update">
+    #{/form}
+  </div>
+</div>
+
+
