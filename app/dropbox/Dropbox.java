@@ -95,7 +95,7 @@ public class Dropbox {
     }
     
     private static String getError(HttpResponse resp) {
-         return resp.getJson().getAsJsonObject().get("error").getAsString();
+        return resp.getJson().getAsJsonObject().get("error").getAsString();
     }
     
     /**
