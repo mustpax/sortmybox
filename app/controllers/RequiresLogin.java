@@ -58,7 +58,7 @@ public class RequiresLogin extends Controller {
     												  request.url), ":"));
     }
 
-    @Before(unless={"login", "auth", "logout"})
+    @Before(unless={"login", "auth", "logout", "offline"})
     static void checkAccess() throws Throwable {
         if (! isLoggedIn()) {
             if ("GET".equals(request.method)) {
@@ -104,7 +104,8 @@ public class RequiresLogin extends Controller {
 	}
 
 	public static boolean isLoggedIn() {
-	    return "true".equals(session.get("login"));
+	    return "true".equals(session.get("login")) || 
+	           "true".equals(session.get("offline"));
 	}
 
     public static void auth() throws Exception {
@@ -153,5 +154,14 @@ public class RequiresLogin extends Controller {
             url = "/";
         }
         redirect(url);
+    }
+
+    /**
+     * Allow development when Dropbox is unreachable by creating a dummy user.
+     */
+    public static void offline() {
+        assert Play.mode.isDev();
+        session.put("offline", "true");
+        Application.index();
     }
 }

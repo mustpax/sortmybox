@@ -10,6 +10,7 @@ POST    /update                                 Application.process
 GET     /auth                                   RequiresLogin.auth
 GET     /login                                  RequiresLogin.login
 GET     /logout                                 RequiresLogin.logout
+GET     /offline                                RequiresLogin.offline
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

@@ -17,11 +17,20 @@ public class Application extends Controller {
     public static String FOLDER = "/Sortbox";
 
     public static void index() {
-        String token = session.get("token");
-        String secret = session.get("secret");
-        Dropbox d = new Dropbox(token, secret);
-        DbxUser user = d.getUser();
-        Set<String> files = d.listDir(FOLDER);
+        DbxUser user;
+        Set<String> files = null;
+        if ("true".equals(session.get("offline"))) {
+            user = new DbxUser();
+            user.uid = 1L;
+            user.email = "test@user.com";
+            user.name = "Test User";
+        } else {
+            String token = session.get("token");
+            String secret = session.get("secret");
+            Dropbox d = new Dropbox(token, secret);
+            user = d.getUser();
+            files = d.listDir(FOLDER);
+        } 
         render(user, files);
     }
     
