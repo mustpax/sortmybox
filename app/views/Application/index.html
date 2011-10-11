@@ -84,7 +84,25 @@
     #{/form}
   </div>
   #{set 'script'}
+      var validateCell = function(cell) {
+        console.log('validate', cell);
+        return true;
+      };
+
+      var validate = function(row) {
+        var ret = true;
+
+        $.each(['pattern', 'dest'], function() {
+          ret = validateCell(row.find('.' + this)) && ret;
+        });
+
+        return ret;
+      };
+
       $('.rules .add').live('click', function() {
+        if (! validate($(this).parents('tr').first())) {
+          return;
+        }
         var add = this;
         var tbody = $(add).parents('tbody').first();
         var new_ = tbody.children('tr.new');
