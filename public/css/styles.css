@@ -5,3 +5,7 @@
 .rules .error input {
     border-color: #C87872;
 }
+
+.rules .error .msg {
+    color: #C87872;
+}
