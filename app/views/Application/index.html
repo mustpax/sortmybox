@@ -24,7 +24,7 @@
       </td>
       <td><input class="to" type="text" value="pdf"></td>
       <td><input class="dest" type="text" value="/target"></td>
-      <td><a class="btn">Del</a></td>
+      <td><a class="del btn">Del</a></td>
     </tr>
     <tr>
       <td>2</td>
@@ -96,6 +96,10 @@
         $(add).text('Del');
         $(add).removeClass('add');
         $(add).addClass('del');
+      });
+
+      $('.rules .del').live('click', function() {
+        $(this).parents('tr').first().hide('fast').remove();
       });
   #{/set}
 </div>
