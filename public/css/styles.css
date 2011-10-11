@@ -1,0 +1,7 @@
+.rules .error {
+    background: #FAE5E3;
+}
+
+.rules .error input {
+    border-color: #C87872;
+}

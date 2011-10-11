@@ -85,8 +85,14 @@
   </div>
   #{set 'script'}
       var validateCell = function(cell) {
-        console.log('validate', cell);
-        return true;
+        console.log('validate', cell, cell.val());
+        var ret = !! cell.val();
+        if (ret) {
+            cell.parent().removeClass('error');
+        } else {
+            cell.parent().addClass('error');
+        }
+        return !! cell.val();
       };
 
       var validate = function(row) {
