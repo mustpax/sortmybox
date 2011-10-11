@@ -87,10 +87,13 @@
       var validateCell = function(cell) {
         console.log('validate', cell, cell.val());
         var ret = !! cell.val();
+
+        cell.parent().find('.msg').hide().remove();
         if (ret) {
             cell.parent().removeClass('error');
         } else {
             cell.parent().addClass('error');
+            cell.parent().append('<span class="msg">Value is missing.</span>');
         }
         return !! cell.val();
       };
