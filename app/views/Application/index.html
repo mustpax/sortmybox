@@ -22,8 +22,8 @@
           <option selected="yes">Extension equals</option>
         </select>
       </td>
-      <td><input type="text" value="pdf"></td>
-      <td><input type="text" value="/target"></td>
+      <td><input class="to" type="text" value="pdf"></td>
+      <td><input class="dest" type="text" value="/target"></td>
       <td><a class="btn">Del</a></td>
     </tr>
     <tr>
@@ -36,8 +36,22 @@
           <option>Extension equals</option>
         </select>
       </td>
-      <td><input type="text"></td>
-      <td><input type="text"></td>
+      <td><input class="to" type="text"></td>
+      <td><input class="dest" type="text"></td>
+      <td><a class="btn add">Add</a></td>
+    </tr>
+    <tr class="new" style="display: none;">
+      <td>3</td>
+      <td>
+        <select>
+          <option>Name contains</option>
+          <option>Name equals</option>
+          <option>Name regex</option>
+          <option>Extension equals</option>
+        </select>
+      </td>
+      <td><input class="to" type="text"></td>
+      <td><input class="dest" type="text"></td>
       <td><a class="btn add">Add</a></td>
     </tr>
   </table>
@@ -71,8 +85,17 @@
     #{/form}
   </div>
   #{set 'script'}
-      $('.rules .add').click(function() {
-        console.log(this);
+      $('.rules .add').live('click', function() {
+        var add = this;
+        var tbody = $(add).parents('tbody').first();
+        var new_ = tbody.children('tr.new');
+        tbody.append(new_.clone());
+        new_.removeClass('new');
+        new_.show('fast');
+
+        $(add).text('Del');
+        $(add).removeClass('add');
+        $(add).addClass('del');
       });
   #{/set}
 </div>
