@@ -5,7 +5,7 @@
 <div class="hero-unit">
   <h1>Sorting rules</h1>
   <p>Add or edit sorting rules. Rules are applied top to bottom. Rule evaluation stops at first match.</p>
-  <table>
+  <table class="rules">
     <tr>
       <th></th>
       <th>When</th>
@@ -38,7 +38,7 @@
       </td>
       <td><input type="text"></td>
       <td><input type="text"></td>
-      <td><a class="btn">Add</a></td>
+      <td><a class="btn add">Add</a></td>
     </tr>
   </table>
   <p>
@@ -70,6 +70,11 @@
     <input type="submit" value="Update">
     #{/form}
   </div>
+  #{set 'script'}
+      $('.rules .add').click(function() {
+        console.log(this);
+      });
+  #{/set}
 </div>
 
 
