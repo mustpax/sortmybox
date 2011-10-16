@@ -115,9 +115,10 @@
         var add = this;
         var tbody = $(add).parents('tbody').first();
         var new_ = tbody.children('tr.new');
-        tbody.append(new_.clone());
+        var new2 = new_.clone().hide();
+        tbody.append(new2);
         new_.removeClass('new');
-        new_.show('fast');
+        new2.show('slow');
 
         $(add).text('Del');
         $(add).removeClass('add');
@@ -126,7 +127,7 @@
       });
 
       $('.rules .del').live('click', function() {
-        $(this).parents('tr').first().hide('fast').remove();
+        $(this).parents('tr').first().hide('fast', function() { $(this).remove(); });
       });
 
       /**
