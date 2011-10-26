@@ -117,13 +117,13 @@
         var new_ = tbody.children('tr.new');
         var new2 = new_.clone().hide();
         tbody.append(new2);
-        new_.removeClass('new');
+        new2.removeClass('new');
+        new2.addClass('rule');
         new2.show('slow');
 
         $(add).text('Del');
         $(add).removeClass('add');
         $(add).addClass('del');
-        $(add).addClass('rule');
       });
 
       $('.rules .del').live('click', function() {
