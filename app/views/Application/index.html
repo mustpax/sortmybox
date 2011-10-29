@@ -15,24 +15,9 @@
       <td>1</td>
       <td>
         <select>
-          <option>Name contains</option>
-          <option>Name equals</option>
-          <option>Name regex</option>
-          <option selected="yes">Extension equals</option>
-        </select>
-      </td>
-      <td><input class="pattern" type="text" value="pdf"></td>
-      <td><input class="dest" type="text" value="/target"></td>
-      <td><a class="del btn">Del</a></td>
-    </tr>
-    <tr class="rule">
-      <td>2</td>
-      <td>
-        <select>
-          <option>Name contains</option>
-          <option>Name equals</option>
-          <option>Name regex</option>
-          <option>Extension equals</option>
+          <option value="NAME_CONTAINS">Name contains</option>
+          <option value="EXT_EQ">Extension equals</option>
+          <option value="NAME_GLOB">Name pattern</option>
         </select>
       </td>
       <td><input class="pattern" type="text"></td>
@@ -43,10 +28,9 @@
       <td>3</td>
       <td>
         <select>
-          <option>Name contains</option>
-          <option>Name equals</option>
-          <option>Name regex</option>
-          <option>Extension equals</option>
+          <option value="NAME_CONTAINS">Name contains</option>
+          <option value="EXT_EQ">Extension equals</option>
+          <option value="NAME_GLOB">Name pattern</option>
         </select>
       </td>
       <td><input class="pattern" type="text"></td>
@@ -55,7 +39,7 @@
     </tr>
   </table>
   <p>
-    <a class="btn primary large run">Run rules now</a>
+    <a class="btn primary large save">Save</a>
     <small>Last ran 3 minutes ago</small>
   </p>
 </div>
@@ -147,8 +131,17 @@
          return ret;
       };
 
-      $('.run').live('click', function() {
-        console.log(serialize());
+      $('.save').live('click', function() {
+        var rules = serialize();
+        console.log(rules);
+        $.ajax({
+            type: 'POST',
+            url: '/rules',
+            data: { 'rules': JSON.stringify(rules) },
+            success: function() {
+                console.log('success');
+            }
+        })
       });
   #{/set}
 </div>

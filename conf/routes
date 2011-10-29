@@ -7,6 +7,9 @@ GET     /                                       Application.index
 GET     /proto                                  Application.proto
 POST    /update                                 Application.process
 
+# Rules
+POST    /rules                                  Rules.update
+
 GET     /auth                                   RequiresLogin.auth
 GET     /login                                  RequiresLogin.login
 GET     /logout                                 RequiresLogin.logout
