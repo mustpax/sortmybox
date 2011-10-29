@@ -1,11 +1,14 @@
 package controllers;
 
+import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
-
+import models.Rule;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.appengine.api.datastore.Entity;
+
 import dropbox.Dropbox;
 import dropbox.gson.DbxUser;
 
@@ -31,7 +34,8 @@ public class Application extends Controller {
             user = d.getUser();
             files = d.listDir(FOLDER);
         } 
-        render(user, files);
+        Iterable<Entity> rules = Rule.getAll();
+        render(user, files, rules);
     }
     
     public static void process() {
