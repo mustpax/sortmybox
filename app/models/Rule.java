@@ -24,6 +24,10 @@ public class Rule {
         return String.format("Rule Type: %s Pattern: '%s' Dest: '%s'",
                              this.type, this.pattern, this.dest);
     }
+
+    public boolean matches(String fileName) {
+        return this.type.matches(this.pattern, fileName);
+    }
     
     public static Iterable<Entity> getAll() {
         Query q = new Query("rule");
@@ -69,8 +73,12 @@ public class Rule {
         NAME_CONTAINS {
             @Override
             public boolean matches(String pattern, String fileName) {
-                // TODO Auto-generated method stub
-                return false;
+                if ((pattern  == null) ||
+                    (fileName == null)) {
+                    return false;
+                }
+
+                return fileName.contains(pattern);
             }
         },
         NAME_GLOB {
