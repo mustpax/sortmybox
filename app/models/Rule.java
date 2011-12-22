@@ -2,6 +2,8 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
+import java.lang.*;
 
 import play.Logger;
 
@@ -81,11 +83,11 @@ public class Rule {
                 return fileName.contains(pattern);
             }
         },
-        NAME_GLOB {
+        GLOB {
             @Override
             public boolean matches(String pattern, String fileName) {
-                // TODO Auto-generated method stub
-                return false;
+                Matcher m = getGlobPattern(pattern).matcher(fileName);
+                return m.matches();
             }
         },
         EXT_EQ {
@@ -104,5 +106,40 @@ public class Rule {
          * @return true if given file name matches the current pattern
          */
         public abstract boolean matches(String pattern, String fileName);
+    }
+
+    /**
+     * Return a regex pattern that will match the given glob pattern.
+     *
+     * Only ? and * are supported.
+     * TODO use a memoizer to cache compiled patterns.
+     * TODO Collapse consecutive *'s.
+     */
+    private static Pattern getGlobPattern(String glob) {
+        if (glob == null) {
+            return Pattern.compile("");
+        }
+
+        StringBuilder out = new StringBuilder();
+        for(int i = 0; i < glob.length(); ++i) {
+            final char c = glob.charAt(i);
+            switch(c) {
+            case '*':
+                out.append(".*");
+                break;
+            case '?':
+                out.append(".");
+                break;
+            case '.':
+                out.append("\\.");
+                break;
+            case '\\':
+                out.append("\\\\");
+                break;
+            default:
+                out.append(c);
+            }
+        }
+        return Pattern.compile(out.toString());
     }
 }
