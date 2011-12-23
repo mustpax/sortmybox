@@ -144,7 +144,7 @@ public class RequiresLogin extends Controller {
     }
     
     public static void logout() {
-    	session.remove("token", "secret", "login");
+    	session.remove("token", "secret", "login", "offline");
     	login();
     }
     
