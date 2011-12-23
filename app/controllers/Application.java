@@ -42,8 +42,4 @@ public class Application extends Controller {
         checkAuthenticity();
         index();
     }
-
-    public static void proto() {
-        render();
-    }
 }

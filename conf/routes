@@ -4,7 +4,6 @@
 
 # Home page
 GET     /                                       Application.index
-GET     /proto                                  Application.proto
 POST    /update                                 Application.process
 
 # Rules
