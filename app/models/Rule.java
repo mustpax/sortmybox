@@ -93,8 +93,13 @@ public class Rule {
         EXT_EQ {
             @Override 
             public boolean matches(String pattern, String fileName) {
-                // TODO Auto-generated method stub
-                return false;
+                String ext = getExtFromName(fileName);
+                if ((ext == null) ||
+                    (pattern == null)) {
+                    return false;
+                }
+
+                return ext.toLowerCase().equals(pattern.toLowerCase());
             }
         };
 
@@ -141,5 +146,40 @@ public class Rule {
             }
         }
         return Pattern.compile(out.toString());
+    }
+
+    /**
+     * Extract the file extension from the file name.
+     *
+     * If the file name starts with a period but does not contain any other
+     * periods we say that it doesn't have an extension.
+     *
+     * Otherwise all text after the last period in the filename is taken to be
+     * the extension even if it contains spaces.
+     * 
+     * Examples:
+     * ".bashrc" has no extension
+     * ".foo.pdf" has the extension pdf
+     * "file.ext ension" has extension "ext ension"
+     *
+     * @return file extension
+     */
+    private static String getExtFromName(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+
+        int extBegin = fileName.lastIndexOf(".");
+
+        if (extBegin <= 0) {
+            return null;
+        }
+
+        String ret = fileName.substring(extBegin + 1);
+        if (ret.isEmpty()) {
+            return null;
+        }
+
+        return ret;
     }
 }

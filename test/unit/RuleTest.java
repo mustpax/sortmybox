@@ -58,4 +58,34 @@ public class RuleTest extends UnitTest {
         assertTrue(r.matches("   foo"));
         assertTrue(r.matches(" foo&."));
     }
+
+    @Test
+    public void testExtEquals() {
+        models.Rule r = new models.Rule();
+        r.type = models.Rule.RuleType.EXT_EQ;
+        r.dest = "/tmp";
+
+        r.pattern = null;
+        assertFalse(r.matches("foo"));
+        assertFalse(r.matches(null));
+        assertFalse(r.matches(""));
+
+        r.pattern = "pdf";
+        assertFalse(r.matches("foo"));
+        assertFalse(r.matches(""));
+        assertFalse(r.matches(null));
+        assertFalse(r.matches(".pdf"));
+        assertFalse(r.matches("pdf"));
+        assertFalse(r.matches("pdf.txt"));
+        assertFalse(r.matches("foo.pdf.txt"));
+        assertFalse(r.matches("file. pdf"));
+        assertFalse(r.matches("file.pdf "));
+
+        assertTrue(r.matches("x pdf.pdf"));
+        assertTrue(r.matches("x pdf .pDf"));
+        assertTrue(r.matches("file.name.PdF"));
+
+        r.pattern = "p d f";
+        assertTrue(r.matches("file.p d F"));
+    }
 }
