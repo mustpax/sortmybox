@@ -102,7 +102,7 @@ public class Rule {
                     return false;
                 }
 
-                return fileName.contains(pattern);
+                return fileName.toLowerCase().contains(pattern.toLowerCase());
             }
         },
         GLOB {
