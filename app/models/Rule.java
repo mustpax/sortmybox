@@ -20,6 +20,8 @@ public class Rule {
     public RuleType type;
     public String pattern;
     public String dest;
+    public Long rank;
+    public Key key;
     
     @Override
     public String toString() {
@@ -31,7 +33,7 @@ public class Rule {
         return this.type.matches(this.pattern, fileName);
     }
     
-    public static Iterable<Entity> getAll() {
+    public static Iterable<Entity> getAllEntities() {
         Query q = new Query("rule");
         q.addSort("rank");
         
@@ -41,9 +43,13 @@ public class Rule {
         return pq.asIterable();
     }
 
+    public static Iterable<Rule> getAll() {
+        return Iterables.transform(getAllEntities(), new RuleConvertor());
+    }
+    
     public static void saveRules(List<Rule> rules) {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        datastore.delete(Iterables.transform(getAll(), new KeyExtractor()));
+        datastore.delete(Iterables.transform(getAllEntities(), new KeyExtractor()));
         
         if (rules == null || rules.isEmpty()) {
             return;
@@ -68,6 +74,22 @@ public class Rule {
         @Override
         public Key apply(Entity ent) {
             return ent.getKey();
+        }
+    }
+
+    public static class RuleConvertor implements Function<Entity, Rule> {
+        @Override
+        public Rule apply(Entity ent) {
+            if (ent == null) {
+                return null;
+            }
+            Rule r = new Rule();
+            r.dest = (String) ent.getProperty("dest");
+            r.type = RuleType.valueOf((String) ent.getProperty("type"));
+            r.pattern = (String) ent.getProperty("pattern");
+            r.key = ent.getKey();
+            r.rank = (Long) ent.getProperty("rank");
+            return r;
         }
     }
     
