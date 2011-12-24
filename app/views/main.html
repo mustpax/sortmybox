@@ -40,11 +40,13 @@
           </ul>
           <p class="pull-right">
           #{if user}
-              Logged in as <a href="#">${user.name}</a></p>
+              Logged in as <a href="#">${user.name}</a>
+              <a href="/logout">Logout</a>
           #{/if}
           #{else}
               <a href="@{RequiresLogin.login()}">Login</a>
           #{/else}
+          </p>
         </div>
       </div>
     </div>
