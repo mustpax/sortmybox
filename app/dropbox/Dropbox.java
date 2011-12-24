@@ -104,10 +104,12 @@ public class Dropbox {
      * escape "/" seperators
      */
     private static String encodePath(String param) {
+        // XXX this will incorrectly unescape %%2F
         return encodeParam(param).replaceAll("%2F", "/");
     }
 
     private static String encodeParam(String param) {
+        // XXX should we toLowerCase here?
         return OAuth.percentEncode(param.toLowerCase());
     }
  } 
