@@ -3,6 +3,8 @@ package controllers;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
+import com.google.appengine.api.datastore.EntityNotFoundException;
+
 import models.User;
 
 import play.Logger;
@@ -146,6 +148,22 @@ public class RequiresLogin extends Controller {
         Dropbox d = new Dropbox(token, secret);
         DbxUser dbxUser = d.getUser();
         return User.getOrCreate(dbxUser, token, secret);
+    }
+    
+    /**
+     * @return the currently logged in user, null if no logged in user
+     */
+    public static User getUser() {
+        String uid = session.get("uid");
+        try {
+            return User.get(Long.valueOf(uid));
+        } catch (NumberFormatException e) {
+            Logger.error(e, "Invalidly formatted or missing uid: %s", uid);
+            return null;
+        } catch (EntityNotFoundException e) {
+            Logger.error(e, "User missing. Uid: %s", uid);
+            return null;
+        }
     }
 
     public static void logout() {

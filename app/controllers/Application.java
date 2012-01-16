@@ -20,32 +20,27 @@ public class Application extends Controller {
     public static String FOLDER = "/Sortbox";
 
     public static void index() {
-        try {
 //          if ("true".equals(session.get("offline"))) {
 //          user = new DbxUser();
 //          user.uid = 1L;
 //          user.email = "test@user.com";
 //          user.name = "Test User";
             
-            User user = User.get(Long.valueOf(session.get("uid")));
-            Dropbox d = new Dropbox(user.getToken(), user.getSecret());
-            Set<String> files = d.listDir(FOLDER);
-            Iterable<Rule> rules = Rule.getAll();
-            render(user, files, rules);
-        } catch (EntityNotFoundException e) {
-            throw new RuntimeException("User not found", e);
-        }
+        User user = RequiresLogin.getUser();
+        Dropbox d = Dropbox.get();
+        Set<String> files = d.listDir(FOLDER);
+        Iterable<Rule> rules = Rule.getAll();
+        render(user, files, rules);
     }
     
     public static void process() {
         checkAuthenticity();
 
-        String token = session.get("token");
-        String secret = session.get("secret");
-        Dropbox d = new Dropbox(token, secret);
+        Dropbox d = Dropbox.get();
         Set<String> files = d.listDir(FOLDER);
         Iterable<Rule> rules = Rule.getAll();
-
+        
+        // TODO return list of moves performed
         for (String file: files) {
             String base = basename(file);
             for (Rule r: rules) {

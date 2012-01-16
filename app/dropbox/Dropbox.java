@@ -2,6 +2,8 @@ package dropbox;
 
 import java.util.Set;
 
+import models.User;
+
 import oauth.signpost.OAuth;
 
 import play.Logger;
@@ -12,6 +14,8 @@ import play.libs.WS.WSRequest;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+
+import controllers.RequiresLogin;
 
 import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxUser;
@@ -94,9 +98,18 @@ public class Dropbox {
         return null;
     }
     
+    /**
+     * @return the correct Dropbox instance for the currently logged in user
+     */
+    public static Dropbox get() {
+        User u = RequiresLogin.getUser();
+        return new Dropbox(u.getToken(), u. getSecret());
+    }
+    
     private static String getError(HttpResponse resp) {
         return resp.getJson().getAsJsonObject().get("error").getAsString();
     }
+    
     
     /**
      * WS.oauth() signing does not play nice with full URL encoded
