@@ -1,26 +1,19 @@
 package controllers;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.Date;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-
-import dropbox.Dropbox;
+import models.User;
 
 import play.Logger;
 import play.Play;
-import play.libs.Mail;
 import play.libs.OAuth;
 import play.mvc.Before;
-import play.mvc.Catch;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
 import play.templates.JavaExtensions;
+import dropbox.Dropbox;
+import dropbox.gson.DbxUser;
 
 /**
  * Make given controller or controller methods require login.
@@ -115,9 +108,10 @@ public class RequiresLogin extends Controller {
 	    	String secret = session.get("secret");
             OAuth.Response oauthResponse = OAuth.service(Dropbox.OAUTH).retrieveAccessToken(token, secret);
             if (oauthResponse.error == null) {
-                session.put("token", oauthResponse.token);
-                session.put("secret", oauthResponse.secret);
+                Logger.info("Succesfully authenticated with Dropbox.");
                 session.put("login", "true");
+                User u = upsertUser(oauthResponse.token, oauthResponse.secret);
+                session.put("uid", u.getUId());
                 redirectToOriginalURL();
             } else {
                 Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
@@ -143,6 +137,16 @@ public class RequiresLogin extends Controller {
         }
     }
     
+    /**
+     * Ensure that the Dropbox user authenticated with the given oauth credentials
+     * is in the datastore.
+     */
+    private static User upsertUser(String token, String secret) {
+        Dropbox d = new Dropbox(token, secret);
+        DbxUser dbxUser = d.getUser();
+        return User.getOrCreate(dbxUser, token, secret);
+    }
+
     public static void logout() {
     	session.remove("token", "secret", "login", "offline");
     	login();
