@@ -112,6 +112,7 @@ public class RequiresLogin extends Controller {
                 session.put("login", "true");
                 User u = upsertUser(oauthResponse.token, oauthResponse.secret);
                 session.put("uid", u.getUId());
+                session.remove("token", "secret");
                 redirectToOriginalURL();
             } else {
                 Logger.error("Error connecting to Dropbox: " + oauthResponse.error);

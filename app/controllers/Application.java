@@ -3,15 +3,14 @@ package controllers;
 import java.io.File;
 import java.util.Set;
 
+import com.google.appengine.api.datastore.EntityNotFoundException;
+
 import models.Rule;
+import models.User;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import com.google.appengine.api.datastore.Entity;
-
 import dropbox.Dropbox;
-import dropbox.gson.DbxUser;
 
 /**
  * @author mustpax
@@ -21,22 +20,21 @@ public class Application extends Controller {
     public static String FOLDER = "/Sortbox";
 
     public static void index() {
-        DbxUser user;
-        Set<String> files = null;
-        if ("true".equals(session.get("offline"))) {
-            user = new DbxUser();
-            user.uid = 1L;
-            user.email = "test@user.com";
-            user.name = "Test User";
-        } else {
-            String token = session.get("token");
-            String secret = session.get("secret");
-            Dropbox d = new Dropbox(token, secret);
-            user = d.getUser();
-            files = d.listDir(FOLDER);
-        } 
-        Iterable<Rule> rules = Rule.getAll();
-        render(user, files, rules);
+        try {
+//          if ("true".equals(session.get("offline"))) {
+//          user = new DbxUser();
+//          user.uid = 1L;
+//          user.email = "test@user.com";
+//          user.name = "Test User";
+            
+            User user = User.get(Long.valueOf(session.get("uid")));
+            Dropbox d = new Dropbox(user.getToken(), user.getSecret());
+            Set<String> files = d.listDir(FOLDER);
+            Iterable<Rule> rules = Rule.getAll();
+            render(user, files, rules);
+        } catch (EntityNotFoundException e) {
+            throw new RuntimeException("User not found", e);
+        }
     }
     
     public static void process() {

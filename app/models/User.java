@@ -8,6 +8,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 
 import dropbox.gson.DbxUser;
 
@@ -40,6 +41,17 @@ public class User {
 
     public Key getKey() {
         return this.entity.getKey();
+    }
+    
+    /**
+     * @return corresponding user for this id
+     * @throws EntityNotFoundException if user not found
+     */
+    public static User get(long uid) throws EntityNotFoundException {
+        Key k = KeyFactory.createKey("user", uid);
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        return new User(datastore.get(k));
     }
     
     public static User getOrCreate(DbxUser u, String token, String secret) {
