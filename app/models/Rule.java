@@ -13,8 +13,11 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+
+import controllers.RequiresLogin;
 
 public class Rule {
     public RuleType type;
@@ -34,7 +37,12 @@ public class Rule {
     }
     
     public static Iterable<Entity> getAllEntities() {
+        return getAllEntities(RequiresLogin.getUser());
+    }
+    
+    public static Iterable<Entity> getAllEntities(User owner) {
         Query q = new Query("rule");
+        q.addFilter("owner", FilterOperator.EQUAL, owner.getKey());
         q.addSort("rank");
         
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -44,10 +52,18 @@ public class Rule {
     }
 
     public static Iterable<Rule> getAll() {
-        return Iterables.transform(getAllEntities(), new RuleConvertor());
+        return getAll(RequiresLogin.getUser());
+    }
+    
+    public static Iterable<Rule> getAll(User owner) {
+        return Iterables.transform(getAllEntities(owner), new RuleConvertor());
     }
     
     public static void saveRules(List<Rule> rules) {
+        saveRules(RequiresLogin.getUser(), rules);
+    }
+
+    public static void saveRules(User owner, List<Rule> rules) {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.delete(Iterables.transform(getAllEntities(), new KeyExtractor()));
         
@@ -63,6 +79,7 @@ public class Rule {
             rule.setProperty("type", r.type.name());
             rule.setProperty("pattern", r.pattern);
             rule.setProperty("dest", r.dest);
+            rule.setProperty("owner", owner.getKey());
             ents.add(rule);
             Logger.info("Processed rule: %s", rule);
         }
