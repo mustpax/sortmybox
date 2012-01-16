@@ -52,6 +52,7 @@ public class Application extends Controller {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule key: %s", file, r.dest, r.key);
                     d.move(file, r.dest + "/" + base);
+                    break;
                 }
             }
         }
