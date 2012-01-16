@@ -13,4 +13,8 @@ public class DbxUser {
 
     @SerializedName("display_name")
     public String name;
+
+    public boolean notNull() {
+        return uid != null;
+    }
 }
