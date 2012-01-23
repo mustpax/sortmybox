@@ -1,7 +1,7 @@
 package controllers;
 
 import java.io.File;
-import java.util.Set;
+import java.util.*;
 
 import com.google.appengine.api.datastore.EntityNotFoundException;
 
@@ -29,7 +29,10 @@ public class Application extends Controller {
         User user = RequiresLogin.getUser();
         Dropbox d = Dropbox.get();
         Set<String> files = d.listDir(FOLDER);
-        Iterable<Rule> rules = Rule.getAll();
+        List<Rule> rules = new ArrayList<Rule>();
+        for (Rule r: Rule.getAll()) {
+            rules.add(r);
+        }
         render(user, files, rules);
     }
     
