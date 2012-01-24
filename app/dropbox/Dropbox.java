@@ -24,7 +24,7 @@ import dropbox.gson.DbxUser;
 public class Dropbox {
 	
 	private static final String pCONSUMER_KEY = "dropbox.consumerKey";
-	private static final String pCONSUMER_SECRET = "dropbx.consumerSecret";
+	private static final String pCONSUMER_SECRET = "dropbox.consumerSecret";
 	
     public static final ServiceInfo OAUTH = new ServiceInfo("https://api.dropbox.com/0/oauth/request_token",
 													        "https://api.dropbox.com/0/oauth/access_token",
