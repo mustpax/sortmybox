@@ -7,6 +7,7 @@ import models.User;
 import oauth.signpost.OAuth;
 
 import play.Logger;
+import play.Play;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
@@ -21,10 +22,15 @@ import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxUser;
 
 public class Dropbox {
+	
+	private static final String pCONSUMER_KEY = "dropbox.consumerKey";
+	private static final String pCONSUMER_SECRET = "dropbx.consumerSecret";
+	
     public static final ServiceInfo OAUTH = new ServiceInfo("https://api.dropbox.com/0/oauth/request_token",
 													        "https://api.dropbox.com/0/oauth/access_token",
 													        "https://www.dropbox.com/0/oauth/authorize",
-													        "tkre6hm3z1cvknj", "2hqpa142727u3lr");
+													        Play.configuration.getProperty(pCONSUMER_KEY),
+													        Play.configuration.getProperty(pCONSUMER_SECRET));
     
     private String token;
     private String secret;
