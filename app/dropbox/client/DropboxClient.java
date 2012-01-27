@@ -3,6 +3,7 @@ package dropbox.client;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import play.Play;
 import play.libs.OAuth.ServiceInfo;
@@ -22,9 +23,9 @@ public interface DropboxClient {
      * 
      * @param from A file or folder to move
      * @param to The new destination
-     * @return The metadata for the moved file or folder.
+     * @return The metadata for the moved file or folder, null if there's a failure
      */
-    @Nonnull DbxMetadata move(String from, String to);
+    @Nullable DbxMetadata move(String from, String to);
     
     /**
      * Get all files, excluding directories, inside the given directory.
