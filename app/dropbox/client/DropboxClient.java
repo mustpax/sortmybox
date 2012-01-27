@@ -8,15 +8,14 @@ import play.Play;
 import play.libs.OAuth.ServiceInfo;
 
 import dropbox.gson.DbxMetadata;
-import dropbox.gson.DbxUser;
+import dropbox.gson.DbxAccount;
 
 public interface DropboxClient {
 
     /**
      * Gets information about currently logged in user's Dropbox account.
      */
-    // TODO(syyang): perhaps rename it as DbxAccount?
-    @Nonnull DbxUser getUser();
+    @Nonnull DbxAccount getAccount();
     
     /**
      * Moves a file or folder to a new location.

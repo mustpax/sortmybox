@@ -22,10 +22,10 @@ public class Application extends Controller {
 
     public static void index() {
 //          if ("true".equals(session.get("offline"))) {
-//          user = new DbxUser();
-//          user.uid = 1L;
-//          user.email = "test@user.com";
-//          user.name = "Test User";
+//          account = new DbxAccount();
+//          account = 1L;
+//          account.email = "test@user.com";
+//          account.name = "Test User";
             
         User user = RequiresLogin.getUser();
         DropboxClient client = DropboxClientFactory.create();

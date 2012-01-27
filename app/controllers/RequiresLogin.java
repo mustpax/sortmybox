@@ -20,7 +20,7 @@ import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
-import dropbox.gson.DbxUser;
+import dropbox.gson.DbxAccount;
 
 /**
  * Make given controller or controller methods require login.
@@ -154,8 +154,8 @@ public class RequiresLogin extends Controller {
      */
     private static User upsertUser(String token, String secret) {
         DropboxClient client = DropboxClientFactory.create(token, secret);
-        DbxUser dbxUser = client.getUser();
-        return User.findOrCreateByDbxUser(dbxUser, token, secret);
+        DbxAccount account = client.getAccount();
+        return User.findOrCreateByDbxAccount(account, token, secret);
     }
     
     /**

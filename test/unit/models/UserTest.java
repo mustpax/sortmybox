@@ -5,7 +5,7 @@ import models.User;
 import org.junit.After;
 import org.junit.Test;
 
-import dropbox.gson.DbxUser;
+import dropbox.gson.DbxAccount;
 
 import play.test.UnitTest;
 
@@ -51,23 +51,23 @@ public class UserTest extends UnitTest {
     }
 
     @Test
-    public void testFindOrCreateByDbxUser() throws Exception {
-        // if DbxUser is null, findOrCreateByDbxUser should just return null
-        assertNull(User.findOrCreateByDbxUser(null, TOKEN, SECRET));
+    public void testFindOrCreateByDbxAccount() throws Exception {
+        // if DbxAccount is null, findOrCreateByDbxAccount should just return null
+        assertNull(User.findOrCreateByDbxAccount(null, TOKEN, SECRET));
 
-        DbxUser dbxUser = new DbxUser();
-        dbxUser.uid = ID;
-        dbxUser.name = NAME;
+        DbxAccount account = new DbxAccount();
+        account.uid = ID;
+        account.name = NAME;
 
         // verify a new User is created
-        User user = new User(dbxUser, TOKEN, SECRET);
-        assertEquals(user, User.findOrCreateByDbxUser(dbxUser, TOKEN, SECRET));
+        User user = new User(account, TOKEN, SECRET);
+        assertEquals(user, User.findOrCreateByDbxAccount(account, TOKEN, SECRET));
 
         // verify stale fields are updated
         String token2 = TOKEN + "2";
         String secret2 = SECRET + "2";
         user.token = token2;
         user.secret = secret2;
-        assertEquals(user, User.findOrCreateByDbxUser(dbxUser, token2, secret2));
+        assertEquals(user, User.findOrCreateByDbxAccount(account, token2, secret2));
     }
 }

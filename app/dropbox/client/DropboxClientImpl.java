@@ -22,7 +22,7 @@ import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.DropboxURLs;
 import dropbox.gson.DbxMetadata;
-import dropbox.gson.DbxUser;
+import dropbox.gson.DbxAccount;
 
 /**
  * REST API Client for Dropbox
@@ -41,9 +41,9 @@ class DropboxClientImpl implements DropboxClient {
     }
 
     @Override
-    public DbxUser getUser() {
+    public DbxAccount getAccount() {
         WSRequest ws = new WSRequestFactory(DropboxURLs.ACCOUNT, token, secret).create();
-        return new Gson().fromJson(ws.get().getJson(), DbxUser.class);
+        return new Gson().fromJson(ws.get().getJson(), DbxAccount.class);
     }
 
     @Override

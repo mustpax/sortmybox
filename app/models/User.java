@@ -13,7 +13,7 @@ import siena.Model;
 import siena.NotNull;
 import siena.Query;
 
-import dropbox.gson.DbxUser;
+import dropbox.gson.DbxAccount;
 
 /**
  * Model for a user.
@@ -37,8 +37,8 @@ public class User extends Model {
 
     public User() { }
 
-    public User(DbxUser dbxUser, String token, String secret) {
-        this(dbxUser.uid, dbxUser.name, token, secret, null);
+    public User(DbxAccount account, String token, String secret) {
+        this(account.uid, account.name, token, secret, null);
     }
 
     public User(Long id, String name, String token, String secret, String email) {
@@ -57,12 +57,12 @@ public class User extends Model {
         return all().filter("id", id).get();
     }
     
-    public static User findOrCreateByDbxUser(DbxUser dbxUser, String token, String secret) {
-        if (dbxUser == null || !dbxUser.notNull())
+    public static User findOrCreateByDbxAccount(DbxAccount account, String token, String secret) {
+        if (account == null || !account.notNull())
             return null;
-        User user = findById(dbxUser.uid);
+        User user = findById(account.uid);
         if (user == null) {
-            user = new User(dbxUser, token, secret);
+            user = new User(account, token, secret);
             user.insert();
         } else if (!user.token.equals(token) || !user.secret.equals(secret)){
             // TODO: update other fields if stale
