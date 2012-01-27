@@ -1,15 +1,38 @@
-package unit;
+package unit.models;
 
 import play.test.*;
 import org.junit.*;
 import models.*;
+import models.Rule;
+import models.Rule.RuleType;
  
 public class RuleTest extends UnitTest {
+
+    @Test
+    public void testCRUD() throws Exception {
+        Rule rule = new Rule(RuleType.GLOB, "a", "b", 1, 2L);
+        
+        // verify insert
+        rule.insert();
+        long id = rule.id;
+        assertEquals(rule, Rule.findById(id));
+
+        // verify update
+        RuleType type2 = RuleType.NAME_CONTAINS;
+        rule.type = type2;
+        rule.update();
+        assertEquals(rule, Rule.findById(id));
+
+        // verify delete
+        rule.delete();
+        assertNull(Rule.findById(id));
+    }
+
     @Test
     public void testNameContains() {
-        models.Rule r = new models.Rule();
+        Rule r = new Rule();
         r.pattern = "foo";
-        r.type = models.Rule.RuleType.NAME_CONTAINS;
+        r.type = RuleType.NAME_CONTAINS;
         r.dest = "/tmp";
 
         assertFalse(r.matches("bar"));
@@ -19,8 +42,8 @@ public class RuleTest extends UnitTest {
 
     @Test
     public void testGlob() {
-        models.Rule r = new models.Rule();
-        r.type = models.Rule.RuleType.GLOB;
+        Rule r = new Rule();
+        r.type = RuleType.GLOB;
         r.dest = "/tmp";
 
         r.pattern = "foo";
@@ -61,8 +84,8 @@ public class RuleTest extends UnitTest {
 
     @Test
     public void testExtEquals() {
-        models.Rule r = new models.Rule();
-        r.type = models.Rule.RuleType.EXT_EQ;
+        Rule r = new Rule();
+        r.type = RuleType.EXT_EQ;
         r.dest = "/tmp";
 
         r.pattern = null;

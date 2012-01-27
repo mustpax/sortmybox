@@ -1,23 +1,24 @@
 package controllers;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
-
-import com.google.appengine.api.datastore.EntityNotFoundException;
 
 import models.Rule;
 import models.User;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import siena.Query;
 import dropbox.Dropbox;
+import dropbox.client.DropboxClient;
+import dropbox.client.DropboxClientFactory;
 
 /**
  * @author mustpax
  */
 @With(RequiresLogin.class)
 public class Application extends Controller {
-    public static String FOLDER = "/Sortbox";
 
     public static void index() {
 //          if ("true".equals(session.get("offline"))) {
@@ -27,26 +28,26 @@ public class Application extends Controller {
 //          user.name = "Test User";
             
         User user = RequiresLogin.getUser();
-        Dropbox d = Dropbox.get();
-        Set<String> files = d.listDir(FOLDER);
-        Iterable<Rule> rules = Rule.getAll();
+        DropboxClient client = DropboxClientFactory.create();
+        Set<String> files = client.listDir(Dropbox.ROOT_DIR);
+        List<Rule> rules = Rule.all().fetch();
         render(user, files, rules);
     }
     
     public static void process() {
         checkAuthenticity();
 
-        Dropbox d = Dropbox.get();
-        Set<String> files = d.listDir(FOLDER);
-        Iterable<Rule> rules = Rule.getAll();
+        DropboxClient client = DropboxClientFactory.create();
+        Set<String> files = client.listDir(Dropbox.ROOT_DIR);
+        Iterable<Rule> rules = Rule.all().iter();
         
         // TODO return list of moves performed
         for (String file: files) {
             String base = basename(file);
             for (Rule r: rules) {
                 if (r.matches(base)) {
-                    Logger.info("Moving file '%s' to '%s'. Rule key: %s", file, r.dest, r.key);
-                    d.move(file, r.dest + "/" + base);
+                    Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
+                    client.move(file, r.dest + "/" + base);
                     break;
                 }
             }

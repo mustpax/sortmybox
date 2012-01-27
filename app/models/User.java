@@ -2,90 +2,112 @@ package models;
 
 import java.util.Arrays;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Query;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.google.common.base.Objects;
+
+import siena.Generator;
+import siena.Id;
+import siena.Model;
+import siena.NotNull;
+import siena.Query;
 
 import dropbox.gson.DbxUser;
 
-public class User {
-    private Entity entity;
+/**
+ * Model for a user.
+ * 
+ * @author mustpax
+ * @author syyang
+ */
+public class User extends Model {
     
-    private User(Entity e) {
-        this.entity = e;
-    }
-
-    public long getUId() {
-        return (Long) this.entity.getProperty("uid");
-    }
+    // the id will be explicitly set to Dropbox uid
+    @Id(Generator.NONE)
+    public Long id;
     
-    public String getToken() {
-        return (String) this.entity.getProperty("token");
-    }
-
-    public String getSecret() {
-        return (String) this.entity.getProperty("secret");
-    }
-
-    public String getEmail() {
-        return (String) this.entity.getProperty("email");
-    }
-
-    public String getName() {
-        return (String) this.entity.getProperty("name");
-    }
-
-    public Key getKey() {
-        return this.entity.getKey();
-    }
+    public String token;
     
-    /**
-     * @return corresponding user for this id
-     * @throws EntityNotFoundException if user not found
-     */
-    public static User get(long uid) throws EntityNotFoundException {
-        Key k = KeyFactory.createKey("user", uid);
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    public String secret;
+    
+    public String email;
 
-        return new User(datastore.get(k));
+    public String name;
+
+    public User() { }
+
+    public User(DbxUser dbxUser, String token, String secret) {
+        this(dbxUser.uid, dbxUser.name, token, secret, null);
+    }
+
+    public User(Long id, String name, String token, String secret, String email) {
+        this.id = id;
+        this.name = name;
+        this.token = token;
+        this.secret = secret;
+        this.email = email;
     }
     
-    public static User getOrCreate(DbxUser u, String token, String secret) {
-        if ((u == null) ||
-            ! u.notNull()) {
+    public static Query<User> all() {
+        return Model.all(User.class);
+    }
+    
+    public static User findById(Long id) {
+        return all().filter("id", id).get();
+    }
+    
+    public static User findOrCreateByDbxUser(DbxUser dbxUser, String token, String secret) {
+        if (dbxUser == null || !dbxUser.notNull())
             return null;
+        User user = findById(dbxUser.uid);
+        if (user == null) {
+            user = new User(dbxUser, token, secret);
+            user.insert();
+        } else if (!user.token.equals(token) || !user.secret.equals(secret)){
+            // TODO: update other fields if stale
+            user.token = token;
+            user.secret = secret;
+            user.update();
         }
-        Key k = KeyFactory.createKey("user", u.uid);
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        return user;
+    }
 
-        Entity e;
-        try {
-            e = datastore.get(k);
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hash = new HashCodeBuilder()
+            .append(this.id)
+            .append(this.name)
+            .append(this.secret)
+            .append(this.token)
+            .append(this.email);
+        return hash.hashCode();
+    }
 
-            // TODO update other fields if stale
-            User tmp = new User(e);
-            if ((! token.equals(tmp.getToken())) ||
-                (! secret.equals(tmp.getSecret()))) {
-                e.setProperty("token", token);
-                e.setProperty("secret", secret);
-                datastore.put(e);
-            }
-        } catch (EntityNotFoundException e1) {
-            e = new Entity(k);
-            e.setProperty("uid", u.uid);
-            e.setProperty("token", token);
-            e.setProperty("secret", secret);
-            e.setProperty("email", u.email);
-            e.setProperty("name", u.name);
-            datastore.put(e);
-        }
-
-        return new User(e);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        EqualsBuilder eq = new EqualsBuilder()
+            .append(this.id, other.id)
+            .append(this.name, other.name)
+            .append(this.secret, other.secret)
+            .append(this.token, other.token)
+            .append(this.email, other.email);
+        return eq.isEquals();
     }
     
-    
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(User.class)
+            .add("id", id)
+            .add("name", name)
+            .add("email", email)        
+            .toString();
+    }
 }
