@@ -51,5 +51,4 @@ test-result/
 # Makefile related
 /.lastdepsrun
 
-# Ignore conf/secrects.conf
-conf/secrects.conf
+conf/secret.conf
