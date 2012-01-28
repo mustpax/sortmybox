@@ -1,115 +1,32 @@
 package models;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.*;
-import java.lang.*;
+import java.util.regex.Matcher;
 
-import play.Logger;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 import controllers.RequiresLogin;
 
-public class Rule {
-    public RuleType type;
-    public String pattern;
-    public String dest;
-    public Long rank;
-    public Key key;
-    
-    @Override
-    public String toString() {
-        return String.format("Rule Type: %s Pattern: '%s' Dest: '%s'",
-                             this.type, this.pattern, this.dest);
-    }
+import play.Logger;
 
-    public boolean matches(String fileName) {
-        return this.type.matches(this.pattern, fileName);
-    }
-    
-    public static Iterable<Entity> getAllEntities() {
-        return getAllEntities(RequiresLogin.getUser());
-    }
-    
-    public static Iterable<Entity> getAllEntities(User owner) {
-        Query q = new Query("rule");
-        q.addFilter("owner", FilterOperator.EQUAL, owner.getKey());
-        q.addSort("rank");
-        
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        PreparedQuery pq = datastore.prepare(q);
-        
-        return pq.asIterable();
-    }
+import models.Rule.RuleType;
+import siena.Column;
+import siena.Generator;
+import siena.Id;
+import siena.Model;
+import siena.Query;
 
-    public static Iterable<Rule> getAll() {
-        return getAll(RequiresLogin.getUser());
-    }
-    
-    public static Iterable<Rule> getAll(User owner) {
-        return Iterables.transform(getAllEntities(owner), new RuleConvertor());
-    }
-    
-    public static void saveRules(List<Rule> rules) {
-        saveRules(RequiresLogin.getUser(), rules);
-    }
+/**
+ * 
+ * @author mustpax
+ * @author syyang
+ */
+public class Rule extends Model {
 
-    public static void saveRules(User owner, List<Rule> rules) {
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        datastore.delete(Iterables.transform(getAllEntities(), new KeyExtractor()));
-        
-        if (rules == null || rules.isEmpty()) {
-            return;
-        }
-        
-        int rank = 0;
-        List<Entity> ents = new ArrayList<Entity>(rules.size());
-        for (Rule r: rules) {
-            Entity rule = new Entity("rule");
-            rule.setProperty("rank", rank++);
-            rule.setProperty("type", r.type.name());
-            rule.setProperty("pattern", r.pattern);
-            rule.setProperty("dest", r.dest);
-            rule.setProperty("owner", owner.getKey());
-            ents.add(rule);
-            Logger.info("Processed rule: %s", rule);
-        }
-        
-        Logger.info("Saved entities: %s:", datastore.put(ents));
-    }
-    
-    public static class KeyExtractor implements Function<Entity, Key> {
-        @Override
-        public Key apply(Entity ent) {
-            return ent.getKey();
-        }
-    }
-
-    public static class RuleConvertor implements Function<Entity, Rule> {
-        @Override
-        public Rule apply(Entity ent) {
-            if (ent == null) {
-                return null;
-            }
-            Rule r = new Rule();
-            r.dest = (String) ent.getProperty("dest");
-            r.type = RuleType.valueOf((String) ent.getProperty("type"));
-            r.pattern = (String) ent.getProperty("pattern");
-            r.key = ent.getKey();
-            r.rank = (Long) ent.getProperty("rank");
-            return r;
-        }
-    }
-    
     public static enum RuleType {
         NAME_CONTAINS {
             @Override
@@ -125,14 +42,14 @@ public class Rule {
         GLOB {
             @Override
             public boolean matches(String pattern, String fileName) {
-                Matcher m = getGlobPattern(pattern).matcher(fileName);
+                Matcher m = RuleUtils.getGlobPattern(pattern).matcher(fileName);
                 return m.matches();
             }
         },
         EXT_EQ {
             @Override 
             public boolean matches(String pattern, String fileName) {
-                String ext = getExtFromName(fileName);
+                String ext = RuleUtils.getExtFromName(fileName);
                 if ((ext == null) ||
                     (pattern == null)) {
                     return false;
@@ -152,73 +69,104 @@ public class Rule {
         public abstract boolean matches(String pattern, String fileName);
     }
 
-    /**
-     * Return a regex pattern that will match the given glob pattern.
-     *
-     * Only ? and * are supported.
-     * TODO use a memoizer to cache compiled patterns.
-     * TODO Collapse consecutive *'s.
-     */
-    private static Pattern getGlobPattern(String glob) {
-        if (glob == null) {
-            return Pattern.compile("");
-        }
+    @Id
+    public Long id;
 
-        StringBuilder out = new StringBuilder();
-        for(int i = 0; i < glob.length(); ++i) {
-            final char c = glob.charAt(i);
-            switch(c) {
-            case '*':
-                out.append(".*");
-                break;
-            case '?':
-                out.append(".");
-                break;
-            case '.':
-                out.append("\\.");
-                break;
-            case '\\':
-                out.append("\\\\");
-                break;
-            default:
-                out.append(c);
-            }
-        }
-        return Pattern.compile(out.toString());
+    public RuleType type; 
+
+    public String pattern;
+
+    public String dest;
+
+    public Integer rank;
+
+    public Long owner;
+
+    public Rule() {}
+    
+    public Rule(RuleType type, String pattern, String dest, Integer rank, Long owner) {
+        this.type = type;
+        this.pattern = pattern;
+        this.dest = dest;
+        this.rank = rank;
+        this.owner = owner;
     }
 
-    /**
-     * Extract the file extension from the file name.
-     *
-     * If the file name starts with a period but does not contain any other
-     * periods we say that it doesn't have an extension.
-     *
-     * Otherwise all text after the last period in the filename is taken to be
-     * the extension even if it contains spaces.
-     * 
-     * Examples:
-     * ".bashrc" has no extension
-     * ".foo.pdf" has the extension pdf
-     * "file.ext ension" has extension "ext ension"
-     *
-     * @return file extension
-     */
-    private static String getExtFromName(String fileName) {
-        if (fileName == null) {
-            return null;
-        }
-
-        int extBegin = fileName.lastIndexOf(".");
-
-        if (extBegin <= 0) {
-            return null;
-        }
-
-        String ret = fileName.substring(extBegin + 1);
-        if (ret.isEmpty()) {
-            return null;
-        }
-
-        return ret;
+    public boolean matches(String fileName) {
+        return type.matches(this.pattern, fileName);
     }
+
+    public static Query<Rule> all() {
+        return Model.all(Rule.class);
+    }
+    
+    public static Rule findById(Long id) {
+        return all().filter("id", id).get();
+    }
+    
+    public static List<Rule> findByOwner(User owner) {
+        Query<Rule> query = all();
+        query.filter("owner", owner.id);
+        query.order("rank");
+        return query.fetch();
+    }
+
+    public static void insert(List<Rule> rules) {
+        insert(RequiresLogin.getUser(), rules);
+    }
+
+    public static void insert(User owner, List<Rule> rules) {
+        if (rules == null || rules.isEmpty()) {
+            return;
+        }
+        
+        int rank = 0;
+        for (Rule rule : rules) {
+            rule.rank = rank++;
+            rule.owner = owner.id;
+        }
+        Model.batch(Rule.class).insert(rules);
+        Logger.info("Saved entities: %s:", rules);
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hash = new HashCodeBuilder()
+            .append(this.id)
+            .append(this.type)
+            .append(this.pattern)
+            .append(this.dest)
+            .append(this.rank)
+            .append(this.owner);
+        return hash.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Rule other = (Rule) obj;
+        EqualsBuilder eq = new EqualsBuilder()
+            .append(this.id, other.id)
+            .append(this.type, other.type)
+            .append(this.pattern, other.pattern)
+            .append(this.dest, other.dest)
+            .append(this.rank, other.rank)
+            .append(this.owner, other.owner);
+        return eq.isEquals();
+    }
+    
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(User.class)
+            .add("rule type", type)
+            .add("pattern", pattern)
+            .add("dest", dest)        
+            .toString();
+    }
+
 }

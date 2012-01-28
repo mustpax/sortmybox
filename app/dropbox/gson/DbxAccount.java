@@ -3,10 +3,10 @@ package dropbox.gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Represents a Dropbox user as represented in the API.
+ * Represents a Dropbox user account as represented in the API.
  * @author mustpax
  */
-public class DbxUser {
+public class DbxAccount {
     public Long uid;
     
     public String email;
