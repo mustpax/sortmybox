@@ -14,8 +14,8 @@ GET     /login                                  RequiresLogin.login
 GET     /logout                                 RequiresLogin.logout
 GET     /offline                                RequiresLogin.offline
 
-# Ignore favicon requests
-GET     /favicon.ico                            404
+# Redirect for favicon.ico
+GET     /favicon.ico                            staticFile:public/img/favicon.ico
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
