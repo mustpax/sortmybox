@@ -2,7 +2,7 @@
 <cronentries>
     <cron>
         <url>/cron/RuleProcessor</url>
-        <description>Run RuleProcessor task</description>
-        <schedule>every 60 seconds</schedule>
+        <description>Runs RuleProcessor job</description>
+        <schedule>every 15 minutes</schedule>
     </cron>
 </cronentries>

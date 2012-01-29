@@ -2,8 +2,6 @@ package controllers;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
@@ -11,6 +9,7 @@ import common.reflection.ReflectionUtils;
 import common.request.Headers;
 import cron.Job;
 
+import play.Logger;
 import play.mvc.Controller;
 import tasks.TaskContext;
 
@@ -25,13 +24,11 @@ import tasks.TaskContext;
  */
 public class CronManager extends Controller {
 
-    private static final Logger logger = Logger.getLogger(CronManager.class);
-
     public static final String pJOB_NAME = "jobName";
     
     public static void process() {
         if (isRequestFromCronService()) {
-            logger.warn("CronManager:request is not from cron service. exiting:" + request.url);
+            Logger.warn("CronManager: request is not from cron service: " + request.url);
             return;
         }
 
@@ -40,24 +37,24 @@ public class CronManager extends Controller {
             String className = getJobClassName(request.url);
             job = ReflectionUtils.newInstance(Job.class, className);
         } catch (Exception e) {
-            logger.error("CronManager:failed to instantiate:"+request.url, e);
+            Logger.error("CronManager failed to instantiate: "+request.url, e);
             return;
         }
         
-        process2(job, request.params.allSimple());
+        process(job, request.params.allSimple());
     }
 
-    private static void process2(Job job, Map<String, String> jobData) {
+    private static void process(Job job, Map<String, String> jobData) {
         assert job != null : "Job can't be null";
         assert jobData != null : "Job data can't be null";
         
         String jobName = job.getClass().getSimpleName();
         try {
             job.execute(jobData);
-            logger.info("CronManager:executed successfully:" + jobName);
+            Logger.info("CronManager successfully executed: " + jobName);
         } catch (Throwable t) {
             // TODO (syyang): we should send out a gack here...
-            logger.error("CronManager:" + jobName + ":failed to execute", t);
+            Logger.error("CronManager failed to execute: " + jobName, t);
             // queued tasks rely on propagating the exception for retry
             Throwables.propagate(t);
         }

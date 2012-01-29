@@ -11,8 +11,8 @@ POST    /rules                                  Rules.update
 
 # Background tasks
 # TODO(syyang): secure /tasks and /cron path
-GET     /tasks/{<.*>rest}                       TaskManager.process
-POST    /tasks/{<.*>rest}                       TaskManager.process
+GET     /tasks                                  TaskManager.process
+POST    /tasks                                  TaskManager.process
 
 GET     /cron/{<.*>rest}                        CronManager.process
 POST    /cron/{<.*>rest}                        CronManager.process

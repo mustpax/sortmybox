@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queue-entries>
+    <!--Limit the total storage limit for all queues to 50MB-->
+    <total-storage-limit>50M</total-storage-limit>
+    <queue>
+        <name>ChunkedRuleProcessor</name>
+        <rate>5/s</rate>
+        <bucket-size>40</bucket-size>
+        <max-concurrent-requests>10</max-concurrent-requests>
+        <retry-parameters>
+            <task-retry-limit>5</task-retry-limit>
+            <min-backoff-seconds>10</min-backoff-seconds>
+            <max-backoff-seconds>200</max-backoff-seconds>
+            <max-doublings>2</max-doublings>
+        </retry-parameters>    
+    </queue>
+</queue-entries>

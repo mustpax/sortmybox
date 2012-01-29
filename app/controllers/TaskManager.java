@@ -1,18 +1,14 @@
 package controllers;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import com.google.common.base.Throwables;
-import com.google.common.collect.MapMaker;
 
 import common.reflection.ReflectionUtils;
 import common.request.Headers;
 
+import play.Logger;
 import play.mvc.Controller;
 import tasks.Task;
 import tasks.TaskContext;
@@ -24,15 +20,13 @@ import tasks.TaskContext;
  * @author syyang
  */
 public class TaskManager extends Controller {
-    
-    private static final Logger logger = Logger.getLogger(TaskManager.class);
 
     /**
      * Executes the task specified by the request url.
      */
     public static void process() {
-        if (isRequestFromQueueService()) {
-            logger.warn("TaskManager:request is not from queue service. exiting:" + request.url);
+        if (!isRequestFromQueueService()) {
+            Logger.warn("TaskManager:request is not from queue service.");
             return;
         }
         
@@ -42,7 +36,7 @@ public class TaskManager extends Controller {
             context = new TaskContext(request);
             task = ReflectionUtils.newInstance(Task.class, context.getTaskClassName());
         } catch (Exception e) {
-            logger.error("TaskManager:failed to instantiate:" + request.url, e);
+            Logger.error("TaskManager failed to instantiate: " + request.url, e);
             return;
         }
 
@@ -55,10 +49,10 @@ public class TaskManager extends Controller {
         String taskName = context.getTaskName();
         try {
             task.execute(context);
-            logger.info("TaskManager:executed successfully:" + taskName);
+            Logger.info("TaskManager succesfully executed: " + taskName);
         } catch (Throwable t) {
             // TODO(syyang): we should send out a gack here...
-            logger.error("TaskManager:" + taskName + ":failed to execute", t);
+            Logger.error("TaskManager:" + taskName + ":failed to execute", t);
             // queued tasks rely on propagating the exception for retry
             Throwables.propagate(t);
         }

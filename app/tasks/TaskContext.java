@@ -20,6 +20,7 @@ import play.mvc.Http.Header;
 public class TaskContext {
 
     private final String queueName;
+    private final String taskId;
     private final String taskName;
     private final int currentRetryCount;
     private final String taskClassName;
@@ -29,6 +30,7 @@ public class TaskContext {
         Preconditions.checkNotNull(request, "Http request can't be null");
         // per http://code.google.com/appengine/docs/java/taskqueue/overview-push.html
         this.queueName = Headers.first(request, Headers.QUEUE_NAME, false);
+        this.taskId = Headers.first(request, Headers.TASK_ID, false);
         this.taskName = Headers.first(request, Headers.TASK_NAME, false);
         String currentRetryCount = Headers.first(request, Headers.TASK_RETRY_COUNT, false);
         this.currentRetryCount = Integer.valueOf(currentRetryCount);
@@ -38,11 +40,13 @@ public class TaskContext {
     }
     
     public TaskContext(String queueName,
+                       String taskId,
                        String taskName,
                        int currentRetryCount,
                        String taskClassName,
                        Map<String, String> params) {
         this.queueName = queueName;
+        this.taskId = taskId;
         this.taskName = taskName;
         this.currentRetryCount = currentRetryCount;
         this.taskClassName = taskClassName;
@@ -55,6 +59,10 @@ public class TaskContext {
     
     public String getTaskName() {
         return taskName;
+    }
+
+    public String getTaskId() {
+        return taskId;
     }
     
     public int getCurrentRetryCount() {
