@@ -3,9 +3,6 @@ package dropbox;
 import play.Play;
 
 public class Dropbox {
-    
-    public static final String ROOT_DIR = "/";
-
     public static final String API_URL = "https://api.dropbox.com";
     
     public static final String SITE_URL = "https://www.dropbox.com";
@@ -25,6 +22,16 @@ public class Dropbox {
             this.path = path;
         }
         public String getPath() { return path; }
+        
+        public String getSortboxPath() {
+            switch(this) {
+            case APP:
+                return "/Sortbox";
+            case SANDBOX:
+                return "/";
+            }
+            throw new IllegalStateException("Unhandled Dropbox root type: " + this);
+        }
     }
 
     public static Root getRoot() {
