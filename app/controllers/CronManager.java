@@ -27,7 +27,7 @@ public class CronManager extends Controller {
     public static final String pJOB_NAME = "jobName";
     
     public static void process() {
-        if (isRequestFromCronService()) {
+        if (!isRequestFromCronService()) {
             Logger.warn("CronManager: request is not from cron service: " + request.url);
             return;
         }

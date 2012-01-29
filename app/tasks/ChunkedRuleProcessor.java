@@ -1,20 +1,18 @@
 package tasks;
 
-import org.apache.log4j.Logger;
-
+import play.Logger;
 import cron.RuleProcessor;
 
 /**
+ * Applies the rules to a chunk of users. 
  * 
  * @author syyang
  */
 public class ChunkedRuleProcessor implements Task {
-
-    private static final Logger logger = Logger.getLogger(ChunkedRuleProcessor.class);
     
     @Override
     public void execute(TaskContext context) throws Exception {
-        logger.info("ChunkedRuleProcessor:" + context.getTaskId() + ":finished");
+        Logger.info("ChunkedRuleProcessor:" + context.getTaskId() + ":finished");
     }
 
 }
