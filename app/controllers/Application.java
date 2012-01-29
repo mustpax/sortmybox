@@ -25,7 +25,7 @@ public class Application extends Controller {
     public static void index() {
         User user = RequiresLogin.getLoggedInUser();
         DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.ROOT_DIR);
+        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
         List<Rule> rules = Rule.all().fetch();
         render(user, files, rules);
     }
@@ -35,7 +35,7 @@ public class Application extends Controller {
 
         User user = RequiresLogin.getLoggedInUser();
         DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.ROOT_DIR);
+        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
         Iterable<Rule> rules = Rule.all().iter();
         
         // TODO return list of moves performed
