@@ -13,7 +13,7 @@
     </tr>
     #{list items:rules, as:'rule'}
 	  <tr class="rule">
-	      <td>${rule.rank}</td>
+	      <td>${rule.rank + 1}</td>
           <td>
 	      #{select 'type', value:rule.type }
 		      #{option 'NAME_CONTAINS'}Name contains#{/option}
@@ -28,7 +28,7 @@
       #{/list}
     
     <tr class="rule">
-      <td>1</td>
+      <td>#{if rules}${rules.size() + 1}#{/if}#{else}1#{/else}</td>
       <td>
         <select>
           <option value="NAME_CONTAINS">Name contains</option>
