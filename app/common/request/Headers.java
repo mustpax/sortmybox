@@ -26,6 +26,9 @@ public class Headers {
     public static final String TASK_IMPL = "x-sortbox-taskimpl";
     public static final String TASK_NAME = "x-sortbox-taskname";
 
+    public static final String FORWARDED_FOR = "x-forwarded-for";
+    public static final String FORWARDED_PROTO = "x-forwarded-proto";
+    
     
     /**
      * Returns the first header value for the specified key, null if no

@@ -6,6 +6,7 @@ import java.util.*;
 import models.Rule;
 import models.User;
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
 import siena.Query;
@@ -19,9 +20,11 @@ import dropbox.client.DropboxClientFactory;
 @With(RequiresLogin.class)
 public class Application extends Controller {
 
+    public static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
+
     public static void index() {
-        User user = RequiresLogin.getUser();
-        DropboxClient client = DropboxClientFactory.create();
+        User user = RequiresLogin.getLoggedInUser();
+        DropboxClient client = DropboxClientFactory.create(user);
         Set<String> files = client.listDir(Dropbox.ROOT_DIR);
         List<Rule> rules = Rule.all().fetch();
         render(user, files, rules);
@@ -30,7 +33,8 @@ public class Application extends Controller {
     public static void process() {
         checkAuthenticity();
 
-        DropboxClient client = DropboxClientFactory.create();
+        User user = RequiresLogin.getLoggedInUser();
+        DropboxClient client = DropboxClientFactory.create(user);
         Set<String> files = client.listDir(Dropbox.ROOT_DIR);
         Iterable<Rule> rules = Rule.all().iter();
         

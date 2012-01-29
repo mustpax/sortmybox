@@ -112,7 +112,7 @@ public class Rule extends Model {
     }
 
     public static void insert(List<Rule> rules) {
-        insert(RequiresLogin.getUser(), rules);
+        insert(RequiresLogin.getLoggedInUser(), rules);
     }
 
     public static void insert(User owner, List<Rule> rules) {

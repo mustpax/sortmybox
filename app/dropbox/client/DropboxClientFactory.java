@@ -11,13 +11,6 @@ import controllers.RequiresLogin;
 public class DropboxClientFactory {
     
     /**
-     * @return DropboxClient for the currently logged in user.
-     */
-    public static DropboxClient create() {
-        return create(RequiresLogin.getUser());
-    }
-    
-    /**
      * @return DropboxClient for the specified user.
      */
     public static DropboxClient create(User user) {

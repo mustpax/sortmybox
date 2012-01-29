@@ -12,16 +12,22 @@ public class Dropbox {
     
     public static final int API_VERSION = 1;
 
-    private static final boolean IS_SANDBOX = 
-        Boolean.valueOf(Play.configuration.getProperty("dropbox.sandboxed", "true"));
+    private static final Root ROOT = Root.valueOf(Play.configuration.getProperty("dropbox.sandboxed", Root.SANDOBX.name()));
 
-    private static final String ROOT = IS_SANDBOX ? "sandbox" : "dropbox";
-    
-    public static boolean isSandbox() {
-        return IS_SANDBOX;
+
+    public static enum Root {
+        APP("dropbox"),
+        SANDOBX("sandbox");
+
+        private final String path;
+
+        private Root(String path) {
+            this.path = path;
+        }
+        public String getPath() { return path; }
     }
-    
-    public static String getRoot() {
+
+    public static Root getRoot() {
         return ROOT;
     }
 

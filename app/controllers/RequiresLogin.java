@@ -3,8 +3,8 @@ package controllers;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
+import common.request.Headers;
 
 import models.User;
 
@@ -32,19 +32,26 @@ import dropbox.gson.DbxAccount;
  * @author mustpax
  */
 public class RequiresLogin extends Controller {
+    
     private static final String REDIRECT_URL = "url";
+    private static final String SESSION_USER = "userid";
 
-    public static final String SESSION_USER = "userid";
+    private static class SessionKeys {
+        static final String TOKEN = "token";
+        static final String SECRET = "secret";
+        static final String LOGIN = "login";
+        static final String OFFLINE = "offline";
+        static final String UID = "uid";
+    }
     
     @Before(priority=10)
     static void https() {
-        if (request.headers.containsKey("x-forwarded-for")) {
-            Header h = request.headers.get("x-forwarded-for");
-            request.remoteAddress = h.value();
+        if (request.headers.containsKey(Headers.FORWARDED_FOR)) {
+            request.remoteAddress = Headers.first(request, Headers.FORWARDED_FOR);
         }
 
-        if (request.headers.containsKey("x-forwarded-proto")) {
-            Header h = request.headers.get("x-forwarded-proto");
+        if (request.headers.containsKey(Headers.FORWARDED_PROTO)) {
+            Header h = request.headers.get(Headers.FORWARDED_PROTO);
             request.secure = "https".equals(h.value());
         }
     }
@@ -56,7 +63,7 @@ public class RequiresLogin extends Controller {
                                 request.method,
                                 request.secure ? "ssl" : "http",
                                 session.get(SESSION_USER),
-                                request.url), ":");
+                                request.url));
     }
 
     @Before(unless={"login", "auth", "logout", "offline"})
@@ -105,27 +112,27 @@ public class RequiresLogin extends Controller {
     }
 
     public static boolean isLoggedIn() {
-        return "true".equals(session.get("login")) || 
+        return "true".equals(session.get(SessionKeys.LOGIN)) || 
                "true".equals(session.get("offline"));
     }
 
     public static void auth() throws Exception {
         flash.keep(REDIRECT_URL);
         if (flash.contains("verifier")) {
-            String token = session.get("token");
-            String secret = session.get("secret");
+            String token = session.get(SessionKeys.TOKEN);
+            String secret = session.get(SessionKeys.SECRET);
             ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
             OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
             if (oauthResponse.error == null) {
                 Logger.info("Succesfully authenticated with Dropbox.");
-                session.put("login", "true");
+                session.put(SessionKeys.LOGIN, "true");
                 User u = upsertUser(oauthResponse.token, oauthResponse.secret);
-                session.put("uid", u.id);
-                session.remove("token", "secret");
+                session.put(SessionKeys.UID, u.id);
+                session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
                 redirectToOriginalURL();
             } else {
                 Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
-                session.remove("token", "secret");
+                session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
                 forbidden("Could not authenticate with Dropbox.");
             }
         } else {
@@ -133,14 +140,12 @@ public class RequiresLogin extends Controller {
             OAuth oauth = OAuth.service(serviceInfo);
             OAuth.Response oauthResponse = oauth.retrieveRequestToken();
             if (oauthResponse.error == null) {
-                session.put("token", oauthResponse.token);
-                session.put("secret", oauthResponse.secret);
+                session.put(SessionKeys.TOKEN, oauthResponse.token);
+                session.put(SessionKeys.SECRET, oauthResponse.secret);
                 flash.put("verifier", "true");
                 redirect(oauth.redirectUrl(oauthResponse.token) +
                          "&oauth_callback=" +
-                         URLEncoder.encode(Play.mode.isDev() ? 
-                                           "http://localhost:9000/auth" : 
-                                           "http://sort-box.appspot.com/auth", "UTF-8"));
+                        URLEncoder.encode(request.getBase()+"/auth", "UTF-8"));
             } else {
                 Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
                 error("Error connecting to Dropbox.");
@@ -161,8 +166,8 @@ public class RequiresLogin extends Controller {
     /**
      * @return the currently logged in user, null if no logged in user
      */
-    public static User getUser() {
-        String uid = session.get("uid");
+    public static User getLoggedInUser() {
+        String uid = session.get(SessionKeys.UID);
         try {
             User user = User.findById(Long.valueOf(uid));
             if (user == null) {
@@ -176,7 +181,8 @@ public class RequiresLogin extends Controller {
     }
 
     public static void logout() {
-        session.remove("token", "secret", "login", "offline");
+        session.remove(SessionKeys.TOKEN, SessionKeys.SECRET,
+                SessionKeys.LOGIN, SessionKeys.OFFLINE);
         login();
     }
     
@@ -193,7 +199,7 @@ public class RequiresLogin extends Controller {
      */
     public static void offline() {
         assert Play.mode.isDev();
-        session.put("offline", "true");
+        session.put(SessionKeys.OFFLINE, "true");
         Application.index();
     }
 }

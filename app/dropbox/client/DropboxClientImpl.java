@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.DropboxURLs;
+import dropbox.Dropbox.Root;
 import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxAccount;
 
@@ -82,7 +83,7 @@ class DropboxClientImpl implements DropboxClient {
                 "To and from paths should start with /");
         
         WSRequest ws = new WSRequestFactory(DropboxURLs.MOVE, token, secret)
-            .addPair("root", Dropbox.getRoot())
+            .addPair("root", Dropbox.getRoot().getPath())
             .addPair("from_path", from)
             .addPair("to_path", to)
             .create();
@@ -118,8 +119,8 @@ class DropboxClientImpl implements DropboxClient {
             this.pairs = Maps.newLinkedHashMap();
         }
         
-        public WSRequestFactory addPath(String root, String path) {
-            this.root = root;
+        public WSRequestFactory addPath(Root root, String path) {
+            this.root = root.getPath();
             this.path = path;
             return this;
         }
