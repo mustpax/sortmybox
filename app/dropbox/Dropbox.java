@@ -12,12 +12,12 @@ public class Dropbox {
     
     public static final int API_VERSION = 1;
 
-    private static final Root ROOT = Root.valueOf(Play.configuration.getProperty("dropbox.sandboxed", Root.SANDOBX.name()));
+    private static final Root ROOT = Root.valueOf(Play.configuration.getProperty("dropbox.sandboxed", Root.SANDBOX.name()));
 
 
     public static enum Root {
         APP("dropbox"),
-        SANDOBX("sandbox");
+        SANDBOX("sandbox");
 
         private final String path;
 
