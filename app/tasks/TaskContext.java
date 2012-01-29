@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import common.request.Headers;
+import common.util.TypedMap;
 
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -29,14 +30,14 @@ public class TaskContext {
     public TaskContext(Http.Request request) {
         Preconditions.checkNotNull(request, "Http request can't be null");
         // per http://code.google.com/appengine/docs/java/taskqueue/overview-push.html
-        this.queueName = Headers.first(request, Headers.QUEUE_NAME, false);
-        this.taskId = Headers.first(request, Headers.TASK_ID, false);
-        this.taskName = Headers.first(request, Headers.TASK_NAME, false);
-        String currentRetryCount = Headers.first(request, Headers.TASK_RETRY_COUNT, false);
-        this.currentRetryCount = Integer.valueOf(currentRetryCount);
+        this.queueName = Headers.first(request, Headers.QUEUE_NAME);
+        this.taskId = Headers.first(request, Headers.TASK_ID);
+        this.taskName = Headers.first(request, Headers.TASK_NAME);
+        String currentRetryCount = Headers.first(request, Headers.TASK_RETRY_COUNT);
+        this.currentRetryCount = currentRetryCount != null ? Integer.valueOf(currentRetryCount) : -1;
         
         this.taskClassName = Headers.first(request, Headers.TASK_IMPL);
-        this.params = ImmutableMap.copyOf(request.params.allSimple());  
+        this.params = request.params.allSimple(); 
     }
     
     public TaskContext(String queueName,

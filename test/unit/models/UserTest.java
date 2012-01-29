@@ -32,7 +32,7 @@ public class UserTest extends UnitTest {
 
     @Test
     public void testCRUD() throws Exception {
-        User user = new User(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
         assertNull(User.findById(ID));
 
         // verify insert
@@ -69,5 +69,15 @@ public class UserTest extends UnitTest {
         user.token = token2;
         user.secret = secret2;
         assertEquals(user, User.findOrCreateByDbxAccount(account, token2, secret2));
+    }
+    
+    private static User newUser(Long id, String token, String email, String secret, String name) {
+        User user = new User();
+        user.id = id;
+        user.token = token;
+        user.email = email;
+        user.secret = secret;
+        user.name = name;
+        return user;
     }
 }

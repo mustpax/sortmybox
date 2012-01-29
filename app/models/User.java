@@ -1,12 +1,15 @@
 package models;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.google.common.base.Objects;
 
+import siena.Column;
+import siena.DateTime;
 import siena.Generator;
 import siena.Id;
 import siena.Model;
@@ -35,18 +38,25 @@ public class User extends Model {
 
     public String name;
 
+    public Integer hash;
+
+    @DateTime
+    public Date created;
+
+    @DateTime
+    public Date modified;
+
+    @DateTime
+    @Column("last_sync")
+    public Date lastSync;
+
     public User() { }
 
     public User(DbxAccount account, String token, String secret) {
-        this(account.uid, account.name, token, secret, null);
-    }
-
-    public User(Long id, String name, String token, String secret, String email) {
-        this.id = id;
-        this.name = name;
+        this.id = account.uid;
+        this.name = account.name;
         this.token = token;
         this.secret = secret;
-        this.email = email;
     }
     
     public static Query<User> all() {
@@ -75,13 +85,17 @@ public class User extends Model {
 
     @Override
     public int hashCode() {
-        HashCodeBuilder hash = new HashCodeBuilder()
+        return new HashCodeBuilder()
             .append(this.id)
             .append(this.name)
             .append(this.secret)
             .append(this.token)
-            .append(this.email);
-        return hash.hashCode();
+            .append(this.email)
+            .append(this.hash)
+            .append(this.created)
+            .append(this.modified)
+            .append(this.lastSync)
+            .hashCode();
     }
 
     @Override
@@ -93,13 +107,17 @@ public class User extends Model {
         if (getClass() != obj.getClass())
             return false;
         User other = (User) obj;
-        EqualsBuilder eq = new EqualsBuilder()
+        return new EqualsBuilder()
             .append(this.id, other.id)
             .append(this.name, other.name)
             .append(this.secret, other.secret)
             .append(this.token, other.token)
-            .append(this.email, other.email);
-        return eq.isEquals();
+            .append(this.email, other.email)
+            .append(this.hash, other.hash)
+            .append(this.created, other.created)
+            .append(this.modified, other.modified)
+            .append(this.lastSync, other.lastSync)
+            .isEquals();
     }
     
     @Override
@@ -107,7 +125,11 @@ public class User extends Model {
         return Objects.toStringHelper(User.class)
             .add("id", id)
             .add("name", name)
-            .add("email", email)        
+            .add("email", email)
+            .add("hash", hash)            
+            .add("created_date", created)
+            .add("last_update", modified)
+            .add("last_sync", lastSync)
             .toString();
     }
 }

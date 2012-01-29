@@ -9,6 +9,7 @@ import common.reflection.ReflectionUtils;
 import common.request.Headers;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import tasks.Task;
 import tasks.TaskContext;
@@ -25,7 +26,7 @@ public class TaskManager extends Controller {
      * Executes the task specified by the request url.
      */
     public static void process() {
-        if (!isRequestFromQueueService()) {
+        if (Play.mode.isProd() && !isRequestFromQueueService()) {
             Logger.warn("TaskManager:request is not from queue service.");
             return;
         }

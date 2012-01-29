@@ -10,6 +10,7 @@ import common.request.Headers;
 import cron.Job;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import tasks.TaskContext;
 
@@ -27,7 +28,7 @@ public class CronManager extends Controller {
     public static final String pJOB_NAME = "jobName";
     
     public static void process() {
-        if (!isRequestFromCronService()) {
+        if (Play.mode.isProd() && !isRequestFromCronService()) {
             Logger.warn("CronManager: request is not from cron service: " + request.url);
             return;
         }

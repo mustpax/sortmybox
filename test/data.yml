@@ -1,7 +1,46 @@
 # you describe your data using the YAML notation here
 # and then load them using Fixtures.load("data.yml")
 
-# User(bob):
-#   email: bob@gmail.com
-#   password: secret
-#   fullname: Bob
+User(bob):
+    id: 100
+    token: 123
+    secret: 456
+    email: bob@bar.com
+    name: bob
+    hash: 0
+    created: 2001-07-04T12:02:56.235Z
+    modified: 2001-09-04T12:08:23.235Z
+    lastSync: 2001-08-04T12:05:51.235Z
+
+User(james):
+    id: 200
+    token: 123
+    secret: 456
+    email: james@bar.com
+    name: james
+    hash: 1
+    created: 2001-07-04T12:02:56.235Z
+    modified: 2001-09-04T12:08:23.235Z
+    lastSync: 2001-08-04T12:05:51.235Z
+
+User(sarah):
+    id: 300
+    token: 123
+    secret: 456
+    email: sarah@bar.com
+    name: sarah
+    hash: 2
+    created: 2001-07-04T12:02:56.235Z
+    modified: 2001-09-04T12:08:23.235Z
+    lastSync: 2001-08-04T12:05:51.235Z
+
+User(kane):
+    id: 400
+    token: 123
+    secret: 456
+    email: kane@bar.com
+    name: kane
+    hash: 3
+    created: 2001-07-04T12:02:56.235Z
+    modified: 2001-09-04T12:08:23.235Z
+    lastSync: 2001-08-04T12:05:51.235Z
