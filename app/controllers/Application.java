@@ -19,9 +19,6 @@ import dropbox.client.DropboxClientFactory;
  */
 @With(RequiresLogin.class)
 public class Application extends Controller {
-
-    public static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
-
     public static void index() {
         User user = RequiresLogin.getLoggedInUser();
         DropboxClient client = DropboxClientFactory.create(user);
