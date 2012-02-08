@@ -80,7 +80,7 @@
         if (! cell.val()) {
             err = "Value is missing.";
         } else if (cell.hasClass('dest') && (cell.val()[0] !== '/')) {
-            err = "Pathes should start with /.";
+            err = "Path should start with /.";
         }
         
         if (err === null) {
