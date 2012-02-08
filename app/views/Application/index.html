@@ -28,7 +28,7 @@
       #{/list}
     
     <tr class="rule">
-      <td>#{if rules}${rules.size() + 1}#{/if}#{else}1#{/else}</td>
+      <td class="rank">#{if rules}${rules.size() + 1}#{/if}#{else}1#{/else}</td>
       <td>
         <select>
           <option value="NAME_CONTAINS">Name contains</option>
@@ -36,24 +36,9 @@
           <option value="GLOB">Name pattern</option>
         </select>
       </td>
-      <td class="error">
-	      <input class="pattern" type="text" value="yeah">
-          <span class="msg">Test</span>
-      </td>
-      <td><input class="dest" type="text"></td>
-      <td><a class="btn add">Add</a></td>
-    </tr>
-    
-    <tr class="new" style="display: none;">
-      <td>3</td>
       <td>
-        <select>
-          <option value="NAME_CONTAINS">Name contains</option>
-          <option value="EXT_EQ">Extension equals</option>
-          <option value="GLOB">Name pattern</option>
-        </select>
+	      <input class="pattern" type="text">
       </td>
-      <td><input class="pattern" type="text"></td>
       <td><input class="dest" type="text"></td>
       <td><a class="btn add">Add</a></td>
     </tr>
@@ -89,16 +74,22 @@
   #{set 'script'}
       var validateCell = function(cell) {
         console.log('validate', cell, cell.val());
-        var ret = !! cell.val();
+        var err = null;
 
         cell.parent().find('.msg').hide().remove();
-        if (ret) {
+        if (! cell.val()) {
+            err = "Value is missing.";
+        } else if (cell.hasClass('dest') && (cell.val()[0] !== '/')) {
+            err = "Pathes should start with /.";
+        }
+        
+        if (err === null) {
             cell.parent().removeClass('error');
         } else {
             cell.parent().addClass('error');
-            cell.parent().append('<span class="msg help-inline">Value is missing.</span>');
+            cell.parent().append('<span class="msg help-inline">' + err + '</span>');
         }
-        return !! cell.val();
+        return err === null;
       };
 
       var validate = function(row) {
@@ -117,11 +108,14 @@
         }
         var add = this;
         var tbody = $(add).parents('tbody').first();
-        var new_ = tbody.children('tr.new');
-        var new2 = new_.clone().hide();
+        var new2 = tbody.children('tr.rule').last().clone().hide();
+        new2.find('.pattern').val('');
+        new2.find('.dest').val('');
+        new2.find('select').val('NAME_CONTAINS');
+        new2.find('.btn').text('Add').removeClass('del').addClass('add');
+        new2.find('.rank').text(String(parseInt(new2.find('.rank').text()) + 1));
+        
         tbody.append(new2);
-        new2.removeClass('new');
-        new2.addClass('rule');
         new2.show('slow');
 
         $(add).text('Del');
@@ -141,11 +135,12 @@
         $('.rules tr.rule')
          .each(function() {
              var pat = $(this).find('.pattern')[0].value;
-             if (pat) {
+             var dest = $(this).find('.dest')[0].value;
+             if (pat && dest) {
                  var cur = {
                     type:    $(this).find('select')[0].value,
                     pattern: pat,
-                    dest:    $(this).find('.dest')[0].value
+                    dest:    dest
                  };
                  ret.push(cur);
              }
