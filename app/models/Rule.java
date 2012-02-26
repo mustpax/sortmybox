@@ -3,22 +3,19 @@ package models;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-
-import controllers.RequiresLogin;
-
 import play.Logger;
-
-import models.Rule.RuleType;
-import siena.Column;
-import siena.Generator;
 import siena.Id;
 import siena.Model;
 import siena.Query;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+
+import controllers.RequiresLogin;
 
 /**
  * 
@@ -121,12 +118,49 @@ public class Rule extends Model {
         }
         
         int rank = 0;
+        List<Rule> toSave = Lists.newLinkedList();
         for (Rule rule : rules) {
-            rule.rank = rank++;
             rule.owner = owner.id;
+            List<RuleError> errors = rule.validate();
+            if (errors.isEmpty()) {
+	            rule.rank = rank++;
+	            toSave.add(rule);
+            }
         }
-        Model.batch(Rule.class).insert(rules);
-        Logger.info("Saved entities: %s:", rules);
+        Model.batch(Rule.class).insert(toSave);
+        Logger.info("Saved entities: %s:", toSave);
+    }
+
+    private List<RuleError> validate() {
+        List<RuleError> ret = Lists.newLinkedList();
+        if (type == null) {
+            ret.add(new RuleError("type", "Missing or invalid type."));
+        }
+
+        if (owner == null) {
+            ret.add(new RuleError("owner", "Missing rule owner."));
+        }
+        
+        if (StringUtils.isBlank(pattern)) {
+            ret.add(new RuleError("pattern", "Pattern cannot be empty."));
+        } else if (pattern.contains("/")) {
+            ret.add(new RuleError("pattern", "Pattern cannot contain slashes (/)."));
+        }
+        // Extensions may not include periods
+        else if ((type == RuleType.EXT_EQ) &&
+	              pattern.contains(".")) {
+            ret.add(new RuleError("pattern", "Extensions cannot contain periods."));
+        }
+
+        if (StringUtils.isBlank(dest)) {
+            ret.add(new RuleError("dest", "Destination directory cannot be empty."));
+        } else if (! dest.startsWith("/")) {
+            ret.add(new RuleError("dest", "Destination directory must start with a slash (/)."));
+        }
+        
+        // TODO check dest is not a file
+
+        return ret;
     }
 
     @Override
@@ -169,4 +203,13 @@ public class Rule extends Model {
             .toString();
     }
 
+    public static class RuleError {
+        public final String field;
+        public final String msg;
+
+        public RuleError(String field, String msg) {
+            this.field = field;
+            this.msg = msg;
+        }
+    }
 }
