@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -108,17 +109,18 @@ public class Rule extends Model {
         return query.fetch();
     }
 
-    public static void insert(List<Rule> rules) {
-        insert(RequiresLogin.getLoggedInUser(), rules);
+    public static List<List<RuleError>> insert(List<Rule> rules) {
+        return insert(RequiresLogin.getLoggedInUser(), rules);
     }
 
-    public static void insert(User owner, List<Rule> rules) {
+    public static List<List<RuleError>> insert(User owner, List<Rule> rules) {
         if (rules == null || rules.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
         
         int rank = 0;
         List<Rule> toSave = Lists.newLinkedList();
+        List<List<RuleError>> allErrors = Lists.newLinkedList();
         for (Rule rule : rules) {
             rule.owner = owner.id;
             List<RuleError> errors = rule.validate();
@@ -126,9 +128,13 @@ public class Rule extends Model {
 	            rule.rank = rank++;
 	            toSave.add(rule);
             }
+            allErrors.add(errors);
         }
+                
+        // TODO do not save on any errors?
         Model.batch(Rule.class).insert(toSave);
         Logger.info("Saved entities: %s:", toSave);
+        return allErrors;
     }
 
     private List<RuleError> validate() {

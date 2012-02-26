@@ -14,6 +14,6 @@ public class Rules extends Controller {
         Type t = new TypeToken<List<Rule>>(){}.getType();
         List<Rule> ruleList = new Gson().fromJson(rules, t);
         Rule.all().delete();
-        Rule.insert(ruleList);
+        renderJSON(Rule.insert(ruleList));
     }
 }

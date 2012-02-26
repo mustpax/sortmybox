@@ -155,8 +155,8 @@
             type: 'POST',
             url: '/rules',
             data: { 'rules': JSON.stringify(rules) },
-            success: function() {
-                console.log('success');
+            success: function(data) {
+                console.log('success', data);
             }
         })
       });
