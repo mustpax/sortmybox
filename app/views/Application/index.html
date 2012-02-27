@@ -74,7 +74,10 @@
   </div>
 </div>
 
-  #{set 'script'}
+#{set 'script'}
+<script>
+(function(window, $, undefined) {
+    $(document).ready(function() {
       $('.rules .add').live('click', function() {
         var add = this;
         var tbody = $(add).parents('tbody').first();
@@ -150,9 +153,11 @@
 	                addErrors(i, v);
                 });
             }
-        })
+        });
       });
-      
-  #{/set}
+    });
+})(window, jQuery);
+</script>
+#{/set}
 
 
