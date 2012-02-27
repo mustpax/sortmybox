@@ -73,40 +73,7 @@
     #{/form}
   </div>
   #{set 'script'}
-      var validateCell = function(cell) {
-        console.log('validate', cell, cell.val());
-        var err = null;
-
-        cell.parent().find('.msg').hide().remove();
-        if (! cell.val()) {
-            err = "Value is missing.";
-        } else if (cell.hasClass('dest') && (cell.val()[0] !== '/')) {
-            err = "Path should start with /.";
-        }
-        
-        if (err === null) {
-            cell.parent().removeClass('error');
-        } else {
-            cell.parent().addClass('error');
-            cell.parent().append('<span class="msg help-inline">' + err + '</span>');
-        }
-        return err === null;
-      };
-
-      var validate = function(row) {
-        var ret = true;
-
-        $.each(['pattern', 'dest'], function() {
-          ret = validateCell(row.find('.' + this)) && ret;
-        });
-
-        return ret;
-      };
-
       $('.rules .add').live('click', function() {
-        if (! validate($(this).parents('tr').first())) {
-          return;
-        }
         var add = this;
         var tbody = $(add).parents('tbody').first();
         var new2 = tbody.children('tr.rule').last().clone().hide();
