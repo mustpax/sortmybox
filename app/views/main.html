@@ -13,13 +13,9 @@
 
     <!-- Le styles -->
     <link href="@{'/public/css/bootstrap.css'}" rel="stylesheet">
+    <link href="@{'/public/css/bootstrap-responsive.css'}" rel="stylesheet">
     <link href="@{'/public/css/styles.css'}" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-      }
-    </style>
-
+    
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="img/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -29,36 +25,37 @@
 
   <body>
 
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div class="container-fluid">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
           <a class="brand" href="#">Sortbox</a>
-          <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-          <p class="pull-right">
-          #{if user}
-              Logged in as <a href="#">${user.name}</a>
-              <a href="/logout">Logout</a>
-          #{/if}
-          #{else}
-              <a href="@{RequiresLogin.login()}">Login</a>
-          #{/else}
-          </p>
+	      <ul class="nav">
+	        <li class="active"><a href="#">Home</a></li>
+	      </ul>
+	      <ul class="nav pull-right navbar-text">
+	        #{if user}
+              <li><a href="#">${user.name}</a></li>
+	          <li class="divider-vertical"></li>
+              <li><a href="/logout">Logout</a></li>
+	          #{/if}
+	          #{else}
+	              <li><a href="@{RequiresLogin.login()}">Login</a></li>
+	          #{/else}
+           </ul>
         </div>
       </div>
     </div>
 
     <div class="container">
       #{doLayout /}
+
+      <hr>
       <footer>
         <p>&copy; Mustafa Paksoy, Sid Yang 2012</p>
       </footer>
     </div>
     <script src="@{'/public/js/json2.js'}"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
     <script>window.jQuery || document.write("<script src='@{'/public/js/jquery-1.6.2.min.js'}'>\x3C/script>")</script>
     <script>
         (function(window, $, undefined) {

@@ -4,14 +4,14 @@
 <div class="hero-unit">
   <h1>Sorting rules</h1>
   <p>Add or edit sorting rules. Rules are applied top to bottom. Rule evaluation stops at first match.</p>
-  <table class="rules">
-    <tr>
+  <table class="rules table table-bordered">
+    <thead>
       <th></th>
       <th>When</th>
       <th>To</th>
       <th>Move file to</th>
       <th></th>
-    </tr>
+    </thead>
     #{list items:rules, as:'rule'}
 	  <tr class="rule">
 	      <td>${rule.rank + 1}</td>
@@ -52,7 +52,7 @@
 
 <!-- Example row of columns -->
 <div class="row">
-  <div class="span8">
+  <div class="span6">
     <h2>User</h2>
     <ul>
       <li>${user.id}
@@ -60,7 +60,7 @@
     </ul>
   </div>
   
-  <div class="span8">
+  <div class="span6">
     <h2>Files</h2>
     <ul>
         #{list files, as:'file'}
@@ -72,6 +72,8 @@
     <input type="submit" value="Update">
     #{/form}
   </div>
+</div>
+
   #{set 'script'}
       $('.rules .add').live('click', function() {
         var add = this;
@@ -152,6 +154,5 @@
       });
       
   #{/set}
-</div>
 
 
