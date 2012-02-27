@@ -174,7 +174,10 @@
         $.ajax({
             type: 'POST',
             url: '/rules',
-            data: { 'rules': JSON.stringify(rules) },
+            data: {
+                'rules': JSON.stringify(rules),
+                'authenticityToken' : window.csrfToken
+            },
             success: function(data) {
                 doneLoading();
                 console.log('success');

@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class Rules extends Controller {
     public static void update(String rules) {
+        checkAuthenticity();
         Type t = new TypeToken<List<Rule>>(){}.getType();
         List<Rule> ruleList = new Gson().fromJson(rules, t);
         Rule.all().delete();
