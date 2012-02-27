@@ -3,11 +3,11 @@ body {
 	padding-bottom: 40px;
 }
 
-.rules .error {
+.rules .rule .error {
     background: #FAE5E3;
 }
 
-.rules .error input {
+.rules .rule .error input {
     border-color: #C87872;
     color: #B94A48;
     background: white;
