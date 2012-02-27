@@ -24,7 +24,10 @@
           </td>
 	      <td><input class="pattern" type="text" value="${rule.pattern}"></td>
 	      <td><input class="dest" type="text" value="${rule.dest}"></td>
-	      <td><a class="btn del">Del</a></td>
+	      <td>
+            <a class="btn del">Del</a>
+            <i class="status"></i>
+          </td>
         </tr>
       #{/list}
     
@@ -41,7 +44,10 @@
 	      <input class="pattern" type="text">
       </td>
       <td><input class="dest" type="text"></td>
-      <td><a class="btn add">Add</a></td>
+      <td>
+        <a class="btn add">Add</a>
+        <i class="status"></i>
+      </td>
     </tr>
   </table>
   <p>
@@ -138,16 +144,35 @@
             cell.addClass('error');
             cell.append($('<span class="msg help-inline"></span>').text(this.msg));
         });
+        
+        if (errors.length === 0) {
+            rule.find('.status').addClass('icon-ok');
+        } else {
+            rule.find('.status').addClass('icon-remove');
+        }
+      };
+
+      function loading() {
+          $('.rules .rule .status').addClass('icon-refresh')
+                                   .addClass('spin')
+                                   .removeClass('icon-ok')
+                                   .removeClass('icon-remove');
+      };
+      
+      function doneLoading() {
+          $('.rules .rule .status').removeClass('icon-refresh').removeClass('spin');
       };
 
       $('.save').live('click', function() {
         var rules = serialize();
         console.log(rules);
+        loading();
         $.ajax({
             type: 'POST',
             url: '/rules',
             data: { 'rules': JSON.stringify(rules) },
             success: function(data) {
+                doneLoading();
                 console.log('success');
                 $.each(data, function(i, v) {
 	                addErrors(i, v);

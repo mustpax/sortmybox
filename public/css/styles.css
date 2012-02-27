@@ -16,3 +16,21 @@ body {
 .rules .error .msg {
     color: #B94A48;
 }
+
+/*
+* jQuery Mobile Framework
+* Copyright (c) jQuery Project
+* Dual licensed under the MIT (MIT-LICENSE.txt) or GPL (GPL-LICENSE.txt) licenses.
+*/
+.spin  {
+    -webkit-transform: rotate(360deg);
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function: linear;
+}
+@-webkit-keyframes spin {
+    from {-webkit-transform: rotate(0deg);}
+    to {-webkit-transform: rotate(360deg);}
+}
+/* end jQuery Mobile */
