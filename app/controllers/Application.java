@@ -29,33 +29,7 @@ public class Application extends Controller {
     
     public static void process() {
         checkAuthenticity();
-
-        User user = RequiresLogin.getLoggedInUser();
-        DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
-        Iterable<Rule> rules = Rule.all().iter();
-        
-        // TODO return list of moves performed
-        for (String file: files) {
-            String base = basename(file);
-            for (Rule r: rules) {
-                if (r.matches(base)) {
-                    Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
-                    client.move(file, r.dest + "/" + base);
-                    break;
-                }
-            }
-        }
-
+        RequiresLogin.getLoggedInUser().runRules();
         index();
-    }
-    
-    private static String basename(String path) {
-        if (path == null) {
-            return null;
-        }
-        
-        File f = new File(path);
-        return f.getName();
     }
 }
