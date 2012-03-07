@@ -27,7 +27,7 @@ public class CronManager extends Controller {
 
     public static final String pJOB_NAME = "jobName";
     
-    public static void process() {
+    public static void process(String jobPath) {
         if (Play.mode.isProd() && !isRequestFromCronService()) {
             Logger.warn("CronManager: request is not from cron service: " + request.url);
             forbidden();
@@ -35,10 +35,10 @@ public class CronManager extends Controller {
 
         Job job = null;
         try {
-            String className = getJobClassName(request.url);
+            String className = getJobClassName(jobPath);
             job = ReflectionUtils.newInstance(Job.class, className);
         } catch (Exception e) {
-            Logger.error("CronManager failed to instantiate: "+request.url, e);
+            Logger.error(e, "CronManager failed to instantiate: %s", jobPath);
             error(e);
         }
         
@@ -64,11 +64,11 @@ public class CronManager extends Controller {
     /**
      * Gets the full job class name from the request url.
      */
-    public static String getJobClassName(String requestUrl) {
-        Preconditions.checkNotNull(requestUrl, "request url can't be null");
+    public static String getJobClassName(String jobPath) {
+        Preconditions.checkNotNull(jobPath, "request url can't be null");
         // skip the first "/" and replace the remaining "/" with "."
         // e.g. /cron/foo/bar will be transformed to cron.foo.bar
-        return requestUrl.substring(1).replace('/', '.');
+        return jobPath.replace('/', '.');
     }
     
     private static boolean isRequestFromCronService() {

@@ -14,8 +14,7 @@ POST    /rules                                  Rules.update
 GET     /tasks                                  TaskManager.process
 POST    /tasks                                  TaskManager.process
 
-GET     /cron/{<.*>rest}                        CronManager.process
-POST    /cron/{<.*>rest}                        CronManager.process
+GET     /cron/{<.*>jobPath}                     CronManager.process
 
 # Authorization
 GET     /auth                                   RequiresLogin.auth
