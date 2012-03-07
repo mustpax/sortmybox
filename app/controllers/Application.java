@@ -23,7 +23,7 @@ public class Application extends Controller {
         User user = RequiresLogin.getLoggedInUser();
         DropboxClient client = DropboxClientFactory.create(user);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
-        List<Rule> rules = Rule.all().fetch();
+        List<Rule> rules = Rule.findByOwner(user).fetch();
         render(user, files, rules);
     }
     

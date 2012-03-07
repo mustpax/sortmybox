@@ -14,11 +14,14 @@ import siena.Model;
 import siena.Query;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import controllers.RequiresLogin;
 
 /**
+ * A sorting rule that allows files to be moved to a specified
+ * location when certain criteria are met.
  * 
  * @author mustpax
  * @author syyang
@@ -102,11 +105,11 @@ public class Rule extends Model {
         return all().filter("id", id).get();
     }
     
-    public static List<Rule> findByOwner(User owner) {
+    public static Query<Rule> findByOwner(User owner) {
         Query<Rule> query = all();
         query.filter("owner", owner.id);
         query.order("rank");
-        return query.fetch();
+        return query;
     }
 
     public static List<List<RuleError>> insert(List<Rule> rules) {
@@ -114,6 +117,8 @@ public class Rule extends Model {
     }
 
     public static List<List<RuleError>> insert(User owner, List<Rule> rules) {
+        Preconditions.checkNotNull(owner);
+        
         if (rules == null || rules.isEmpty()) {
             return Collections.emptyList();
         }
@@ -130,7 +135,7 @@ public class Rule extends Model {
             }
             allErrors.add(errors);
         }
-                
+
         // TODO do not save on any errors?
         Model.batch(Rule.class).insert(toSave);
         Logger.info("Saved entities: %s:", toSave);

@@ -78,9 +78,8 @@ public class User extends Model {
         List<Move> ret = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(this);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
-        Iterable<Rule> rules = Rule.all().iter();
+        List<Rule> rules = Rule.findByOwner(this).fetch();
         
-        // TODO return list of moves performed
         for (String file: files) {
             String base = basename(file);
             for (Rule r: rules) {
