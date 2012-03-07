@@ -66,9 +66,7 @@ public class CronManager extends Controller {
      */
     public static String getJobClassName(String jobPath) {
         Preconditions.checkNotNull(jobPath, "request url can't be null");
-        // skip the first "/" and replace the remaining "/" with "."
-        // e.g. /cron/foo/bar will be transformed to cron.foo.bar
-        return jobPath.replace('/', '.');
+        return "cron." + jobPath.replace('/', '.');
     }
     
     private static boolean isRequestFromCronService() {
