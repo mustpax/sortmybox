@@ -2,17 +2,17 @@ package controllers;
 
 import java.util.Map;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-
-import common.reflection.ReflectionUtils;
-import common.request.Headers;
-import cron.Job;
-
 import play.Logger;
 import play.Play;
+import play.mvc.Before;
 import play.mvc.Controller;
-import tasks.TaskContext;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import common.reflection.ReflectionUtils;
+import common.request.Headers;
+
+import cron.Job;
 
 /**
  * This class is responsible for relaying a GET request to an appropriate {@link Job}.
@@ -28,11 +28,6 @@ public class CronManager extends Controller {
     public static final String pJOB_NAME = "jobName";
     
     public static void process(String jobPath) {
-        if (Play.mode.isProd() && !isRequestFromCronService()) {
-            Logger.warn("CronManager: request is not from cron service: " + request.url);
-            forbidden();
-        }
-
         Job job = null;
         try {
             String className = getJobClassName(jobPath);
@@ -69,8 +64,12 @@ public class CronManager extends Controller {
         return "cron." + jobPath.replace('/', '.');
     }
     
-    private static boolean isRequestFromCronService() {
+    @Before
+    static void checkCronService() {
         String isCron = Headers.first(request, Headers.CRON);
-        return "true".equals(isCron);
+        if (Play.mode.isProd() && !"true".equals(isCron)) {
+            Logger.warn("CronManager: request is not from cron service: " + request.url);
+            forbidden();
+        }
     }
 }
