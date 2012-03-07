@@ -41,7 +41,12 @@ public class RuleProcessor implements Job {
         final int chunkSize = data.get(CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
 
         int numUsers = User.all().count();
+        int lastChunk = numUsers % chunkSize;
         int numChunks = numUsers / chunkSize;
+        // Create a new chunk for the last incomplete chunk
+        if (lastChunk > 0) {
+            numChunks++;
+        }
 
         List<String> taskIds = Lists.newArrayList();
         Queue queue = TaskUtils.getQueue(ChunkedRuleProcessor.class);
@@ -52,7 +57,9 @@ public class RuleProcessor implements Job {
             TaskHandle handle = queue.add(options);
             taskIds.add(handle.getName());
         }
-        Logger.info("RuleProcessor finished enqueuing chunked tasks:" + taskIds);
+        Logger.info("RuleProcessor finished enqueuing chunked tasks." +
+	        		"Num chunks: %d Chunk size: %d Num users: %d Task ids: %s",
+	        		numChunks, chunkSize, numUsers, taskIds);
     }
 
 }
