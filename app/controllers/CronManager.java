@@ -30,7 +30,7 @@ public class CronManager extends Controller {
     public static void process() {
         if (Play.mode.isProd() && !isRequestFromCronService()) {
             Logger.warn("CronManager: request is not from cron service: " + request.url);
-            return;
+            forbidden();
         }
 
         Job job = null;
@@ -39,7 +39,7 @@ public class CronManager extends Controller {
             job = ReflectionUtils.newInstance(Job.class, className);
         } catch (Exception e) {
             Logger.error("CronManager failed to instantiate: "+request.url, e);
-            return;
+            error(e);
         }
         
         process(job, request.params.allSimple());
