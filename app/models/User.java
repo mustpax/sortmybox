@@ -9,6 +9,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
+import play.Play;
 
 import siena.Column;
 import siena.DateTime;
@@ -85,7 +86,10 @@ public class User extends Model {
             for (Rule r: rules) {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
-                    client.move(file, r.dest + "/" + base);
+                    // TODO do not move files on production just yet
+                    if (Play.mode.isDev()) {
+                        client.move(file, r.dest + "/" + base);
+                    }
                     ret.add(new Move(r, file, r.dest));
                     break;
                 }
