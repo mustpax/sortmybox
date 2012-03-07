@@ -40,12 +40,13 @@ public class ChunkedRuleProcessor implements Task {
         ChunkInfo chunkInfo = new ChunkInfo(chunk, numChunks, getKeySpace());
         Query<User> query = getChunkQuery(chunkInfo);
 
+        int moves = 0;
         for (User user : query.iter()) {
-            // TODO(syyang): apply rules for each user
+            moves += user.runRules().size();
         }
 
-        String message = JOINER.join("ChunkedRuleProcessor",
-                "finished", context.getTaskId(), chunk, numChunks);
+        String message = JOINER.join("ChunkedRuleProcessor", "finished",
+                                     context.getTaskId(), chunk, numChunks, moves);
         Logger.info(message);
     }
 
