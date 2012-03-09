@@ -1,6 +1,5 @@
 package func.cron;
 
-import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,14 @@ import models.User;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import play.Logger;
+import play.modules.siena.SienaFixtures;
+import play.mvc.Http.Header;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import tasks.ChunkedRuleProcessor;
+import unit.BaseTaskQueueTest;
 
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -19,16 +26,6 @@ import com.google.common.collect.Maps;
 
 import cron.RuleProcessor;
 
-import play.Logger;
-import play.modules.siena.SienaFixtures;
-import play.mvc.Http.Header;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.test.BaseTest;
-import tasks.ChunkedRuleProcessor;
-import tasks.ChunkedRuleProcessor.ChunkInfo;
-import unit.BaseTaskQueueTest;
-
 /**
  * Functional tests for {@link RuleProcessor}.
  *
@@ -38,7 +35,6 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
 
     private static final String QUEUE_NAME = ChunkedRuleProcessor.class.getSimpleName();
     private static final int CHUNK_SIZE = 2;
-    private static final int KEY_SPACE = 4;
 
     private LocalTaskQueue taskQueue;
     
@@ -53,9 +49,6 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
         super.setUp();
         
         this.taskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
-        
-        // override the key space in ChunkedRuleProcessor
-        ChunkedRuleProcessor.KEY_SPACE = KEY_SPACE;
     }
     
     @Override
@@ -77,9 +70,7 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
         
         // 2. Verify the number of enqueued tasks.
         QueueStateInfo queueInfo = getQueueStateInfo();
-        int numUsers = User.all().count();
-        int queuedTasks = numUsers / CHUNK_SIZE;
-        assertEquals(queuedTasks, queueInfo.getCountTasks());
+        assertEquals(1, queueInfo.getCountTasks());
         
         // 3. Manually processes the tasks
         for (TaskStateInfo taskInfo : queueInfo.getTaskInfo()) {
@@ -96,7 +87,7 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     
     private static void runRuleProcessor() {
         Map<String, String> jobData = Maps.newHashMap();
-        jobData.put(RuleProcessor.CHUNK_SIZE, String.valueOf(CHUNK_SIZE));
+        jobData.put(RuleProcessor.CHUNK_SIZE, Integer.toString(CHUNK_SIZE));
         new RuleProcessor().execute(jobData);
     }
 
@@ -114,30 +105,4 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
         String queuedTask = taskInfo.getBody();
         return POST(request, "/tasks", APPLICATION_X_WWW_FORM_URLENCODED, queuedTask);
     }
-    
-    /**
-     * Tests {@link ChunkInfo}.
-     */
-    @Test
-    public void testChunkInfo() {
-        ChunkInfo info = new ChunkInfo(0, 2, 4);
-        assertEquals(2, info.chunkRange);
-        assertEquals(0, info.lowerBound);
-        assertEquals(2, info.upperBound);
-        assertFalse(info.lastChunk);
-        
-        info = new ChunkInfo(1, 2, 4);
-        assertEquals(2, info.chunkRange);
-        assertEquals(2, info.lowerBound);
-        assertEquals(4, info.upperBound);
-        assertTrue(info.lastChunk);
-        
-        try {
-            new ChunkInfo(2, 2, 4);
-            fail("chunk index should be less than the number of chunks");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
-    
 }

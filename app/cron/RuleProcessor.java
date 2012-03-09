@@ -28,38 +28,14 @@ import tasks.TaskUtils;
  * @author syyang
  */
 public class RuleProcessor implements Job {
-    
-    public static final String KEY_SPACE = "KeySpace";
-    public static final String CHUNK_SIZE = "ChunkSize";
-
     /** Indicates how many users to process per task */
     public static final int DEFAULT_CHUNK_SIZE = 20;
+    public static final String CHUNK_SIZE = "ChunkSize";
 
     @Override
     public void execute(Map<String, String> jobData) {
         TypedMap data = new TypedMap(jobData);
         final int chunkSize = data.get(CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
-
-        int numUsers = User.all().count();
-        int lastChunk = numUsers % chunkSize;
-        int numChunks = numUsers / chunkSize;
-        // Create a new chunk for the last incomplete chunk
-        if (lastChunk > 0) {
-            numChunks++;
-        }
-
-        List<String> taskIds = Lists.newArrayList();
-        Queue queue = TaskUtils.getQueue(ChunkedRuleProcessor.class);
-        for (int i = 0; i < numChunks; i++) {
-            TaskOptions options = TaskUtils.newTaskOptions(ChunkedRuleProcessor.class);
-            options.param(ChunkedRuleProcessor.pCHUNK, String.valueOf(i));
-            options.param(ChunkedRuleProcessor.pNUM_CHUNKS, String.valueOf(numChunks));
-            TaskHandle handle = queue.add(options);
-            taskIds.add(handle.getName());
-        }
-        Logger.info("RuleProcessor finished enqueuing chunked tasks." +
-	        		"Num chunks: %d Chunk size: %d Num users: %d Task ids: %s",
-	        		numChunks, chunkSize, numUsers, taskIds);
+        ChunkedRuleProcessor.submit(0, chunkSize, null);
     }
-
 }

@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import dropbox.gson.DbxAccount;
 
+import play.Logger;
 import play.test.UnitTest;
 
 /**
@@ -59,18 +60,27 @@ public class UserTest extends UnitTest {
         account.uid = ID;
         account.name = NAME;
 
-        // verify a new User is created
-        User user = new User(account, TOKEN, SECRET);
-        assertEquals(user, User.findOrCreateByDbxAccount(account, TOKEN, SECRET));
-
-        // verify stale fields are updated
-        String token2 = TOKEN + "2";
-        String secret2 = SECRET + "2";
-        user.token = token2;
-        user.secret = secret2;
-        assertEquals(user, User.findOrCreateByDbxAccount(account, token2, secret2));
+        assertNotNull(User.findOrCreateByDbxAccount(account, TOKEN, SECRET).id);
     }
     
+    @Test
+    public void testModstamp() {
+        DbxAccount account = new DbxAccount();
+        account.uid = ID;
+        account.name = NAME;
+
+        User u = User.findOrCreateByDbxAccount(account, TOKEN, SECRET);
+        assertNotNull(u.modified);
+        assertNotNull(u.created);
+        assertEquals(u.modified, u.created);
+        
+        // Updating token and secret should update modification date but not creation date
+        u = User.findOrCreateByDbxAccount(account, TOKEN + "x", SECRET + "x");
+        assertNotNull(u.modified);
+        assertNotNull(u.created);
+        assertTrue(u.modified.after(u.created));
+    }
+
     private static User newUser(Long id, String token, String email, String secret, String name) {
         User user = new User();
         user.id = id;

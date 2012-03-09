@@ -9,6 +9,7 @@
 *.vi
 *~
 *.class
+*.jpage
 
 # OS or Editor folders
 .DS_Store
