@@ -3,6 +3,7 @@ package models;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -77,8 +78,8 @@ public class User extends Model {
      * 
      * @return list of file moves performed
      */
-    public List<Move> runRules() {
-        List<Move> ret = Lists.newArrayList();
+    public List<FileMove> runRules() {
+        List<FileMove> ret = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(this);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
         List<Rule> rules = Rule.findByOwner(this).fetch();
@@ -93,7 +94,7 @@ public class User extends Model {
                     if (Play.mode.isDev()) {
                         client.move(file, r.dest + "/" + base);
                     }
-                    ret.add(new Move(r, base));
+                    ret.add(new FileMove(r, base));
                     break;
                 }
             }
@@ -101,14 +102,19 @@ public class User extends Model {
 
         Logger.info("Done running rules for %s. %d moves performed", this, ret.size());
         if (! ret.isEmpty()) {
-            Model.batch(Move.class).insert(ret);
+            Model.batch(FileMove.class).insert(ret);
         }
 
+        // Delete old Move rows with 1% probability
+        if ((new Random().nextInt() % 100) == 0) {
+            FileMove.deleteStaleForUser(this.id);
+        }
+        
         return ret;
     }
     
-    public Query<Move> getMoves() {
-        return Move.all().filter("owner", this.id).order("when");
+    public Query<FileMove> getMoves() {
+        return FileMove.all().filter("owner", this.id).order("when");
     }
 
     private static String basename(String path) {

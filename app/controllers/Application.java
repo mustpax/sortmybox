@@ -2,7 +2,7 @@ package controllers;
 
 import java.util.List;
 
-import models.Move;
+import models.FileMove;
 import models.Rule;
 import models.User;
 import play.Logger;
@@ -17,7 +17,7 @@ public class Application extends Controller {
     public static void index() {
         User user = RequiresLogin.getLoggedInUser();
         List<Rule> rules = Rule.findByOwner(user).fetch();
-        List<Move> moves = user.getMoves().limit(10).fetch();
+        List<FileMove> moves = user.getMoves().limit(10).fetch();
         render(user, rules, moves);
     }
     
