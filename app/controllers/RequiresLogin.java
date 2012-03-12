@@ -39,8 +39,6 @@ public class RequiresLogin extends Controller {
     private static class SessionKeys {
         static final String TOKEN = "token";
         static final String SECRET = "secret";
-        static final String LOGIN = "login";
-        static final String OFFLINE = "offline";
         static final String UID = "uid";
     }
     
@@ -112,8 +110,7 @@ public class RequiresLogin extends Controller {
     }
 
     public static boolean isLoggedIn() {
-        return "true".equals(session.get(SessionKeys.LOGIN)) &&
-                getLoggedInUser() != null;
+        return getLoggedInUser() != null;
     }
 
     public static void auth() throws Exception {
@@ -125,7 +122,6 @@ public class RequiresLogin extends Controller {
             OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
             if (oauthResponse.error == null) {
                 Logger.info("Succesfully authenticated with Dropbox.");
-                session.put(SessionKeys.LOGIN, "true");
                 User u = upsertUser(oauthResponse.token, oauthResponse.secret);
                 session.put(SessionKeys.UID, u.id);
                 session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
@@ -181,9 +177,8 @@ public class RequiresLogin extends Controller {
     }
 
     public static void logout() {
-        session.remove(SessionKeys.TOKEN, SessionKeys.SECRET,
-                SessionKeys.LOGIN, SessionKeys.OFFLINE);
-        login();
+        session.remove(SessionKeys.UID);
+        Application.index();
     }
     
     static void redirectToOriginalURL() {
@@ -192,14 +187,5 @@ public class RequiresLogin extends Controller {
             url = "/";
         }
         redirect(url);
-    }
-
-    /**
-     * Allow development when Dropbox is unreachable by creating a dummy user.
-     */
-    public static void offline() {
-        assert Play.mode.isDev();
-        session.put(SessionKeys.OFFLINE, "true");
-        Application.index();
     }
 }
