@@ -59,30 +59,19 @@
   </p>
 </div>
 
-<!-- Example row of columns -->
-<div class="row">
-  <div class="span6">
-    <h2>User</h2>
-    <ul>
-      <li>${user.id}
-      <li>${user.name}
-    </ul>
+  <div class="row">
+    <div class="span6">
+        <h2>Recent activity</h2>
+        <ul>
+            #{list items:moves, as:'move'}
+	            <li>Moved <code>${move.from}</code> to <code>${move.to}/${move.from}</code> ${move.when.since()}.
+            #{/list}
+        </ul>
+	    #{form @process(), method:'POST'}
+		    <input class="btn btn-warning" type="submit" value="Run rules now">
+	    #{/form}
+    </div>
   </div>
-  
-  <div class="span6">
-    <h2>Files</h2>
-    <ul>
-        #{list files, as:'file'}
-        <li>${file}
-        #{/list}
-    </ul>
-
-    #{form @process(), method:'POST'}
-    <input type="submit" value="Update">
-    #{/form}
-  </div>
-</div>
-
 #{set 'script'}
 <script>
 (function(window, $, undefined) {

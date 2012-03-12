@@ -112,8 +112,8 @@ public class RequiresLogin extends Controller {
     }
 
     public static boolean isLoggedIn() {
-        return "true".equals(session.get(SessionKeys.LOGIN)) || 
-               "true".equals(session.get("offline"));
+        return "true".equals(session.get(SessionKeys.LOGIN)) &&
+                getLoggedInUser() != null;
     }
 
     public static void auth() throws Exception {

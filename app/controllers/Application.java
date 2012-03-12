@@ -1,18 +1,13 @@
 package controllers;
 
-import java.io.File;
-import java.util.*;
+import java.util.List;
 
+import models.Move;
 import models.Rule;
 import models.User;
 import play.Logger;
-import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
-import siena.Query;
-import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClientFactory;
 
 /**
  * @author mustpax
@@ -21,10 +16,9 @@ import dropbox.client.DropboxClientFactory;
 public class Application extends Controller {
     public static void index() {
         User user = RequiresLogin.getLoggedInUser();
-        DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
         List<Rule> rules = Rule.findByOwner(user).fetch();
-        render(user, files, rules);
+        List<Move> moves = user.getMoves().limit(10).fetch();
+        render(user, rules, moves);
     }
     
     public static void process() {

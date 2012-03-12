@@ -10,7 +10,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
 import play.Play;
-
 import siena.Column;
 import siena.DateTime;
 import siena.Generator;
@@ -58,7 +57,10 @@ public class User extends Model {
     @Column("last_sync")
     public Date lastSync;
 
-    public User() { }
+    public User() {
+        this.created = new Date();
+        this.modified = new Date();
+    }
 
     public User(DbxAccount account, String token, String secret) {
         this.id = account.uid;
@@ -80,6 +82,7 @@ public class User extends Model {
         DropboxClient client = DropboxClientFactory.create(this);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
         List<Rule> rules = Rule.findByOwner(this).fetch();
+        Logger.info("Running rules for %s", this);
         
         for (String file: files) {
             String base = basename(file);
@@ -90,14 +93,24 @@ public class User extends Model {
                     if (Play.mode.isDev()) {
                         client.move(file, r.dest + "/" + base);
                     }
-                    ret.add(new Move(r, file, r.dest));
+                    ret.add(new Move(r, base));
                     break;
                 }
             }
         }
+
+        Logger.info("Done running rules for %s. %d moves performed", this, ret.size());
+        if (! ret.isEmpty()) {
+            Model.batch(Move.class).insert(ret);
+        }
+
         return ret;
     }
     
+    public Query<Move> getMoves() {
+        return Move.all().filter("owner", this.id).order("when");
+    }
+
     private static String basename(String path) {
         if (path == null) {
             return null;
@@ -105,22 +118,6 @@ public class User extends Model {
         
         File f = new File(path);
         return f.getName();
-    }
-    
-    public static class Move {
-        public String from, to;
-        public Rule rule;
-        public Move(Rule rule, String from, String to) {
-            this.from = from;
-            this.to = to;
-            this.rule = rule;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Moved file '%s' to '%s' because it matches rule: %s",
-			                     this.from, this.to, this.rule.toString());
-        }
     }
     
     public static Query<User> all() {
