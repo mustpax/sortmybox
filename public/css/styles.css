@@ -17,6 +17,10 @@ body {
     color: #B94A48;
 }
 
+.rule-template {
+    display: none;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project

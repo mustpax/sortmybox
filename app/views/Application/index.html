@@ -6,7 +6,6 @@
   <p>Add or edit sorting rules. Rules are applied top to bottom. Rule evaluation stops at first match.</p>
   <table class="rules table table-bordered">
     <thead>
-      <th></th>
       <th>When</th>
       <th>To</th>
       <th>Move file to</th>
@@ -14,7 +13,6 @@
     </thead>
     #{list items:rules, as:'rule'}
 	  <tr class="rule">
-	      <td>${rule.rank + 1}</td>
           <td>
 	      #{select 'type', value:rule.type }
 		      #{option 'NAME_CONTAINS'}Name contains#{/option}
@@ -31,10 +29,9 @@
             <i class="status"></i>
           </td>
         </tr>
-      #{/list}
-    
+    #{/list}
+    #{else}
     <tr class="rule">
-      <td class="rank">#{if rules}${rules.size() + 1}#{/if}#{else}1#{/else}</td>
       <td>
         <select>
           <option value="NAME_CONTAINS">Name contains</option>
@@ -47,14 +44,32 @@
       </td>
       <td><input class="dest" type="text"></td>
       <td>
-        <a class="btn add">Add</a>
+        <button class="btn btn-danger del">Delete</button>
+        <i class="status"></i>
+      </td>
+    </tr>
+    #{/else}
+    
+    <tr class="rule-template">
+      <td>
+        <select>
+          <option value="NAME_CONTAINS">Name contains</option>
+          <option value="EXT_EQ">Extension equals</option>
+          <option value="GLOB">Name pattern</option>
+        </select>
       </td>
       <td>
+	      <input class="pattern" type="text">
+      </td>
+      <td><input class="dest" type="text"></td>
+      <td>
+        <button class="btn btn-danger del">Delete</button>
         <i class="status"></i>
       </td>
     </tr>
   </table>
   <p>
+    <a class="btn btn-large new">Create New</a>
     <a class="btn btn-primary btn-large save">Save</a>
   </p>
 </div>
@@ -76,22 +91,13 @@
 <script>
 (function(window, $, undefined) {
     $(document).ready(function() {
-      $('.rules .add').live('click', function() {
-        var add = this;
-        var tbody = $(add).parents('tbody').first();
-        var new2 = tbody.children('tr.rule').last().clone().hide();
-        new2.find('.pattern').val('');
-        new2.find('.dest').val('');
-        new2.find('select').val('NAME_CONTAINS');
-        new2.find('.btn').text('Add').removeClass('del').addClass('add');
-        new2.find('.rank').text(String(parseInt(new2.find('.rank').text()) + 1));
+      $('.new').bind('click', function() {
+        var tbody = $('.rules');
+        var new2 = $('.rule-template').clone();
+        new2.removeClass('rule-template').addClass('rule');
         
         tbody.append(new2);
         new2.show('slow');
-
-        $(add).text('Del');
-        $(add).removeClass('add');
-        $(add).addClass('del');
       });
 
       $('.rules .del').live('click', function() {
