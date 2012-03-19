@@ -21,6 +21,10 @@ body {
     display: none;
 }
 
+select[size] {
+    height: 28px;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
