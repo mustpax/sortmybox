@@ -114,7 +114,7 @@ public class User extends Model {
     }
     
     public Query<FileMove> getMoves() {
-        return FileMove.all().filter("owner", this.id).order("when");
+        return FileMove.all().filter("owner", this.id).order("-when");
     }
 
     private static String basename(String path) {
