@@ -77,7 +77,7 @@
         <h2>Recent activity</h2>
         <ul>
             #{list items:moves, as:'move'}
-	            <li>Moved <code>${move.from}</code> to <code>${move.to}/${move.from}</code> ${move.when.since()}.
+	            <li>Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> ${move.when.since()}.
             #{/list}
         </ul>
 	    #{form @process(), method:'POST'}
