@@ -91,6 +91,29 @@
         });
       });
     });
+
+    /**
+     * Get list of directories inside given directory from
+     * the server.
+     * @param cb function is called with the output
+     * @param optional path of directory to get a listing of
+     */
+    function getDirs(cb, path) {
+        $.ajax({
+            type: 'GET',
+            url: '/dirs',
+            data: {
+                'path': path || '/',
+                'authenticityToken' : window.csrfToken
+            },
+            success: function(data) {
+                if (cb) {
+                    cb(data);
+                }
+            }
+        });
+        
+    };
     
     /**
      * Init file explorer inside the given table cell.
