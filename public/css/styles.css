@@ -25,6 +25,19 @@ select[size] {
     height: 28px;
 }
 
+.exp {
+    display: none;
+    position: absolute;
+}
+
+.exp-active {
+    position: relative;
+}
+
+.exp-active > .exp {
+    display: block;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project

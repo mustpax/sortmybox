@@ -91,4 +91,29 @@
         });
       });
     });
+    
+    /**
+     * Init file explorer inside the given table cell.
+     */
+    function initExplorer(cell) {
+        var exp = $(cell).find('.exp').get(0);
+        if (! exp) {
+            exp = $('<ul class="exp">');
+            $.each(["foo", "bar", "baz"], function(i, v) {
+                var li = $("<li>").text(v);
+                $(exp).append(li);
+            });
+            $(cell).append(exp);
+        }
+    };
+
+    $('.rule .dest').live('focus', function() {
+        var cell = $(this).parent('td');
+        initExplorer(cell);
+        $(this).parent('td').addClass('exp-active');
+    });
+
+    $('.rule .dest').live('blur', function() {
+        $(this).parent('td').removeClass('exp-active');
+    });
 })(window, jQuery);
