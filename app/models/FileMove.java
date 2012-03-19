@@ -22,20 +22,32 @@ public class FileMove extends Model {
     
     public Long owner;
     
-    public FileMove(Rule rule, String from) {
+    public Boolean successful;
+    
+    public FileMove(Rule rule, String from, boolean success) {
         this.owner = rule.owner;
         this.toDir = rule.dest;
         this.fromFile = from;
         this.when = new Date();
+        this.successful = success;
     }
     
     public static Query<FileMove> all() {
         return Model.all(FileMove.class);
     }
     
+    public boolean isSuccessful() {
+        return this.successful == null ? true : this.successful;
+    }
+
     @Override
     public String toString() {
-        return String.format("Moved file '%s' to '%s' at %s",
+        if (isSuccessful()) {
+            return String.format("Moved file '%s' to '%s' at %s",
+			                     this.fromFile, this.toDir, this.when);
+        }
+
+        return String.format("Failed to move file '%s' to '%s' at %s",
 			                 this.fromFile, this.toDir, this.when);
     }
 

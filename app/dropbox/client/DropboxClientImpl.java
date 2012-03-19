@@ -76,7 +76,7 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     @Override
-    public DbxMetadata move(String from, String to) {
+    public DbxMetadata move(String from, String to) throws FileMoveCollisionException {
         Preconditions.checkArgument(from != null && to != null,
                 "To and from paths cannot be null.");
         Preconditions.checkArgument((from.charAt(0) == '/') && (to.charAt(0) == '/'),
@@ -93,7 +93,13 @@ class DropboxClientImpl implements DropboxClient {
             Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
             return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
         }
-        Logger.warn("Failed to move files. Error: %s", getError(resp));
+
+        String err = getError(resp);
+        Logger.warn("Failed to move files. Error: %s", err);
+        if (Integer.valueOf(403).equals(resp.getStatus())) {
+            throw new FileMoveCollisionException(err);
+        }
+
         return null;
     }
     

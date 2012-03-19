@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.FileMoveCollisionException;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -90,11 +91,16 @@ public class User extends Model {
             for (Rule r: rules) {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
+                    boolean success = true;
                     // TODO do not move files on production just yet
                     if (Play.mode.isDev()) {
-                        client.move(file, r.dest + "/" + base);
+                        try {
+                            client.move(file, r.dest + "/" + base);
+                        } catch (FileMoveCollisionException e) {
+                            success = false;
+                        }
                     }
-                    ret.add(new FileMove(r, base));
+                    ret.add(new FileMove(r, base, success));
                     break;
                 }
             }

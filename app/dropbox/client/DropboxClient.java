@@ -25,7 +25,7 @@ public interface DropboxClient {
      * @param to The new destination
      * @return The metadata for the moved file or folder, null if there's a failure
      */
-    @Nullable DbxMetadata move(String from, String to);
+    @Nullable DbxMetadata move(String from, String to) throws FileMoveCollisionException;
     
     /**
      * Get all files, excluding directories, inside the given directory.

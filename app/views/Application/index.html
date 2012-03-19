@@ -75,9 +75,15 @@
   <div class="row">
     <div class="span6">
         <h2>Recent activity</h2>
-        <ul>
+        <ul class="moves">
             #{list items:moves, as:'move'}
-	            <li>Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> ${move.when.since()}.
+                #{if move.successful}
+	            <li class="failure">Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code>. (${move.when.since()})
+                #{/if}
+                #{else}
+	            <li class="success">Failed to move <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> since
+                                    there is already a file with the same name at the location. (${move.when.since()})
+                #{/else}
             #{/list}
         </ul>
 	    #{form @process(), method:'POST'}

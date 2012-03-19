@@ -57,7 +57,7 @@ public class FileMoveTest extends UnitTest {
     
     public static FileMove createMove(Date when, long owner) {
         Rule r = new Rule(RuleType.EXT_EQ, "txt", "/txt", 0, owner);
-        FileMove m = new FileMove(r, "foo.txt");
+        FileMove m = new FileMove(r, "foo.txt", true);
         m.when = when;
         m.insert();
         return m;
