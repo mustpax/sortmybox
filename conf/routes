@@ -5,6 +5,7 @@
 # Home page
 GET     /                                       Application.index
 POST    /update                                 Application.process
+GET     /dirs                                   Application.dirs
 
 # Rules
 POST    /rules                                  Rules.update

@@ -12,7 +12,9 @@ import play.libs.WS;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
+import play.templates.JavaExtensions;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -49,6 +51,10 @@ class DropboxClientImpl implements DropboxClient {
 
     @Override
     public Set<String> listDir(String path) {
+        return listDir(path, ListingType.FILES);
+    }
+
+    public Set<String> listDir(String path, ListingType listingType) {
         Preconditions.checkNotNull(path, "Path missing.");
         Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
            
@@ -65,7 +71,11 @@ class DropboxClientImpl implements DropboxClient {
             }
 
             for (DbxMetadata entry: metadata.contents) {
-                if (!entry.isDir) {
+                if (entry.isDir && listingType.includeDirs) {
+                    files.add(entry.path);
+                }
+
+                if ((!entry.isDir) && listingType.includeFiles) {
                     files.add(entry.path);
                 }
             }
@@ -161,13 +171,20 @@ class DropboxClientImpl implements DropboxClient {
          * escape "/" seperators
          */
         private static String encodePath(String param) {
-            // XXX this will incorrectly unescape %%2F
-            return encodeParam(param).replaceAll("%2F", "/");
+            if ((param == null) || param.isEmpty()) {
+                return "";
+            }
+
+            String[] nodes = param.split("/");
+            for (int i = 0; i < nodes.length; i++) {
+                nodes[i] = encodeParam(nodes[i]);
+            }
+
+            return Joiner.on("/").join(nodes);
         }
 
         private static String encodeParam(String param) {
-            // XXX should we toLowerCase here?
-            return OAuth.percentEncode(param.toLowerCase());
+            return OAuth.percentEncode(param);
         } 
     }
 }

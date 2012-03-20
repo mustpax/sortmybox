@@ -5,9 +5,11 @@ import java.util.List;
 import models.FileMove;
 import models.Rule;
 import models.User;
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import dropbox.client.DropboxClient;
+import dropbox.client.DropboxClientFactory;
+import dropbox.client.DropboxClient.ListingType;
 
 /**
  * @author mustpax
@@ -25,5 +27,11 @@ public class Application extends Controller {
         checkAuthenticity();
         RequiresLogin.getLoggedInUser().runRules();
         index();
+    }
+    
+    public static void dirs(String path) {
+        checkAuthenticity();
+        DropboxClient client = DropboxClientFactory.create(RequiresLogin.getLoggedInUser());
+        renderJSON(client.listDir(path, ListingType.DIRS));
     }
 }

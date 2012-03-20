@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.io.Files;
+
 import play.Play;
 import play.libs.OAuth.ServiceInfo;
 
@@ -34,5 +36,27 @@ public interface DropboxClient {
      * @return set of files (not directories) inside the directory
      */
     @Nonnull Set<String> listDir(String path);
+    
+    /**
+     * Get all files, excluding directories, inside the given directory.
+     * 
+     * @param path path to the directory to check with the leading /
+     * @param listingType which types of entries to return
+     * @return set of files (not directories) inside the directory
+     */
+    @Nonnull Set<String> listDir(String path, ListingType listingType);
 
+    public static enum ListingType {
+        DIRS(true, false),
+        ALL(true, true),
+        FILES(false, true);
+        
+        public final boolean includeDirs;
+        public final boolean includeFiles;
+        
+        private ListingType(boolean includeDirs, boolean includeFiles) {
+            this.includeDirs  = includeDirs;
+            this.includeFiles = includeFiles;
+        }
+    }
 }
