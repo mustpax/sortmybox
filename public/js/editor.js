@@ -95,10 +95,10 @@
     /**
      * Get list of directories inside given directory from
      * the server.
-     * @param cb function is called with the output
      * @param optional path of directory to get a listing of
+     * @param cb function is called with the output
      */
-    function getDirs(cb, path) {
+    function getDirs(path, cb) {
         $.ajax({
             type: 'GET',
             url: '/dirs',
@@ -115,25 +115,28 @@
         
     };
     
-    /**
-     * Init file explorer inside the given table cell.
-     */
-    function initExplorer(cell) {
-        var exp = $(cell).find('.exp').get(0);
-        if (! exp) {
+    function displayDirs(dirs, cell) {
+        var exp = $(cell).find('.exp');
+        if (! exp.length) {
             exp = $('<ul class="exp">');
-            $.each(["foo", "bar", "baz"], function(i, v) {
-                var li = $("<li>").text(v);
-                $(exp).append(li);
-            });
             $(cell).append(exp);
         }
+        
+        exp.empty();
+        dirs.sort();
+        $.each(dirs, function(i, v) {
+            var li = $('<li>').text(v);
+            exp.append(li);
+        });
     };
-
+    
     $('.rule .dest').live('focus', function() {
         var cell = $(this).parent('td');
-        initExplorer(cell);
+        var path = $(this).val() || '/';
         $(this).parent('td').addClass('exp-active');
+        getDirs(path, function(dirs) {
+            displayDirs(dirs, cell);
+        });
     });
 
     $('.rule .dest').live('blur', function() {
