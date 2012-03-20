@@ -26,7 +26,6 @@ select[size] {
 }
 
 .exp {
-    display: none;
     position: absolute;
 }
 
@@ -34,9 +33,6 @@ select[size] {
     position: relative;
 }
 
-.exp-active > .exp {
-    display: block;
-}
 
 /*
 * jQuery Mobile Framework

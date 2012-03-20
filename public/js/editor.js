@@ -118,14 +118,15 @@
     function displayDirs(dirs, cell) {
         var exp = $(cell).find('.exp');
         if (! exp.length) {
-            exp = $('<ul class="exp">');
+            exp = $('<ul class="exp nav nav-list">');
             $(cell).append(exp);
         }
         
         exp.empty();
         dirs.sort();
         $.each(dirs, function(i, v) {
-            var li = $('<li>').text(v);
+            var li = $('<li>');
+            li.append($('<a href="#">').text(v));
             exp.append(li);
         });
     };
