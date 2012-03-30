@@ -93,6 +93,9 @@
                 #{/else}
             #{/list}
         </ul>
+        #{else}
+            <em>None yet. Create some rules and save files in your Sortbox folder to get going.</em>
+        #{/else}
     </div>
   </div>
 #{form @process(), method:'POST', id:'run-rules-form'}
