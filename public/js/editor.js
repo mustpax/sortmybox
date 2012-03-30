@@ -1,11 +1,14 @@
 (function(window, $, undefined) {
     $(document).ready(function() {
+      $('.run-rules').bind('click', function() {
+          $('#run-rules-form').submit();
+      });
+      
       $('.new').bind('click', function() {
-        var tbody = $('.rules');
         var new2 = $('.rule-template').clone();
         new2.removeClass('rule-template').addClass('rule');
         
-        tbody.append(new2);
+        $('.new-rule-row').before(new2);
         new2.show('slow');
       });
 

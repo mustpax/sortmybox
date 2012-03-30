@@ -47,6 +47,13 @@
       </td>
     </tr>
     #{/else}
+
+    <tr class="new-rule-row">
+        <td colspan="3"></td>
+        <td>
+	        <button class="btn new">New rule</button>
+        </td>
+    </tr>
     
     <tr class="rule-template">
       <td>
@@ -67,8 +74,8 @@
     </tr>
   </table>
   <p>
-    <a class="btn btn-large new">Create New</a>
     <a class="btn btn-primary btn-large save">Save</a>
+    <a class="btn btn-warning btn-large run-rules">Run rules now</a>
   </p>
 </div>
 
@@ -86,11 +93,10 @@
                 #{/else}
             #{/list}
         </ul>
-	    #{form @process(), method:'POST'}
-		    <input class="btn btn-warning" type="submit" value="Run rules now">
-	    #{/form}
     </div>
   </div>
+#{form @process(), method:'POST', id:'run-rules-form'}
+#{/form}
 #{set 'script'}
 <script src="@{'/public/js/editor.js'}"></script>
 #{/set}
