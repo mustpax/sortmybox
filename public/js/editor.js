@@ -140,7 +140,7 @@
     };
     
 
-    function displayDirs(path, dirs, cell) {
+    function displayDirs(path, dirs, cell, isLoading) {
         var exp = $(cell).find('.exp');
         if (! exp.length) {
             exp = $('<ul class="exp nav nav-list">');
@@ -148,7 +148,6 @@
         }
         
         exp.empty();
-        dirs.sort();
         
         function upLink() {
             var li = $('<li>');
@@ -166,28 +165,46 @@
         if (path !== '/') {
             exp.append(upLink());
         }
-
-        $.each(dirs, function(i, v) {
+        
+        function loading() {
             var li = $('<li>');
-            var folder = $('<i>').addClass('icon-folder-open');
-            var anchor = $('<a href="#">').append(folder)
-							              .append($('<span>').text(v));
-            anchor.attr('data-path', v);
-            li.append(anchor);
-            exp.append(li);
-        });
+            li.append($('<span>').text('Loading '));
+            li.append($('<i>').addClass('icon-refresh')
+                              .addClass('spin'));
+            return li;
+        }
+
+        if (isLoading) {
+            exp.append(loading());
+        } else {
+            dirs.sort();
+            $.each(dirs, function(i, v) {
+                var li = $('<li>');
+                var folder = $('<i>').addClass('icon-folder-open');
+                var anchor = $('<a href="#">').append(folder)
+                .append($('<span>').text(v));
+                anchor.attr('data-path', v);
+                li.append(anchor);
+                exp.append(li);
+            });
+        }
     };
     
     var dirUpdater = _.debounce(function () {
         var cell = $(this).parent('td');
         var path = $(this).val() || '/';
-        cell.addClass('exp-active');
+        displayDirs(path, null, cell, true);
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
     }, 250);
     
     $('.rule .dest').live('keyup focus change', dirUpdater);
+
+    $('.rule .dest').live('focus', function() {
+        var cell = $(this).parent('td');
+        cell.addClass('exp-active');
+    });
     
     $('.exp a').live('click', function(e) {
         var path = $(this).attr('data-path');
