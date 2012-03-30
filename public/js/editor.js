@@ -226,7 +226,7 @@
 	}
 
     function blurHandler() {
-        _.delay(clearIfUnfocused, 1000, this);
+        _.delay(clearIfUnfocused, 250, this);
     };
 
     $('.rule .dest').live('blur', blurHandler);
