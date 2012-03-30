@@ -32,6 +32,11 @@ select[size] {
     max-height: 240px;
     overflow-y: auto;
     overflow-x: hidden;
+    display: none;
+}
+
+.exp-active .exp {
+    display: block;
 }
 
 .exp-active {
