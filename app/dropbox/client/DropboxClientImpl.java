@@ -114,7 +114,11 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     private static String getError(HttpResponse resp) {
-        return resp.getJson().getAsJsonObject().get("error").getAsString();
+        try {
+	        return resp.getJson().getAsJsonObject().get("error").getAsString();
+        } catch (UnsupportedOperationException e) {
+            return "Status: " + resp.getStatus() + resp.getString();
+        }
     }
     
     /**
