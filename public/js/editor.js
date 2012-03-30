@@ -173,20 +173,24 @@
                               .addClass('spin'));
             return li;
         }
-
+        
         if (isLoading) {
             exp.append(loading());
         } else {
             dirs.sort();
-            $.each(dirs, function(i, v) {
-                var li = $('<li>');
-                var folder = $('<i>').addClass('icon-folder-open');
-                var anchor = $('<a href="#">').append(folder)
-                .append($('<span>').text(v));
-                anchor.attr('data-path', v);
-                li.append(anchor);
-                exp.append(li);
-            });
+            if (_.isEmpty(dirs)) {
+                exp.append($("<li><em>No directories</em></li>"));
+            } else {
+	            $.each(dirs, function(i, v) {
+	                var li = $('<li>');
+	                var folder = $('<i>').addClass('icon-folder-open');
+	                var anchor = $('<a href="#">').append(folder)
+	                .append($('<span>').text(v));
+	                anchor.attr('data-path', v);
+	                li.append(anchor);
+	                exp.append(li);
+	            });
+            }
         }
     };
     
@@ -197,7 +201,7 @@
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
-    }, 250);
+    }, 100);
     
     $('.rule .dest').live('keyup focus change', dirUpdater);
 
