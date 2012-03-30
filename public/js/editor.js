@@ -197,10 +197,27 @@
         var input = $(this).parents('td').first().find('input');
         input.val(path);
         input.trigger('change');
-        e.preventDefault();
+        input.focus();
+        return false;
     });
 
-    $('.rule .dest').live('blur', function() {
-        $(this).parent('td').removeClass('exp-active');
+    function clearIfUnfocused(elem) {
+        if (! $(elem).attr('data-focus')) {
+	        $(elem).parent('td').removeClass('exp-active');
+        }
+	}
+
+    function blurHandler() {
+        _.delay(clearIfUnfocused, 1000, this);
+    };
+
+    $('.rule .dest').live('blur', blurHandler);
+    
+    $('input[type="text"]').live('focus', function() {
+        $(this).attr('data-focus', 1);
+    });
+
+    $('input[type="text"]').live('blur', function() {
+        $(this).attr('data-focus', '');
     });
 })(window, jQuery);
