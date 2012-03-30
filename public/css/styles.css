@@ -30,7 +30,7 @@ select[size] {
     background: white;
     width: 200px;
     max-height: 240px;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
