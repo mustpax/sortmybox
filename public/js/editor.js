@@ -157,7 +157,7 @@
             upPath = '/'  + upPath.join('/');
             a.attr('data-path', upPath);
             a.append($('<i>').addClass('icon-chevron-up'));
-            a.append($('<em>').text('Up one directory'));
+            a.append($('<em>').text('Go up one folder'));
             return li.append(a);
         };
         
@@ -179,7 +179,7 @@
         } else {
             dirs.sort();
             if (_.isEmpty(dirs)) {
-                exp.append($("<li><em>No directories</em></li>"));
+                exp.append($("<li><em>No more folders</em></li>"));
             } else {
 	            $.each(dirs, function(i, v) {
 	                var li = $('<li>');
