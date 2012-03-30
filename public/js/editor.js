@@ -47,7 +47,6 @@
 
         $.each(errors, function() {
             var cell = rule.find('input.' + this.field).parents('td').first();
-            console.log('cell', cell);
             cell.addClass('error');
             cell.append($('<span class="msg help-inline"></span>').text(this.msg));
         });
@@ -72,7 +71,7 @@
 
       $('.save').live('click', function() {
         var rules = serialize();
-        console.log(rules);
+        console.log('serialed rules', rules);
         loading();
         $.ajax({
             type: 'POST',
@@ -83,7 +82,7 @@
             },
             success: function(data) {
                 doneLoading();
-                console.log('success');
+                console.log('save success');
                 $.each(data, function(i, v) {
                     addErrors(i, v);
                 });
@@ -121,8 +120,7 @@
             return;
         }
 
-        console.log('cache miss', path);
-        console.log('request from server', path);
+        console.log('cache miss, request from server', path);
         var req = $.ajax({
             type: 'GET',
             url: '/dirs',
@@ -158,7 +156,6 @@
             var upPath = _.filter(path.split('/'), function(x) { return !!x; });
             upPath.pop();
             upPath = '/'  + upPath.join('/');
-            console.log(path, upPath);
             a.attr('data-path', upPath);
             a.append($('<i>').addClass('icon-chevron-up'));
             a.append($('<em>').text('Up one directory'));
