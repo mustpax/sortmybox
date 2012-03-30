@@ -141,7 +141,8 @@
                    req  : req };
     };
     
-    function displayDirs(dirs, cell) {
+
+    function displayDirs(path, dirs, cell) {
         var exp = $(cell).find('.exp');
         if (! exp.length) {
             exp = $('<ul class="exp nav nav-list">');
@@ -150,19 +151,34 @@
         
         exp.empty();
         dirs.sort();
-        if (_.isEmpty(dirs)) {
-            exp.append($('<em>').text('Empty.'));
-        } else {
-            $.each(dirs, function(i, v) {
-                var li = $('<li>');
-                var folder = $('<i>').addClass('icon-folder-open');
-                var anchor = $('<a href="#">').append(folder)
-								              .append($('<span class="path">').text(v));
-                anchor.attr('data-path', v);
-                li.append(anchor);
-                exp.append(li);
-            });
+        
+        function upLink() {
+            var li = $('<li>');
+            var a = $('<a href="#">');
+            var upPath = _.filter(path.split('/'), function(x) { return !!x; });
+            upPath.pop();
+            upPath = '/'  + upPath.join('/');
+            console.log(path, upPath);
+            a.attr('data-path', upPath);
+            a.append($('<i>').addClass('icon-chevron-up'));
+            a.append($('<em>').text('Up one directory'));
+            return li.append(a);
+        };
+        
+        // Add up link if not top dir
+        if (path !== '/') {
+            exp.append(upLink());
         }
+
+        $.each(dirs, function(i, v) {
+            var li = $('<li>');
+            var folder = $('<i>').addClass('icon-folder-open');
+            var anchor = $('<a href="#">').append(folder)
+							              .append($('<span>').text(v));
+            anchor.attr('data-path', v);
+            li.append(anchor);
+            exp.append(li);
+        });
     };
     
     var dirUpdater = _.debounce(function () {
@@ -170,7 +186,7 @@
         var path = $(this).val() || '/';
         cell.addClass('exp-active');
         getDirs(path, function(dirs) {
-            displayDirs(dirs, cell);
+            displayDirs(path, dirs, cell);
         });
     }, 250);
     
@@ -179,8 +195,8 @@
     $('.exp a').live('click', function(e) {
         var path = $(this).attr('data-path');
         var input = $(this).parents('td').first().find('input');
-        console.log(path, input);
         input.val(path);
+        input.trigger('change');
         e.preventDefault();
     });
 
