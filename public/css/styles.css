@@ -27,6 +27,11 @@ select[size] {
 
 .exp {
     position: absolute;
+    background: white;
+    width: 200px;
+    max-height: 240px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .exp-active {

@@ -92,6 +92,8 @@
       });
     });
 
+    var dirCache = {};
+    var curReq = null; 
     /**
      * Get list of directories inside given directory from
      * the server.
@@ -99,20 +101,44 @@
      * @param cb function is called with the output
      */
     function getDirs(path, cb) {
-        $.ajax({
+        if (curReq) {
+            // There is already a request for this
+            // path in flight ignore this one
+            if (curReq.path === path) {
+                console.log('already requesting', path);
+                return;
+            }
+
+            // There is a request for another path abort it
+            console.log('request obsolete, aborting', curReq.path);
+            curReq.req.abort();
+            curReq = null;
+        }
+
+        if (dirCache[path]) {
+            console.log('cache hit', path);
+            cb(dirCache[path]);
+            return;
+        }
+
+        console.log('cache miss', path);
+        console.log('request from server', path);
+        var req = $.ajax({
             type: 'GET',
             url: '/dirs',
             data: {
                 'path': path || '/',
                 'authenticityToken' : window.csrfToken
             },
-            success: function(data) {
-                if (cb) {
-                    cb(data);
-                }
+            success: function(dirs) {
+                curReq = null;
+                dirCache[path] = dirs;
+                cb(dirs);
             }
         });
         
+        curReq = { path : path,
+                   req  : req };
     };
     
     function displayDirs(dirs, cell) {
@@ -124,20 +150,38 @@
         
         exp.empty();
         dirs.sort();
-        $.each(dirs, function(i, v) {
-            var li = $('<li>');
-            li.append($('<a href="#">').text(v));
-            exp.append(li);
-        });
+        if (_.isEmpty(dirs)) {
+            exp.append($('<em>').text('Empty.'));
+        } else {
+            $.each(dirs, function(i, v) {
+                var li = $('<li>');
+                var folder = $('<i>').addClass('icon-folder-open');
+                var anchor = $('<a href="#">').append(folder)
+								              .append($('<span class="path">').text(v));
+                anchor.attr('data-path', v);
+                li.append(anchor);
+                exp.append(li);
+            });
+        }
     };
     
-    $('.rule .dest').live('focus', function() {
+    var dirUpdater = _.debounce(function () {
         var cell = $(this).parent('td');
         var path = $(this).val() || '/';
-        $(this).parent('td').addClass('exp-active');
+        cell.addClass('exp-active');
         getDirs(path, function(dirs) {
             displayDirs(dirs, cell);
         });
+    }, 250);
+    
+    $('.rule .dest').live('keyup focus change', dirUpdater);
+    
+    $('.exp a').live('click', function(e) {
+        var path = $(this).attr('data-path');
+        var input = $(this).parents('td').first().find('input');
+        console.log(path, input);
+        input.val(path);
+        e.preventDefault();
     });
 
     $('.rule .dest').live('blur', function() {
