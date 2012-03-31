@@ -33,6 +33,7 @@ select[size] {
     overflow-y: auto;
     overflow-x: hidden;
     display: none;
+    box-shadow: 0 0 5px 5px rgba(221, 221, 221, 0.5)
 }
 
 .exp-active .exp {
