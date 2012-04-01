@@ -2,6 +2,8 @@ package controllers;
 
 import java.util.List;
 
+import org.mortbay.log.Log;
+
 import models.FileMove;
 import models.Rule;
 import models.User;
@@ -32,6 +34,10 @@ public class Application extends Controller {
     public static void dirs(String path) {
         checkAuthenticity();
         DropboxClient client = DropboxClientFactory.create(RequiresLogin.getLoggedInUser());
-        renderJSON(client.listDir(path, ListingType.DIRS));
+        try {
+	        renderJSON(client.listDir(path, ListingType.DIRS));
+        } catch (IllegalArgumentException e) {
+            badRequest();
+        }
     }
 }
