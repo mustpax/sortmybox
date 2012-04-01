@@ -32,29 +32,9 @@
         </tr>
     #{/list}
     #{else}
-    <tr class="rule">
-      <td>
-        <select>
-          <option value="EXT_EQ">Extension equals</option>
-          <option value="NAME_CONTAINS">Name contains</option>
-          <option value="GLOB">Name pattern</option>
-        </select>
-      </td>
-      <td>
-	      <input class="pattern" type="text">
-      </td>
-      <td>
-        <div class="dest-wrap">
-	        <i class="exp-status icon-folder-close"></i>
-	        <input class="dest" type="text">
-        </div>
-      </td>
-      <td class="center">
-        <button class="btn btn-danger del">Delete</button>
-        <i class="status"></i>
-      </td>
-    </tr>
+        #{rule /}
     #{/else}
+    
 
     <tr class="new-rule-row">
         <td colspan="3"></td>
@@ -63,26 +43,7 @@
         </td>
     </tr>
     
-    <tr class="rule-template">
-      <td>
-        <select>
-          <option value="EXT_EQ">Extension equals</option>
-          <option value="NAME_CONTAINS">Name contains</option>
-          <option value="GLOB">Name pattern</option>
-        </select>
-      </td>
-      <td>
-	      <input class="pattern" type="text">
-      </td>
-      <td>
-        <i class="exp-status icon-folder-close"></i>
-        <input class="dest" type="text">
-      </td>
-      <td class="center">
-        <button class="btn btn-danger del">Delete</button>
-        <i class="status"></i>
-      </td>
-    </tr>
+    #{rule class:'rule-template' /}
   </table>
   <p>
     <a class="btn btn-primary btn-large save">Save</a>

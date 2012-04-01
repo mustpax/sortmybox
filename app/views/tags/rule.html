@@ -1,0 +1,22 @@
+<tr class="${_class.yesno(_class, 'rule')}">
+  <td>
+    <select>
+      <option value="EXT_EQ">Extension equals</option>
+      <option value="NAME_CONTAINS">Name contains</option>
+      <option value="GLOB">Name pattern</option>
+    </select>
+  </td>
+  <td>
+      <input class="pattern" type="text">
+  </td>
+  <td>
+    <div class="dest-wrap">
+        <i class="exp-status icon-folder-close"></i>
+        <input class="dest" type="text">
+    </div>
+  </td>
+  <td class="center">
+    <button class="btn btn-danger del">Delete</button>
+    <i class="status"></i>
+  </td>
+</tr>
