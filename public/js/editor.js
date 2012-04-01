@@ -171,10 +171,11 @@
         
         function loading() {
             var li = $('<li>');
-            li.append($('<span>').text('Loading '));
-            li.append($('<i>').addClass('icon-refresh')
+            var a = $('<a>');
+            a.append($('<span>').text('Loading '));
+            a.append($('<i>').addClass('icon-refresh')
                               .addClass('spin'));
-            return li;
+            return li.append(a);
         }
         
         if (isLoading) {
