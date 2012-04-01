@@ -153,7 +153,7 @@ public class User extends Model implements Serializable {
         if (ret == null) {
 	        ret = all().filter("id", id).get();
 	        if (ret != null) {
-	            Cache.add(key, ret);
+	            Cache.add(key, ret, "1h");
 	        }
         }
         return ret;
