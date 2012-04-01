@@ -28,12 +28,13 @@ select[size] {
 .exp {
     position: absolute;
     background: white;
-    width: 200px;
+    width: 190px;
     max-height: 240px;
     overflow-y: auto;
     overflow-x: hidden;
     display: none;
-    box-shadow: 0 0 5px 5px rgba(221, 221, 221, 0.5)
+    border: 1px solid #ddd;
+    box-shadow: 0 0 2px 2px rgba(221, 221, 221, 0.4);
 }
 
 .exp-active .exp {
