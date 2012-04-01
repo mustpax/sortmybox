@@ -182,6 +182,11 @@
         
         exp.empty();
         
+        function select() {
+            return template('exp-select', { path: basename(path),
+				                            dataPath: path });
+        };
+
         function upLink() {
             var upPath = '/'  + pathList.slice(0, pathList.length - 1).join('/');
             return template('exp-uplink', {dataPath : upPath});
@@ -189,6 +194,7 @@
         
         // Add up link if not top dir
         if (! _.isEmpty(pathList)) {
+            exp.append(select());
             exp.append(upLink());
         }
         
@@ -234,10 +240,12 @@
     
     $('.exp a[href]').live('click', function(e) {
         var path = $(this).attr('data-path');
-        var input = $(this).parents('td').first().find('input');
-        input.val(path);
-        input.trigger('change');
-        input.focus();
+        if (path) {
+	        var input = $(this).parents('td').first().find('input');
+	        input.val(path);
+	        input.trigger('change');
+	        input.focus();
+        }
         return false;
     });
 
