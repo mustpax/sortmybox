@@ -6,6 +6,10 @@ run: all
 
 deps: .lastdepsrun
 
+deploy: deps
+	play gae:deploy
+	git push origin master:gae
+
 .lastdepsrun: conf/dependencies.yml
 	play deps --sync
 	play ec
