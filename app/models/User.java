@@ -92,13 +92,13 @@ public class User extends Model {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
                     boolean success = true;
-                    // TODO do not move files on production just yet
-                    if (Play.mode.isDev()) {
-                        try {
-                            client.move(file, r.dest + "/" + base);
-                        } catch (FileMoveCollisionException e) {
-                            success = false;
-                        }
+                    try {
+                        String dest = r.dest +
+                                      (r.dest.endsWith("/") ? "" : "/") +
+                                      base;
+                        client.move(file, dest);
+                    } catch (FileMoveCollisionException e) {
+                        success = false;
                     }
                     ret.add(new FileMove(r, base, success));
                     break;
