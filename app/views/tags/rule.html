@@ -1,18 +1,18 @@
-<tr class="${_class.yesno(_class, 'rule')}">
+<tr class="${_class}">
   <td>
-    <select>
-      <option value="EXT_EQ">Extension equals</option>
-      <option value="NAME_CONTAINS">Name contains</option>
-      <option value="GLOB">Name pattern</option>
-    </select>
+  #{select 'type', value:_rule?.type }
+	  #{option 'EXT_EQ'}Extension equals#{/option}
+      #{option 'NAME_CONTAINS'}Name contains#{/option}
+      #{option 'GLOB'}Name pattern#{/option}
+  #{/select}
   </td>
   <td>
-      <input class="pattern" type="text">
+    <input class="pattern" type="text" value="${_rule?.pattern}">
   </td>
   <td>
     <div class="dest-wrap">
-        <i class="exp-status icon-folder-close"></i>
-        <input class="dest" type="text">
+	    <i class="exp-status icon-folder-close"></i>
+	    <input class="dest" type="text" value="${_rule?.dest}">
     </div>
   </td>
   <td class="center">

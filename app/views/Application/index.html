@@ -12,27 +12,10 @@
       <th></th>
     </thead>
     #{list items:rules, as:'rule'}
-	  <tr class="rule">
-          <td>
-	      #{select 'type', value:rule.type }
-			  #{option 'EXT_EQ'}Extension equals#{/option}
-		      #{option 'NAME_CONTAINS'}Name contains#{/option}
-		      #{option 'GLOB'}Name pattern#{/option}
-	      #{/select}
-          </td>
-	      <td><input class="pattern" type="text" value="${rule.pattern}"></td>
-	      <td>
-            <i class="exp-status icon-folder-close"></i>
-            <input class="dest" type="text" value="${rule.dest}">
-          </td>
-	      <td class="center">
-	        <button class="btn btn-danger del">Delete</button>
-            <i class="status"></i>
-          </td>
-        </tr>
+        #{rule rule:rule, class:'rule' /}
     #{/list}
     #{else}
-        #{rule /}
+        #{rule class:'rule' /}
     #{/else}
     
 
