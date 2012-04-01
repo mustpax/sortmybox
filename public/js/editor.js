@@ -195,13 +195,10 @@
                 exp.append($("<li><a><em>No more folders</em></a></li>"));
             } else {
 	            $.each(dirs, function(i, v) {
-	                var li = $('<li class="folder">');
-	                var folder = $('<i>').addClass('icon-folder-open');
-	                var anchor = $('<a href="#">').append(folder)
-	                .append($('<span>').text(v));
-	                anchor.attr('data-path', v);
-	                li.append(anchor);
-	                exp.append(li);
+	                exp.append(template('exp-folder', {
+	                    path: v,
+	                    dataPath: v
+	                }));
 	            });
             }
         }
