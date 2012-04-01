@@ -142,6 +142,25 @@
                    req  : req };
     };
     
+    var templateCache = {};
+    /**
+     * Render the template with the given name into a jQuery
+     * wrapped unattached DOM element.
+     */
+    function template(name, context) {
+        var t = templateCache[name];
+        if (! t) {
+            var e = $('#' + name);
+            if (! e.length) {
+                throw 'Cannot find template with name: ' + name;
+            }
+            
+            t = _.template(e.html());
+            templateCache[name] = t;
+        }
+
+        return $(t(context));
+    };
 
     function displayDirs(path, dirs, cell, isLoading) {
         var exp = $(cell).find('.exp');
@@ -153,15 +172,10 @@
         exp.empty();
         
         function upLink() {
-            var li = $('<li>');
-            var a = $('<a href="#">');
             var upPath = _.filter(path.split('/'), function(x) { return !!x; });
             upPath.pop();
             upPath = '/'  + upPath.join('/');
-            a.attr('data-path', upPath);
-            a.append($('<i>').addClass('icon-chevron-up'));
-            a.append($('<em>').text('Go up one folder'));
-            return li.append(a);
+            return template('exp-uplink', {dataPath : upPath});
         };
         
         // Add up link if not top dir
@@ -170,12 +184,7 @@
         }
         
         function loading() {
-            var li = $('<li>');
-            var a = $('<a>');
-            a.append($('<span>').text('Loading '));
-            a.append($('<i>').addClass('icon-refresh')
-                              .addClass('spin'));
-            return li.append(a);
+            return template('exp-loading');
         }
         
         if (isLoading) {
@@ -214,7 +223,7 @@
         cell.addClass('exp-active');
     });
     
-    $('.exp a').live('click', function(e) {
+    $('.exp a[href]').live('click', function(e) {
         var path = $(this).attr('data-path');
         var input = $(this).parents('td').first().find('input');
         input.val(path);
