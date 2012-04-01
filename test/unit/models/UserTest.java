@@ -3,12 +3,11 @@ package unit.models;
 import models.User;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import dropbox.gson.DbxAccount;
-
-import play.Logger;
 import play.test.UnitTest;
+import dropbox.gson.DbxAccount;
 
 /**
  * Unit tests for {@link User}.
@@ -17,14 +16,15 @@ import play.test.UnitTest;
  */
 public class UserTest extends UnitTest {
 
-    private static final long ID = 1L;
+    private static final long ID = 67676767L;
     private static final String TOKEN = "abc";
     private static final String SECRET = "def";
     private static final String EMAIL = "foo@bar";
     private static final String NAME = "john doe";
 
+    @Before
     @After
-    public void tearDown() {
+    public void clean() {
         User user = User.findById(ID);
         if (user != null) {
             user.delete();

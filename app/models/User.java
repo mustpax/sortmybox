@@ -1,23 +1,30 @@
 package models;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.persistence.PreUpdate;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
-import play.Play;
+import play.cache.Cache;
 import siena.Column;
 import siena.DateTime;
 import siena.Generator;
 import siena.Id;
 import siena.Model;
+import siena.NotNull;
 import siena.Query;
+import siena.core.lifecycle.PostDelete;
+import siena.core.lifecycle.PostUpdate;
 
+import com.google.appengine.api.datastore.PreDelete;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -33,14 +40,19 @@ import dropbox.gson.DbxAccount;
  * @author mustpax
  * @author syyang
  */
-public class User extends Model {
+public class User extends Model implements Serializable {
+    private static String getCacheKey(Long id) {
+        return String.format("user:%d", id);
+    }
     
     // the id will be explicitly set to Dropbox uid
     @Id(Generator.NONE)
     public Long id;
     
+    @NotNull
     public String token;
     
+    @NotNull
     public String secret;
     
     public String email;
@@ -60,17 +72,15 @@ public class User extends Model {
     public Date lastSync;
 
     public User() {
-        this.created = new Date();
-        this.modified = new Date();
+        this.created = this.modified = new Date();
     }
 
     public User(DbxAccount account, String token, String secret) {
+        this();
         this.id = account.uid;
         this.name = account.name;
         this.token = token;
         this.secret = secret;
-        this.created = new Date();
-        this.modified = new Date();
     }
     
     /**
@@ -137,7 +147,16 @@ public class User extends Model {
     }
     
     public static User findById(Long id) {
-        return all().filter("id", id).get();
+        assert id != null : "id cannot be null";
+        String key = getCacheKey(id);
+        User ret = (User) Cache.get(key);
+        if (ret == null) {
+	        ret = all().filter("id", id).get();
+	        if (ret != null) {
+	            Cache.add(key, ret);
+	        }
+        }
+        return ret;
     }
     
     public static User findOrCreateByDbxAccount(DbxAccount account, String token, String secret) {
@@ -206,4 +225,30 @@ public class User extends Model {
             .add("last_sync", lastSync)
             .toString();
     }
+    
+    /**
+     * Invalidate the cached version of this object.
+     */
+    public void invalidate() {
+        Cache.safeDelete(getCacheKey(this.id));
+    }
+
+    @Override
+    public void delete() {
+        invalidate();
+        super.delete();
+    }
+
+    @Override
+    public void save() {
+        invalidate();
+        super.save();
+    }
+
+    @Override
+    public void update() {
+        invalidate();
+        super.update();
+    }
+    
 }
