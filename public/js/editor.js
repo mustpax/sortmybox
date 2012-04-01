@@ -161,8 +161,19 @@
 
         return $(t(context));
     };
+    
+
+    function basename(path) {
+        return _.chain(path.split('/')).filter(function(x) {
+		                                    return !!x;
+		                                })
+		                               .last()
+		                               .value();
+    };
 
     function displayDirs(path, dirs, cell, isLoading) {
+        var pathList = _.filter(path.split('/'), function(x) { return !!x; });
+        
         var exp = $(cell).find('.exp');
         if (! exp.length) {
             exp = $('<ul class="exp nav nav-list">');
@@ -172,14 +183,12 @@
         exp.empty();
         
         function upLink() {
-            var upPath = _.filter(path.split('/'), function(x) { return !!x; });
-            upPath.pop();
-            upPath = '/'  + upPath.join('/');
+            var upPath = '/'  + pathList.slice(0, pathList.length - 1).join('/');
             return template('exp-uplink', {dataPath : upPath});
         };
         
         // Add up link if not top dir
-        if (path !== '/') {
+        if (! _.isEmpty(pathList)) {
             exp.append(upLink());
         }
         
@@ -196,7 +205,7 @@
             } else {
 	            $.each(dirs, function(i, v) {
 	                exp.append(template('exp-folder', {
-	                    path: v,
+	                    path: basename(v),
 	                    dataPath: v
 	                }));
 	            });
