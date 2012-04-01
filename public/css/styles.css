@@ -44,6 +44,10 @@ select[size] {
     position: relative;
 }
 
+.table .center {
+    text-align: center;
+}
+
 
 /*
 * jQuery Mobile Framework
