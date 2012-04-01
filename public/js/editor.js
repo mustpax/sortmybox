@@ -220,6 +220,9 @@
 
     $('.rule .dest').live('focus', function() {
         var cell = $(this).parents('td').first();
+        cell.find('.exp-status')
+            .addClass('icon-folder-open')
+            .removeClass('icon-folder-close');
         cell.addClass('exp-active');
     });
     
@@ -239,6 +242,11 @@
 	}
 
     function blurHandler() {
+        $(this).parents('td')
+               .first()
+               .find('.exp-status')
+               .removeClass('icon-folder-open')
+               .addClass('icon-folder-close');
         _.delay(clearIfUnfocused, 250, this);
     };
 
