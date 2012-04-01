@@ -147,7 +147,7 @@
         var exp = $(cell).find('.exp');
         if (! exp.length) {
             exp = $('<ul class="exp nav nav-list">');
-            $(cell).append(exp);
+            $(cell).find('.dest-wrap').append(exp);
         }
         
         exp.empty();
@@ -183,10 +183,10 @@
         } else {
             dirs.sort();
             if (_.isEmpty(dirs)) {
-                exp.append($("<li><em>No more folders</em></li>"));
+                exp.append($("<li><a><em>No more folders</em></a></li>"));
             } else {
 	            $.each(dirs, function(i, v) {
-	                var li = $('<li>');
+	                var li = $('<li class="folder">');
 	                var folder = $('<i>').addClass('icon-folder-open');
 	                var anchor = $('<a href="#">').append(folder)
 	                .append($('<span>').text(v));
@@ -199,7 +199,7 @@
     };
     
     var dirUpdater = _.debounce(function () {
-        var cell = $(this).parent('td');
+        var cell = $(this).parents('td').first();
         var path = $(this).val() || '/';
         displayDirs(path, null, cell, true);
         getDirs(path, function(dirs) {
@@ -210,7 +210,7 @@
     $('.rule .dest').live('keyup focus change', dirUpdater);
 
     $('.rule .dest').live('focus', function() {
-        var cell = $(this).parent('td');
+        var cell = $(this).parents('td').first();
         cell.addClass('exp-active');
     });
     
@@ -225,7 +225,7 @@
 
     function clearIfUnfocused(elem) {
         if (! $(elem).attr('data-focus')) {
-	        $(elem).parent('td').removeClass('exp-active');
+	        $(elem).parents('td').first().removeClass('exp-active');
         }
 	}
 

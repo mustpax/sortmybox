@@ -32,23 +32,39 @@ select[size] {
     max-height: 240px;
     overflow-y: auto;
     overflow-x: hidden;
-    display: none;
     border: 1px solid #ddd;
     box-shadow: 0 0 2px 2px rgba(221, 221, 221, 0.4);
+    display: none;
 }
 
 .exp-active .exp {
     display: block;
 }
 
-.exp-active {
+.dest-wrap {
     position: relative;
+}
+
+
+.exp-status {
+    position: absolute;
+    display: block;
+    top: 6px;
+    left: 16px;
+}
+
+.exp .folder i {
+    margin-right: 5px;
 }
 
 .table .center {
     text-align: center;
 }
 
+.dest {
+    padding-left: 32px;
+    width: 182px;
+}
 
 /*
 * jQuery Mobile Framework

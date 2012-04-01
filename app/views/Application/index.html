@@ -21,7 +21,10 @@
 	      #{/select}
           </td>
 	      <td><input class="pattern" type="text" value="${rule.pattern}"></td>
-	      <td><input class="dest" type="text" value="${rule.dest}"></td>
+	      <td>
+            <i class="exp-status icon-folder-close"></i>
+            <input class="dest" type="text" value="${rule.dest}">
+          </td>
 	      <td class="center">
 	        <button class="btn btn-danger del">Delete</button>
             <i class="status"></i>
@@ -40,7 +43,12 @@
       <td>
 	      <input class="pattern" type="text">
       </td>
-      <td><input class="dest" type="text"></td>
+      <td>
+        <div class="dest-wrap">
+	        <i class="exp-status icon-folder-close"></i>
+	        <input class="dest" type="text">
+        </div>
+      </td>
       <td class="center">
         <button class="btn btn-danger del">Delete</button>
         <i class="status"></i>
@@ -66,7 +74,10 @@
       <td>
 	      <input class="pattern" type="text">
       </td>
-      <td><input class="dest" type="text"></td>
+      <td>
+        <i class="exp-status icon-folder-close"></i>
+        <input class="dest" type="text">
+      </td>
       <td class="center">
         <button class="btn btn-danger del">Delete</button>
         <i class="status"></i>
