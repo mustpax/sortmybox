@@ -1,4 +1,6 @@
 (function(window, $, undefined) {
+    'use strict';
+
     $(document).ready(function() {
       $('.run-rules').bind('click', function() {
           $('#run-rules-form').submit();
