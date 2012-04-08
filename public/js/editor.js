@@ -2,10 +2,6 @@
     'use strict';
 
     $(document).ready(function() {
-      $('.run-rules').bind('click', function() {
-          $('#run-rules-form').submit();
-      });
-      
       $('.new').bind('click', function() {
         var new2 = $('.rule-template').clone();
         new2.removeClass('rule-template').addClass('rule');

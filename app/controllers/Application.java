@@ -26,12 +26,6 @@ public class Application extends Controller {
         render(user, rules, moves, createdSortbox);
     }
     
-    public static void process() {
-        checkAuthenticity();
-        RequiresLogin.getLoggedInUser().runRules();
-        index();
-    }
-    
     public static void dirs(String path) {
         checkAuthenticity();
         DropboxClient client = DropboxClientFactory.create(RequiresLogin.getLoggedInUser());

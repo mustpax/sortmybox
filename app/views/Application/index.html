@@ -42,8 +42,7 @@
     #{rule class:'rule-template' /}
   </table>
   <p>
-    <a class="btn btn-primary btn-large save">Save</a>
-    <a class="btn btn-warning btn-large run-rules">Run rules now</a>
+    <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
   </p>
   
   <small class="pull-right">
@@ -70,8 +69,6 @@
         #{/else}
     </div>
   </div>
-#{form @process(), method:'POST', id:'run-rules-form'}
-#{/form}
 #{set 'script'}
 <script src="@{'/public/js/editor.js'}"></script>
 #{/set}
