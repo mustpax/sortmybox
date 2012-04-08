@@ -1,19 +1,20 @@
-# Put your Dropbox files where they belong without lifting a finger.\*
+# Put your files where they belong without lifting a finger.\*
+
+Sortbox is a magic folder in your Dropbox that moves files saved to it to
+their correct location based on sorting rules that *you* create. Neat!
 
 Like email filters, for your Dropbox.
-
-Hunting for folders in Finder (or Explorer) sucks. Save all your files
-in the Sortbox folder in your Dropbox, and Sortbox will automatically
-move them based on sorting rules you create. 
 
 \* You need to define your own sorting rules. Offer may not be combined with other offers.
 
 # Credits
 
+## People
+
 - Mustafa “Let’s do it in JavaScript” Paksoy
 - Sid “This codebase needs more FactoryImpl’s” Yang
 
-# Geek stuff
+## Tech
 
 - [Bootstrap][] for making clean HTML easy. (And pretty.)
 - [jQuery][] for being jQuery.
