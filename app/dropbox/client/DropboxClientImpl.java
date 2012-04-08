@@ -50,22 +50,34 @@ class DropboxClientImpl implements DropboxClient {
     }
 
     @Override
+    public DbxMetadata getMetadata(String path) {
+        Preconditions.checkNotNull(path, "Path missing.");
+        Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
+
+        WSRequest ws = new WSRequestFactory(DropboxURLs.METADATA, token, secret)
+            .addPath(Dropbox.getRoot(), path)
+            .create();
+
+        HttpResponse resp = ws.get();
+        if (resp.success()) {
+            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+        }
+
+        Logger.error("Failed getting metadata for '%s'. Message: %s", path, getError(resp));
+        return null;
+    }
+
+    @Override
     public Set<String> listDir(String path) {
         return listDir(path, ListingType.FILES);
     }
 
+    @Override
     public Set<String> listDir(String path, ListingType listingType) {
-        Preconditions.checkNotNull(path, "Path missing.");
-        Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
-           
-        WSRequest ws = new WSRequestFactory(DropboxURLs.METADATA, token, secret)
-            .addPath(Dropbox.getRoot(), path)
-            .create();
-        HttpResponse resp = ws.get();
-        
         Set<String> files = Sets.newHashSet();
-        if (resp.success()) {
-            DbxMetadata metadata = new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+        DbxMetadata metadata = getMetadata(path);
+
+        if (metadata != null) {
             if (!metadata.isDir) {
                 throw new IllegalArgumentException("Expecting dir, got a file: " + path);
             }
@@ -79,8 +91,6 @@ class DropboxClientImpl implements DropboxClient {
                     files.add(entry.path);
                 }
             }
-        } else {
-            Logger.error("Failed listing '%s'. %s", path, getError(resp));
         }
         return files;
     }

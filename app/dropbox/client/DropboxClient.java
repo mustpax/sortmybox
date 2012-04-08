@@ -2,6 +2,7 @@ package dropbox.client;
 
 import java.util.Set;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -20,6 +21,13 @@ public interface DropboxClient {
      */
     @Nonnull DbxAccount getAccount();
     
+    /**
+     * Get file or directory metadata.
+     * @param path file path
+     * @return file or directory metadata, null if not found.
+     */
+    @CheckForNull DbxMetadata getMetadata(String path);
+
     /**
      * Moves a file or folder to a new location.
      * 
