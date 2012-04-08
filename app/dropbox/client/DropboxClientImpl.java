@@ -153,7 +153,7 @@ class DropboxClientImpl implements DropboxClient {
         public WSRequest create() {
             StringBuilder fullUrl = new StringBuilder(url);
             if (path != null) {
-                fullUrl.append("/").append(root).append(encodePath(path));
+                fullUrl.append("/").append(encodeParam(root)).append(encodePath(path));
             }
             if (pairs.size() > 0) {
                 fullUrl.append("?");
