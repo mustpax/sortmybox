@@ -33,6 +33,7 @@ import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.gson.DbxAccount;
+import dropbox.gson.DbxMetadata;
 
 /**
  * Model for a user.
@@ -137,6 +138,23 @@ public class User extends Model implements Serializable {
     
     public Query<FileMove> getMoves() {
         return FileMove.all().filter("owner", this.id).order("-when");
+    }
+
+    /**
+     * Create the Sortbox folder for this user if necessary. 
+     * @return true if a sortbox folder was created, false if nothing was done
+     */
+    public boolean createSortboxIfNecessary() {
+        DropboxClient client = DropboxClientFactory.create(this);
+        String sortboxPath = Dropbox.getRoot().getSortboxPath();
+        DbxMetadata file = client.getMetadata(sortboxPath);
+
+        if (file == null) {
+            Logger.info("Sortbox folder missing for user '%s' at path '%s'", this, sortboxPath);
+            return client.mkdir(sortboxPath) != null;
+        }
+
+        return false;
     }
 
     private static String basename(String path) {

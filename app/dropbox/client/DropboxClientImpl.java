@@ -56,11 +56,16 @@ class DropboxClientImpl implements DropboxClient {
 
         WSRequest ws = new WSRequestFactory(DropboxURLs.METADATA, token, secret)
             .addPath(Dropbox.getRoot(), path)
+            .addPair("include_deleted", "false")
             .create();
 
         HttpResponse resp = ws.get();
         if (resp.success()) {
-            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+            DbxMetadata ret = new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+            if (ret.isDeleted()) {
+                return null;
+            }
+            return ret;
         }
 
         Logger.error("Failed getting metadata for '%s'. Message: %s", path, getError(resp));
@@ -93,6 +98,25 @@ class DropboxClientImpl implements DropboxClient {
             }
         }
         return files;
+    }
+    
+    @Override
+    public DbxMetadata mkdir(String path) {
+        Preconditions.checkNotNull(path, "Path missing.");
+        Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
+
+        WSRequest ws = new WSRequestFactory(DropboxURLs.CREATE_FOLDER, token, secret)
+            .addPair("root", Dropbox.getRoot().getPath())
+            .addPair("path", path)
+            .create();
+
+        HttpResponse resp = ws.get();
+        if (resp.success()) {
+            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+        }
+
+        Logger.error("Failed creating folder at '%s'. Message: %s", path, getError(resp));
+        return null;
     }
     
     @Override
@@ -201,4 +225,5 @@ class DropboxClientImpl implements DropboxClient {
             return OAuth.percentEncode(param);
         } 
     }
+
 }

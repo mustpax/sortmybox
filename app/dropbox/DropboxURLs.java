@@ -14,7 +14,8 @@ public enum DropboxURLs {
     AUTHORIZATION(Dropbox.SITE_URL, "oauth/authorize"),
     ACCOUNT("account/info"),
     METADATA("metadata"),
-    MOVE("fileops/move")
+    MOVE("fileops/move"),
+    CREATE_FOLDER("fileops/create_folder")
     ;
 
     private final String path;

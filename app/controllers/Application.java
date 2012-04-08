@@ -20,9 +20,10 @@ import dropbox.client.DropboxClient.ListingType;
 public class Application extends Controller {
     public static void index() {
         User user = RequiresLogin.getLoggedInUser();
+        boolean createdSortbox = user.createSortboxIfNecessary();
         List<Rule> rules = Rule.findByOwner(user).fetch();
         List<FileMove> moves = user.getMoves().limit(10).fetch();
-        render(user, rules, moves);
+        render(user, rules, moves, createdSortbox);
     }
     
     public static void process() {
