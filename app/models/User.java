@@ -93,6 +93,12 @@ public class User extends Model implements Serializable {
         List<FileMove> ret = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(this);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
+
+        if (files.isEmpty()) {
+            Logger.info("Ran rules for %s, no files to process.", this);
+            return ret;
+        }
+
         List<Rule> rules = Rule.findByOwner(this).fetch();
         Logger.info("Running rules for %s", this);
         
