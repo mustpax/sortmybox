@@ -1,8 +1,8 @@
 <tr class="${_class}">
   <td>
   #{select 'type', value:_rule?.type }
-	  #{option 'EXT_EQ'}Extension equals#{/option}
       #{option 'NAME_CONTAINS'}Name contains#{/option}
+	  #{option 'EXT_EQ'}Extension equals#{/option}
       #{option 'GLOB'}Name pattern#{/option}
   #{/select}
   </td>
