@@ -94,6 +94,12 @@
             }
         });
       });
+
+      $('a[data-dismiss="alert"]').live('click', function() {
+          $(this).parents('.alert').first().slideUp('fast');
+      });
+
+      $('.alert-created').slideDown('slow');
     });
 
     var dirCache = {};
