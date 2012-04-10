@@ -259,16 +259,14 @@
         }
 	}
 
-    function blurHandler() {
+    $('.rule .dest').live('blur', function() {
         $(this).parents('td')
                .first()
                .find('.exp-status')
                .removeClass('icon-folder-open')
                .addClass('icon-folder-close');
         _.delay(clearIfUnfocused, 250, this);
-    };
-
-    $('.rule .dest').live('blur', blurHandler);
+    });
     
     $('input[type="text"]').live('focus', function() {
         $(this).attr('data-focus', 1);
