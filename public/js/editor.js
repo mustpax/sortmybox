@@ -1,102 +1,23 @@
 (function(window, $, undefined) {
     'use strict';
-
-    $(document).ready(function() {
-      $('.new').bind('click', function() {
-        var new2 = $('.rule-template').clone();
-        new2.removeClass('rule-template').addClass('rule');
-        
-        $('.new-rule-row').before(new2);
-        new2.show('slow');
-      });
-
-      $('.rules .del').live('click', function() {
-        $(this).parents('tr').first().hide('fast', function() { $(this).remove(); });
-      });
-
-      /**
-       * Convert the current rule set into a JSON-serializable object.
-       */
-      var serialize = function() {
+    /**
+     * Convert the current rule set into a JSON-serializable object.
+     */
+    function serialize() {
         var ret = [];
         $('.rules tr.rule')
-         .each(function() {
-             var pat = $(this).find('.pattern')[0].value;
-             var dest = $(this).find('.dest')[0].value;
-             var cur = {
-                type:    $(this).find('select')[0].value,
+            .each(function() {
+                var pat = $(this).find('.pattern')[0].value;
+                var dest = $(this).find('.dest')[0].value;
+                var cur = {
+                    type:    $(this).find('select')[0].value,
                 pattern: pat,
                 dest:    dest
-             };
-             ret.push(cur);
-         });
-         return ret;
-      };
-      
-      /**
-       * Display the given errors to the given rule.
-       * @param i the rank of the rule to add errors to
-       * @param errors list of errors
-       */
-      function addErrors(i, errors) {
-        var rule = $('.rules tr.rule').eq(i);
-        console.log('errors', i, rule, errors);
-
-        // Clear old errors
-        rule.find('td').removeClass('error');
-        rule.find('.msg.help-inline').remove();
-
-        $.each(errors, function() {
-            var cell = rule.find('input.' + this.field).parents('td').first();
-            cell.addClass('error');
-            cell.append($('<span class="msg help-inline"></span>').text(this.msg));
-        });
-        
-        if (errors.length === 0) {
-            rule.find('.status').addClass('icon-ok');
-        } else {
-            rule.find('.status').addClass('icon-remove');
-        }
-      };
-
-      function loading() {
-          $('.rules .rule .status').addClass('icon-refresh')
-                                   .addClass('spin')
-                                   .removeClass('icon-ok')
-                                   .removeClass('icon-remove');
-      };
-      
-      function doneLoading() {
-          $('.rules .rule .status').removeClass('icon-refresh').removeClass('spin');
-      };
-
-      $('.save').live('click', function() {
-        var rules = serialize();
-        console.log('serialed rules', rules);
-        loading();
-        $.ajax({
-            type: 'POST',
-            url: '/rules',
-            data: {
-                'rules': JSON.stringify(rules),
-                'authenticityToken' : window.csrfToken
-            },
-            success: function(data) {
-                doneLoading();
-                console.log('save success');
-                $.each(data, function(i, v) {
-                    addErrors(i, v);
-                });
-            }
-        });
-      });
-
-      $('a[data-dismiss="alert"]').live('click', function() {
-          $(this).parents('.alert').first().slideUp('fast');
-      });
-
-      $('.alert-created').slideDown('slow');
-    });
+                };
+                ret.push(cur);
+            });
+        return ret;
+    };
 
     var dirCache = {};
     var curReq = null; 
@@ -259,16 +180,14 @@
         }
 	}
 
-    function blurHandler() {
+    $('.rule .dest').live('blur', function() {
         $(this).parents('td')
                .first()
                .find('.exp-status')
                .removeClass('icon-folder-open')
                .addClass('icon-folder-close');
         _.delay(clearIfUnfocused, 250, this);
-    };
-
-    $('.rule .dest').live('blur', blurHandler);
+    });
     
     $('input[type="text"]').live('focus', function() {
         $(this).attr('data-focus', 1);
@@ -277,4 +196,84 @@
     $('input[type="text"]').live('blur', function() {
         $(this).attr('data-focus', '');
     });
+
+    /**
+     * Display the given errors to the given rule.
+     * @param i the rank of the rule to add errors to
+     * @param errors list of errors
+     */
+    function addErrors(i, errors) {
+        var rule = $('.rules tr.rule').eq(i);
+        console.log('errors', i, rule, errors);
+
+        // Clear old errors
+        rule.find('td').removeClass('error');
+        rule.find('.msg.help-inline').remove();
+
+        $.each(errors, function() {
+            var cell = rule.find('input.' + this.field).parents('td').first();
+            cell.addClass('error');
+            cell.append($('<span class="msg help-inline"></span>').text(this.msg));
+        });
+
+        if (errors.length === 0) {
+            rule.find('.status').addClass('icon-ok');
+        } else {
+            rule.find('.status').addClass('icon-remove');
+        }
+    };
+
+    function loading() {
+        $('.rules .rule .status').addClass('icon-refresh')
+            .addClass('spin')
+            .removeClass('icon-ok')
+            .removeClass('icon-remove');
+    };
+
+    function doneLoading() {
+        $('.rules .rule .status').removeClass('icon-refresh').removeClass('spin');
+    };
+
+
+    $(document).ready(function() {
+        $('.new').bind('click', function() {
+            var new2 = $('.rule-template').clone();
+            new2.removeClass('rule-template').addClass('rule');
+
+            $('.new-rule-row').before(new2);
+            new2.show('slow');
+        });
+
+        $('.rules .del').live('click', function() {
+            $(this).parents('tr').first().hide('fast', function() { $(this).remove(); });
+        });
+
+        $('.save').live('click', function() {
+            var rules = serialize();
+            console.log('serialed rules', rules);
+            loading();
+            $.ajax({
+                type: 'POST',
+                url: '/rules',
+                data: {
+                    'rules': JSON.stringify(rules),
+                'authenticityToken' : window.csrfToken
+                },
+                success: function(data) {
+                             doneLoading();
+                             console.log('save success');
+                             $.each(data, function(i, v) {
+                                 addErrors(i, v);
+                             });
+                         }
+            });
+        });
+
+        $('a[data-dismiss="alert"]').live('click', function() {
+            $(this).parents('.alert').first().slideUp('fast');
+        });
+
+        $('.alert-created').slideDown('slow');
+    });
+
 })(window, jQuery);
