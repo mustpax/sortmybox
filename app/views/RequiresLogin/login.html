@@ -1,6 +1,23 @@
 #{extends 'main.html' /}
 #{set title:'Login' /}
 
-<a class="btn primary large" href="@{auth()}">
-    Login via Dropbox
-</a>
+<div class="row">
+    <div class="span12">
+        <h1>Put your files where they belong without lifting a finger!</h1></br>
+    </div>
+</div>
+</br>
+<div class="row">    
+    <div class="span6">
+        <p><h3>
+          Sortbox is a magic folder in your Dropbox that moves files saved it to their correct location based on sorting rules that <em>you</em> create.
+        </h3></p></br>
+        <p><h3>Like email filters, for your Dropbox.</h3></p></br></br>
+        <p>
+          <a class="btn-large btn-primary" href="@{auth()}">
+              Login via Dropbox
+          </a>
+        </p>
+    </div>
+    <div class="span6"></br><img src="@{'/public/img/sortbox.png'}"></div>
+</div>

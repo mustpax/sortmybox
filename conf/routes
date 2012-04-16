@@ -7,6 +7,12 @@ GET     /                                       Application.index
 POST    /run-rules                              Application.process
 GET     /dirs                                   Application.dirs
 
+# Footer
+GET     /team                                   Footer.team
+GET     /terms                                  Footer.terms
+GET     /privacy                                Footer.privacy
+GET     /contact                                Footer.contact
+
 # Rules
 POST    /rules                                  Rules.update
 

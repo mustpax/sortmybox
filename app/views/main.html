@@ -14,27 +14,31 @@
     <link href="@{'/public/css/bootstrap.css'}" rel="stylesheet">
     <link href="@{'/public/css/styles.css'}" rel="stylesheet">
     
-    <link rel="shortcut icon" href="img/favicon.ico">
+    <link rel="shortcut icon" href=""@{'/public/img/favicon.ico'}">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
   </head>
 
   <body>
-
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="/">Sortbox</a>
-	      <ul class="nav pull-right navbar-text">
+	      <ul class="nav pull-right">
 	        #{if user}
               <li><a href="#">${user.name}</a></li>
 	          <li class="divider-vertical"></li>
+	            <li class="dropdown">
+	              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Settings<b class="caret"></b></a>
+	              <ul class="dropdown-menu">
+	                <li><a href="#">Disable periodic sort</a></li>
+	                <li class="divider"></li>
+	                <li><a href="#">Delete account</a></li>
+	              </ul>
+	            </li>
               <li><a href="/logout">Logout</a></li>
 	          #{/if}
-	          #{else}
-	              <li><a href="@{RequiresLogin.login()}">Login</a></li>
-	          #{/else}
            </ul>
         </div>
       </div>
@@ -44,9 +48,20 @@
       #{doLayout /}
 
       <hr>
-      <footer>
-        <p>&copy; Mustafa Paksoy, Sid Yang 2012</p>
-      </footer>
+      <div class="row">
+        <div class="span12">
+        <p>
+          &copy; Mustafa Paksoy, Sid Yang 2012 &middot;
+          <a href="/team">Team</a> &middot;
+          <a href="/terms">Terms</a> &middot;
+          <a href="/privacy">Privacy</a> &middot;
+          <a href="/contact">Contact</a>
+        </p> 
+        <p>
+          <iframe allowtransparency="true" frameborder="0" scrolling="no" src="https://platform.twitter.com/widgets/follow_button.1334389481.html#_=1334432920074&amp;id=twitter-widget-0&amp;lang=en&amp;screen_name=sortboxteam&amp;show_count=false&amp;show_screen_name=true&amp;size=m" class="twitter-follow-button" style="width: 122px; height: 20px; " title="Follow"></iframe>
+        </p>
+        </footer>
+      </div>
     </div>
     <script>
     window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
@@ -55,12 +70,14 @@
     <script src="@{'/public/js/underscore.js'}"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
     <script>window.jQuery || document.write("<script src='@{'/public/js/jquery-1.6.2.min.js'}'>\x3C/script>")</script>
+    <script src="@{'/public/js/bootstrap.min.js'}"></script>
     #{get 'script' /}
     
     <script>
 	    _.templateSettings = {
 	        escape : /\{\{(.+?)\}\}/g
         };
+        $('.dropdown-toggle').dropdown();
     </script>
     #{include 'js-templates.html' /}
   </body>

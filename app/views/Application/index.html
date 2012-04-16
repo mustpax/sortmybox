@@ -1,5 +1,4 @@
 #{extends 'main.html' /}
-#{set title:'Home' /}
 
 #{if createdSortbox}
 <div class="row">
@@ -14,10 +13,12 @@
 </div>
 #{/if}
 
-<div class="hero-unit">
+<div class="page-header">
   <h1>Sorting rules</h1>
+</div>
+<div>
   <p>Add or edit sorting rules. Rules are applied to the files in the Sortbox folder in your Dropbox.</p>
-  <table class="rules table table-bordered">
+  <table class="rules table table-bordered table-striped">
     <thead>
       <th>When</th>
       <th>Apply to</th>
@@ -41,34 +42,35 @@
     
     #{rule class:'rule-template' /}
   </table>
-  <p>
-    <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
-  </p>
-  
   <small class="pull-right">
   Rules are applied top to bottom. Rule evaluation stops at first match.
   </small>
+  <p>
+    <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
+  </p>  
 </div>
-
-  <div class="row">
-    <div class="span6">
-        <h2>Recent activity</h2>
-        <ul class="moves">
-            #{list items:moves, as:'move'}
-                #{if move.successful}
-	            <li class="failure">Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code>. (${move.when.since()})
-                #{/if}
-                #{else}
-	            <li class="success">Failed to move <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> since
+<br/>
+<div class="page-header">
+  <h1>Recent activity</h1>
+</div>
+<div class="row">
+  <div class="span12">
+      <ul class="moves">
+          #{list items:moves, as:'move'}
+              #{if move.successful}
+                  <li class="failure">Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code>. (${move.when.since()})
+              #{/if}
+              #{else}
+	              <li class="success">Failed to move <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> since
                                     there is already a file with the same name at the location. (${move.when.since()})
-                #{/else}
-            #{/list}
-        </ul>
-        #{else}
-            <em>None yet. Create some rules and save files in your Sortbox folder to get going.</em>
-        #{/else}
+              #{/else}
+          #{/list}
+      </ul>
+      #{else}
+          <em>None yet. Create some rules and save files in your Sortbox folder to get going.</em>
+      #{/else}
     </div>
-  </div>
+</div>
 #{set 'script'}
 <script src="@{'/public/js/editor.js'}"></script>
 #{/set}

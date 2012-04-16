@@ -1,6 +1,6 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
     <application>sort-box</application>
-    <version>2</version>
+    <version>3</version>
     <threadsafe>true</threadsafe>
     <system-properties>
         <property name="app.id" value="prod" />
