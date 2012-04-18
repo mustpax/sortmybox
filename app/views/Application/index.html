@@ -13,48 +13,48 @@
 </div>
 #{/if}
 
-<div class="page-header">
-  <h1>Sorting rules</h1>
-</div>
-<div>
-  <p>Add or edit sorting rules. Rules are applied to the files in the Sortbox folder in your Dropbox.</p>
-  <table class="rules table table-bordered table-striped">
-    <thead>
-      <th>When</th>
-      <th>Apply to</th>
-      <th>Move file to</th>
-      <th></th>
-    </thead>
-    #{list items:rules, as:'rule'}
-        #{rule rule:rule, class:'rule' /}
-    #{/list}
-    #{else}
-        #{rule class:'rule' /}
-    #{/else}
-    
-
-    <tr class="new-rule-row">
-        <td colspan="3"></td>
-        <td class="center">
-	        <button class="btn new">New rule</button>
-        </td>
-    </tr>
-    
-    #{rule class:'rule-template' /}
-  </table>
-  <small class="pull-right">
-  Rules are applied top to bottom. Rule evaluation stops at first match.
-  </small>
-  <p>
-    <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
-  </p>  
-</div>
-<br/>
-<div class="page-header">
-  <h1>Recent activity</h1>
-</div>
 <div class="row">
   <div class="span12">
+    <div class="page-header">
+      <h1>Sorting rules
+        <small>Rules are applied in the order displayed to your Sortbox folder every 15 minutes.</small>
+      </h1>
+    </div>
+    <table class="rules table table-bordered table-striped">
+      <thead>
+        <th>When</th>
+        <th></th>
+        <th>Move file to</th>
+        <th></th>
+      </thead>
+      #{list items:rules, as:'rule'}
+	      #{rule rule:rule, class:'rule' /}
+      #{/list}
+      #{else}
+	      #{rule class:'rule' /}
+      #{/else}
+
+
+      <tr class="new-rule-row">
+        <td colspan="3"></td>
+        <td class="center">
+          <button class="btn new">New rule</button>
+        </td>
+      </tr>
+
+      #{rule class:'rule-template' /}
+    </table>
+    <p>
+    <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="span12">
+	<div class="page-header">
+	  <h1>Recent activity</h1>
+	</div>
       <ul class="moves">
           #{list items:moves, as:'move'}
               #{if move.successful}
