@@ -11,6 +11,11 @@ deps: .lastdepsrun
 	play ec
 	date > .lastdepsrun
 
+deploy:
+	build/checkbranch.sh prod
+	-play gae:deploy
+	git push origin prod
+
 clean:
 	play clean
 
