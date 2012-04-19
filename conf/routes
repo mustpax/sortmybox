@@ -24,10 +24,10 @@ POST    /tasks                                  TaskManager.process
 GET     /cron/{<.*>jobPath}                     CronManager.process
 
 # Authorization
-GET     /auth                                   RequiresLogin.auth
-GET     /login                                  RequiresLogin.login
-GET     /logout                                 RequiresLogin.logout
-GET     /offline                                RequiresLogin.offline
+GET     /auth                                   Login.auth
+GET     /login                                  Login.login
+GET     /logout                                 Login.logout
+GET     /offline                                Login.offline
 
 # Redirect for favicon.ico
 GET     /favicon.ico                            staticFile:public/img/favicon.ico

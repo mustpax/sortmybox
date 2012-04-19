@@ -17,7 +17,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import controllers.RequiresLogin;
+import controllers.Login;
 
 /**
  * A sorting rule that allows files to be moved to a specified
@@ -113,7 +113,7 @@ public class Rule extends Model {
     }
 
     public static List<List<RuleError>> insert(List<Rule> rules) {
-        return insert(RequiresLogin.getLoggedInUser(), rules);
+        return insert(Login.getLoggedInUser(), rules);
     }
 
     public static List<List<RuleError>> insert(User owner, List<Rule> rules) {

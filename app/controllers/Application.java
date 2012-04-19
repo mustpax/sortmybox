@@ -16,10 +16,10 @@ import dropbox.client.DropboxClient.ListingType;
 /**
  * @author mustpax
  */
-@With(RequiresLogin.class)
+@With(Login.class)
 public class Application extends Controller {
     public static void index() {
-        User user = RequiresLogin.getLoggedInUser();
+        User user = Login.getLoggedInUser();
         boolean createdSortbox = user.createSortboxIfNecessary();
         List<Rule> rules = Rule.findByOwner(user).fetch();
         List<FileMove> moves = user.getMoves().limit(10).fetch();
@@ -28,7 +28,7 @@ public class Application extends Controller {
     
     public static void dirs(String path) {
         checkAuthenticity();
-        DropboxClient client = DropboxClientFactory.create(RequiresLogin.getLoggedInUser());
+        DropboxClient client = DropboxClientFactory.create(Login.getLoggedInUser());
         try {
 	        renderJSON(client.listDir(path, ListingType.DIRS));
         } catch (IllegalArgumentException e) {

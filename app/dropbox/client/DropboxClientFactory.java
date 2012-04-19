@@ -3,7 +3,7 @@ package dropbox.client;
 import com.google.common.base.Preconditions;
 
 import models.User;
-import controllers.RequiresLogin;
+import controllers.Login;
 
 /**
  * Factory for creating a {@link DropboxClient} implementation.

@@ -14,13 +14,13 @@ import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-@With(RequiresLogin.class)
+@With(Login.class)
 public class Rules extends Controller {
     public static void update(String rules) {
         checkAuthenticity();
         Type t = new TypeToken<List<Rule>>(){}.getType();
         List<Rule> ruleList = new Gson().fromJson(rules, t);
-        User user = RequiresLogin.getLoggedInUser();
+        User user = Login.getLoggedInUser();
         Rule.findByOwner(user).delete();
         List<List<RuleError>> errors = Rule.insert(user, ruleList);
         if (! hasErrors(errors)) {

@@ -22,7 +22,7 @@ public class Footer extends Controller {
     }
 
     private static void renderWithUser() {
-        User user = RequiresLogin.getLoggedInUser();        
+        User user = Login.getLoggedInUser();        
         if (user == null) {
             render();
         } else {

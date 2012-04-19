@@ -31,7 +31,7 @@ import dropbox.gson.DbxAccount;
  *
  * @author mustpax
  */
-public class RequiresLogin extends Controller {
+public class Login extends Controller {
     
     private static final String REDIRECT_URL = "url";
     private static final String SESSION_USER = "userid";
@@ -164,6 +164,11 @@ public class RequiresLogin extends Controller {
      */
     public static User getLoggedInUser() {
         String uid = session.get(SessionKeys.UID);
+        if (uid == null) {
+            Logger.warn("Session uid not found.");
+            return null;
+        }
+
         try {
             User user = User.findById(Long.valueOf(uid));
             if (user == null) {

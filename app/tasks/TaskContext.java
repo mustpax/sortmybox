@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import common.request.Headers;
-import common.util.TypedMap;
 
 import play.mvc.Controller;
 import play.mvc.Http;
