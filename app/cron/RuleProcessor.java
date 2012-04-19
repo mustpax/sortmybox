@@ -12,8 +12,6 @@ import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.collect.Lists;
 
-import common.util.TypedMap;
-
 import controllers.TaskManager;
 
 import siena.Query;
@@ -34,8 +32,8 @@ public class RuleProcessor implements Job {
 
     @Override
     public void execute(Map<String, String> jobData) {
-        TypedMap data = new TypedMap(jobData);
-        final int chunkSize = data.get(CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
+        int chunkSize = jobData.containsKey(CHUNK_SIZE) ?
+                Integer.parseInt(jobData.get(CHUNK_SIZE)) : DEFAULT_CHUNK_SIZE;
         ChunkedRuleProcessor.submit(0, chunkSize, null);
     }
 }
