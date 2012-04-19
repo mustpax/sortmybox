@@ -6,22 +6,22 @@ import play.mvc.Controller;
 public class Footer extends Controller {
 
     public static void team() {
-        renderWithUser();
+        renderInner();
     }
 
     public static void terms() {
-        renderWithUser();
+        renderInner();
     }
     
     public static void privacy() {
-        renderWithUser();
+        renderInner();
     }
     
     public static void contact() {
-        renderWithUser();
+        renderInner();
     }
 
-    private static void renderWithUser() {
+    private static void renderInner() {
         User user = Login.getLoggedInUser();        
         if (user == null) {
             render();
