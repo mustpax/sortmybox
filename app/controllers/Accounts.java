@@ -26,8 +26,8 @@ public class Accounts extends Controller {
 	}
 	
     public static void delete() {
-    	session.clear();
-    	flash.put(DELETED_ACCOUNT, "true");
+        session.clear();
+        flash.put(DELETED_ACCOUNT, "true");
         Login.login();
     }
 
