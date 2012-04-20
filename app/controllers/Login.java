@@ -25,7 +25,7 @@ import dropbox.gson.DbxAccount;
 /**
  * Make given controller or controller methods require login.
  * Usage:
- * @With(RequiresLogin.class)
+ * @With(Login.class)
  * 
  * Based on {@link Secure}.
  *
@@ -182,8 +182,8 @@ public class Login extends Controller {
     }
 
     public static void logout() {
-        session.remove(SessionKeys.UID);
-        Application.index();
+        session.clear();
+        login();
     }
     
     static void redirectToOriginalURL() {

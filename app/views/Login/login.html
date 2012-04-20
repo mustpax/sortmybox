@@ -1,5 +1,18 @@
 #{extends 'main.html' /} #{set title:'Login' /}
 
+#{if flash.deletedAccount}
+<div class="row">
+  <div class="deletedAccount">
+	<div class="span12">
+      <div class="alert alert-info alert-created">
+        <a class="close" data-dismiss="alert">×</a>
+		<h4 class="alert-heading">Successfully deleted your Sortbox account.</h4>
+      </div>
+	</div>
+  </div>
+</div>
+#{/if}
+
 <div class="row">
  <div class="span12">
   <div class="hero-unit">

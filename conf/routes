@@ -7,6 +7,13 @@ GET     /                                       Application.index
 POST    /run-rules                              Application.process
 GET     /dirs                                   Application.dirs
 
+# Account
+GET     /account/info                           Accounts.info
+GET     /account/settings                       Accounts.settings
+POST    /account/settings                       Accounts.save
+GET     /account/delete                         Accounts.confirmDelete
+POST    /account/delete                         Accounts.delete
+
 # Footer
 GET     /team                                   Footer.team
 GET     /terms                                  Footer.terms
