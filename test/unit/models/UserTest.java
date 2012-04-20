@@ -17,8 +17,8 @@ import dropbox.gson.DbxAccount;
 public class UserTest extends UnitTest {
 
     private static final long ID = 67676767L;
-    private static final String TOKEN = "abc";
-    private static final String SECRET = "def";
+    private static final String TOKEN = "abcd";
+    private static final String SECRET = "defg";
     private static final String EMAIL = "foo@bar";
     private static final String NAME = "john doe";
 
@@ -42,7 +42,7 @@ public class UserTest extends UnitTest {
 
         // verify update
         String secret2 = SECRET + "2";
-        user.secret = secret2;
+        user.setSecret(secret2);
         user.update();
         assertEquals(user, User.findById(ID));
 
@@ -61,6 +61,22 @@ public class UserTest extends UnitTest {
         account.name = NAME;
 
         assertNotNull(User.findOrCreateByDbxAccount(account, TOKEN, SECRET).id);
+    }
+    
+    /**
+     * Verify that secret and token fields are encrypted if they are
+     */
+    @Test
+    public void testEncryptUnencrypted() {
+        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+
+        assertEquals(TOKEN, user.getToken());
+        user.setTokenRaw(TOKEN);
+        assertEquals(TOKEN, user.getToken());
+        
+        assertEquals(SECRET, user.getSecret());
+        user.setSecretRaw(SECRET);
+        assertEquals(SECRET, user.getSecret());
     }
     
     @Test
@@ -84,9 +100,9 @@ public class UserTest extends UnitTest {
     private static User newUser(Long id, String token, String email, String secret, String name) {
         User user = new User();
         user.id = id;
-        user.token = token;
+        user.setToken(token);
         user.email = email;
-        user.secret = secret;
+        user.setSecret(secret);
         user.name = name;
         return user;
     }

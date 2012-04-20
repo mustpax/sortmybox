@@ -15,7 +15,7 @@ public class DropboxClientFactory {
      */
     public static DropboxClient create(User user) {
         Preconditions.checkNotNull(user, "User can't be null");
-        return create(user.token, user.secret);
+        return create(user.getToken(), user.getSecret());
     }
     
     /**

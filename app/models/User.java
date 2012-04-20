@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.persistence.PreUpdate;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
+import play.exceptions.UnexpectedException;
+import play.libs.Crypto;
 import siena.Column;
 import siena.DateTime;
 import siena.Generator;
@@ -21,10 +22,7 @@ import siena.Id;
 import siena.Model;
 import siena.NotNull;
 import siena.Query;
-import siena.core.lifecycle.PostDelete;
-import siena.core.lifecycle.PostUpdate;
 
-import com.google.appengine.api.datastore.PreDelete;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -51,10 +49,10 @@ public class User extends Model implements Serializable {
     public Long id;
     
     @NotNull
-    public String token;
+    private String token;
     
     @NotNull
-    public String secret;
+    private String secret;
     
     public String email;
 
@@ -67,7 +65,7 @@ public class User extends Model implements Serializable {
 
     @DateTime
     public Date modified;
-
+    
     @DateTime
     @Column("last_sync")
     public Date lastSync;
@@ -80,10 +78,54 @@ public class User extends Model implements Serializable {
         this();
         this.id = account.uid;
         this.name = account.name;
-        this.token = token;
-        this.secret = secret;
+        setToken(token);
+        setSecret(secret);
     }
     
+    /**
+     * Only for testing.
+     */
+    public void setTokenRaw(String token) {
+        assert Play.runingInTestMode();
+        this.token = token;
+    }
+    
+    /**
+     * Only for testing.
+     */
+    public void setSecretRaw(String secret) {
+        assert Play.runingInTestMode();
+        this.secret = secret;
+    }
+
+    public void setToken(String token) {
+        this.token = Crypto.encryptAES(token);
+    }
+    
+    public void setSecret(String secret) {
+        this.secret = Crypto.encryptAES(secret);
+    }
+    
+    public String getToken() {
+        try {
+            return Crypto.decryptAES(this.token);
+        } catch (UnexpectedException e) {
+            String tmp = this.token;
+            setToken(this.token);
+            return tmp;
+        }
+    }
+    
+    public String getSecret() {
+        try {
+            return Crypto.decryptAES(this.secret);
+        } catch (UnexpectedException e) {
+            String tmp = this.secret;
+            setSecret(this.secret);
+            return tmp;
+        }
+    }
+
     /**
      * Process all rules for the current user and move files to new location
      * as approriate.
@@ -190,10 +232,10 @@ public class User extends Model implements Serializable {
         if (user == null) {
             user = new User(account, token, secret);
             user.insert();
-        } else if (!user.token.equals(token) || !user.secret.equals(secret)){
+        } else if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
             // TODO: update other fields if stale
-            user.token = token;
-            user.secret = secret;
+            user.setToken(token);
+            user.setSecret(secret);
             user.modified = new Date();
             user.update();
         }
