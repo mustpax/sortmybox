@@ -1,0 +1,64 @@
+#{extends 'main.html' /} #{set title:'FAQ' /}
+
+
+<div class="content-body markdown-body markdown-format">
+<div class="page-header">
+	<h1>Frequenty Asked Questions</h1>
+</div>
+<div class="well faq">
+
+	<h2>What is Sortbox?</h2>
+	
+	<p>Sortbox is a simple application that helps you organize your Dropbox.</p>
+	
+	<h2>How does Sortbox work?</h2>
+	
+	<p>Sortbox uses sorting rules you create to organize your Dropbox files. Place your files in your Sortbox folder, and Sortbox will do the rest.</p>
+	
+	<h2>Is Sortbox for me?</h2>
+	
+	<p>Yes! Whether you're keeping your photos and videos organized or sharing documents with other people, Sortbox will keep your files organized.</p>
+	
+	<h2>How do I begin?</h2>
+	
+	<p>Log into <a href="http://www.sortmybox.com">Sortbox</a> with your Dropbox credentials, and grant the application the required credentials. We create a Sortbox folder for you - You just create the sorting rules and place the files you want to organize in the Sortbox folder, and hit "Run rules"! This will sort your files, and setup the rules to run every 15 minutes.</p>
+	
+	<h2>Why do I have to provide access for my Dropbox account?</h2>
+	
+	<p>Sortbox needs permission to move files around in your Dropbox. Sortbox will never user your Dropbox access for any other purposes.</p>
+	
+	<h2>What sorting options do I have?</h2>
+		
+	<p>We have 3 kinds of rules: </p>
+	<dl class="dl-horizontal">
+		<dt>Name Contains:</dt>
+		<dd> Move similarly named files to an appropriate folder.</dd> 
+		<dd>For example: Files containing <code>photo_2011</code> in their names will be moved to <code>/Photos 2011</code>.</dd>
+	
+		<dt>Extension equals:</dt> 
+		<dd>Files with a matching extension will be moved to an appropriate folder.</dd> 
+		<dd>For example: Files with extension <code>.doc</code> will be moved to <code>/Documents</code>.</dd>
+	
+		<dt>Name Pattern:</dt> 
+		<dd>Use wildcards like <code>?</code> and <code>*</code> to move files to an appropriate folder. <code>?</code> matches a single letter/number/symbol/character whereas <code>*</code> can match any number of them.</dd> 
+		<dd>For example: Files matching <code>DSC*</code> will be moved to the <code>Photos</code> folder.</dd>
+	</dl>
+	<h2>Is Sortbox free?</h2>
+	
+	<p>Yes.</p>
+	
+	<h2>Open source?</h2>
+	
+	<p>Sortbox is open source and BSD licensed, you can find it on <a href ="https://github.com/mustpax/sortbox"> GitHub.</a></p>
+	
+	<p>You can even run it on your own Google AppEngine instance. Instructions forthcoming!</p>
+	
+	<h2>How do I contact you?</h2>
+	
+	<p>You can <a href = "mailto: ${play.configuration.getProperty("sortbox.email")}" >email us</a> or find us on <a href = "http://twitter.com/sortboxteam">Twitter</a>.</p>
+	
+	<h2>Anything else?</h2>
+	
+	<p>Yes, please help us spread the word and share Sortbox with other Dropbox users! </p>
+      
+</div>
