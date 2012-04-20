@@ -20,7 +20,11 @@ public class Footer extends Controller {
     public static void contact() {
         renderInner();
     }
-
+    
+    public static void faq() {
+        renderInner();
+    }
+    
     private static void renderInner() {
         User user = Login.getLoggedInUser();        
         if (user == null) {

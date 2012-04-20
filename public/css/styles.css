@@ -67,6 +67,9 @@ select[size] {
     width: 182px;
 }
 
+.faq p {
+	font-size: 110%;
+}
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project

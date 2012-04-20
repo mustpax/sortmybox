@@ -12,6 +12,7 @@ GET     /team                                   Footer.team
 GET     /terms                                  Footer.terms
 GET     /privacy                                Footer.privacy
 GET     /contact                                Footer.contact
+GET     /faq                                	Footer.faq
 
 # Rules
 POST    /rules                                  Rules.update
