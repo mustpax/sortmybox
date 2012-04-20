@@ -257,7 +257,7 @@
                 url: '/rules',
                 data: {
                     'rules': JSON.stringify(rules),
-                'authenticityToken' : window.csrfToken
+	                'authenticityToken' : window.csrfToken
                 },
                 success: function(data) {
                              doneLoading();
