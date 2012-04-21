@@ -1,36 +1,34 @@
 #{extends 'main.html' /}
 
 <ul class="nav nav-tabs">
-  <li class="">
+  <li>
     <a href="@{info()}">Account info</a>
   </li>
   <li class="active">
-    <a href="#">Account settings</a>
+    <a href="@{settings()}">Account settings</a>
+  </li>
+  <li>
+    <a href="@{delete()}">Delete account</a>
   </li>
 </ul>
 
 <div class="row">
-  <div class="span12">
-    <div class="span2">&nbsp;</div>
-    <div class="span8">
-      <form class="form-horizontal">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label" for="optionsCheckbox2">Enable periodic sort</label>
-            <div class="controls">
-              <label class="checkbox">
-                <input type="checkbox" id="optionsCheckbox2" value="option1" checked>
-              </label>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save changes</button>
-            <a class="btn" href="@{info()}">Cancel</a>    
-          </div>
-        </fieldset>
-      </form>
-      <a href="@{delete()}">Delete my account</a> 
+ <div class="span8 offset2">
+  <form class="form-horizontal">
+   <fieldset>
+    <div class="control-group">
+     <label class="control-label" for="optionsCheckbox2">Enable
+      periodic sort</label>
+     <div class="controls">
+      <label class="checkbox"> <input type="checkbox"
+       id="optionsCheckbox2" value="option1" checked> </label>
+     </div>
     </div>
-    <div class="span2">&nbsp;</div>
-  </div>
+    <div class="form-actions">
+     <button type="submit" class="btn btn-primary">Save changes</button>
+     <a class="btn" href="@{info()}">Cancel</a>
+    </div>
+   </fieldset>
+  </form>
+ </div>
 </div>

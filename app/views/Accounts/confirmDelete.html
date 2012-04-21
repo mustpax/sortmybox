@@ -1,8 +1,18 @@
 #{extends 'main.html' /}
+<ul class="nav nav-tabs">
+  <li class="">
+    <a href="@{info()}">Account info</a>
+  </li>
+  <li>
+    <a href="@{settings()}">Account settings</a>
+  </li>
+  <li class="active">
+    <a href="@{delete()}">Delete account</a>
+  </li>
+</ul>
 
 <div class="row">
-  <div class="span2">&nbsp;</div>
-    <div class="span8">
+    <div class="span8 offset2">
       <form class="well" action="@{delete()}" method="POST">
         <h3>Are you sure you want to delete your Sortbox account?</h3></br>
         <p>If you are having an issue and think if we might be able to help, please try <a href="/contact">contacting support</a> first.</p>
@@ -11,5 +21,4 @@
         <a class="btn" href="@{info()}">Cancel</a>    
       </form>
     </div>
-  <div class="span2">&nbsp;</div>
 </div>
