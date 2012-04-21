@@ -70,6 +70,19 @@ select[size] {
 .faq p {
 	font-size: 110%;
 }
+
+.hero-unit {
+  text-align: center;
+}
+
+.hero-unit h1 {
+  line-height: 36px;
+}
+
+.share-links {
+  text-align: center;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
