@@ -1,5 +1,5 @@
 body {
-	padding-top: 60px;
+	padding-top: 120px;
 	padding-bottom: 40px;
 }
 
@@ -79,8 +79,22 @@ select[size] {
   line-height: 36px;
 }
 
+.hero-unit h1 small {
+  letter-spacing: normal;
+}
+
 .share-links {
   text-align: center;
+}
+
+.logo {
+  position: relative;
+}
+
+.logo img {
+  position: absolute;
+  top: -128px;
+  left: 346px;
 }
 
 /*
