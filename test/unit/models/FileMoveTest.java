@@ -6,64 +6,75 @@ import java.util.List;
 
 import models.FileMove;
 import models.Rule;
-import models.Rule.RuleType;
 import models.User;
 
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Iterables;
 
 import play.Logger;
-import play.modules.siena.SienaFixtures;
 import play.test.UnitTest;
+import rules.RuleType;
+import unit.TestUtil;
 
-public class FileMoveTest extends UnitTest {
-    private static final long USER_ID = 1L;
+public class FileMoveTest extends BaseModelTest {
     
-    @BeforeClass
-    public static void loadFixtures() throws Exception {
-        SienaFixtures.deleteAllModels();
-    }
+    private User user;
+    private User user2;
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        user = TestUtil.createUser(1);
+        user2 = TestUtil.createUser(2);
+    }
+    
     @Test
-    public void testDeleteStale() {
+    public void testDeleteStale() throws Exception {
         Date now = new Date();
         Date yesterday = DateTime.now().minusDays(FileMove.RETENTION_DAYS - 1).toDate();
         Date lastWeek  = DateTime.now().minusDays(FileMove.RETENTION_DAYS + 1).toDate();
-        List<FileMove> retained = Arrays.asList(createMove(lastWeek, 2L),
+        List<FileMove> retained = Arrays.asList(createMove(lastWeek, user2),
 	                                            createMove(now),
 	                                            createMove(yesterday));
         List<FileMove> deleted = Arrays.asList(createMove(lastWeek));
-        
+
         // Check that all moves exist
         for (FileMove m: Iterables.concat(retained, deleted)) {
-            assertNotNull(m.findById(m.id));
+            User user = User.findById(m.owner);
+            assertNotNull(FileMove.findById(user, m.id));
         }
-        Logger.info("count %d", FileMove.all().count());
 
-        // Delete stale then check again
-        assertTrue(FileMove.deleteStaleForUser(USER_ID) > 0);
+        FileMove.truncateFileMoves(user);
 
-        Logger.info("count %d", FileMove.all().count());
         for (FileMove m: retained) {
-            assertNotNull(m.findById(m.id));
+            User user = User.findById(m.owner);
+            assertNotNull(FileMove.findById(user, m.id));
         }
         for (FileMove m: deleted) {
-            assertNull(m.findById(m.id));
+            User user = User.findById(m.owner);
+            assertNull(FileMove.findById(user, m.id));
         }
     }
     
-    public static FileMove createMove(Date when, long owner) {
-        Rule r = new Rule(RuleType.EXT_EQ, "txt", "/txt", 0, owner);
+    public FileMove createMove(Date when, User owner) throws Exception {
+        Rule r = new Rule(RuleType.EXT_EQ, "txt", "/txt", 0, owner.id);
         FileMove m = new FileMove(r, "foo.txt", true);
         m.when = when;
-        m.insert();
-        return m;
+        
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        Entity entity = m.toEntity(owner);
+        ds.put(entity);
+        return new FileMove(ds.get(entity.getKey()));
     }
         
-    public static FileMove createMove(Date when) {
-        return createMove(when, USER_ID);
+    public FileMove createMove(Date when) throws Exception {
+        return createMove(when, user);
     }
 }

@@ -1,82 +1,62 @@
 package models;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import models.Rule.RuleType;
-import models.Rule.TooManyRulesException;
+import java.util.Iterator;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.gdata.util.common.base.Preconditions;
 
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
-import siena.Column;
-import siena.DateTime;
-import siena.Generator;
-import siena.Id;
-import siena.Model;
-import siena.NotNull;
-import siena.Query;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-
-import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClientFactory;
-import dropbox.client.FileMoveCollisionException;
 import dropbox.gson.DbxAccount;
-import dropbox.gson.DbxMetadata;
 
-/**
- * Model for a user.
- * 
- * @author mustpax
- * @author syyang
- */
-public class User extends Model implements Serializable {
-    private static AtomicBoolean cacheInit = new AtomicBoolean(false);
+import rules.RuleType;
+
+public class User implements Serializable {
+
+    static {
+        if ((Cache.cacheImpl != Cache.forcedCacheImpl) && (Cache.forcedCacheImpl != null)) {
+            Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
+                        Cache.cacheImpl.getClass(),
+                        Cache.forcedCacheImpl.getClass());
+           Cache.cacheImpl = Cache.forcedCacheImpl;
+        }
+    }
+
+    public static final Function<Entity, User> TO_USER = new Function<Entity, User>() {
+        @Override public User apply(Entity entity) {
+            return new User(entity);
+        }};
 
     private static String getCacheKey(Long id) {
         return String.format("user:%d", id);
     }
-    
-    // the id will be explicitly set to Dropbox uid
-    @Id(Generator.NONE)
+
+    public static final String KIND = "User";
+
     public Long id;
-    
-    @NotNull
-    private String token;
-    
-    @NotNull
-    private String secret;
-    
-    public String email;
-
     public String name;
-
+    public String email;
     public Integer hash;
-
-    @DateTime
     public Date created;
-
-    @DateTime
     public Date modified;
-    
-    @DateTime
-    @Column("last_sync")
     public Date lastSync;
 
+    private String token;
+    private String secret;
+    
     public User() {
         this.created = this.modified = new Date();
     }
@@ -87,6 +67,42 @@ public class User extends Model implements Serializable {
         this.name = account.name;
         setToken(token);
         setSecret(secret);
+    }
+    
+    public User(Entity entity) {
+        this.id = (Long) entity.getProperty("id");
+        this.name = (String) entity.getProperty("name");
+        this.email = (String) entity.getProperty("email");        
+        this.hash = (Integer) entity.getProperty("rank");
+        this.created = (Date) entity.getProperty("created");
+        this.modified = (Date) entity.getProperty("modified");
+        this.lastSync = (Date) entity.getProperty("lastSync");
+        
+        this.token = (String) entity.getProperty("token");
+        this.secret = (String) entity.getProperty("secret");
+    }
+    
+    public Entity toEntity() {
+        Entity entity = new Entity(getKey());
+        entity.setProperty("id", id);
+        entity.setProperty("name", name);
+        entity.setProperty("email", email);
+        entity.setProperty("hash", hash);
+        entity.setProperty("created", created);
+        entity.setProperty("modified", modified);
+        entity.setProperty("lastSync", lastSync);
+        
+        entity.setProperty("token", token);
+        entity.setProperty("secret", secret);
+        return entity;
+    }
+
+    public String getKind() {
+        return KIND;
+    }
+
+    public Key getKey() {
+        return KeyFactory.createKey(KIND, id);
     }
     
     /**
@@ -133,145 +149,67 @@ public class User extends Model implements Serializable {
         }
     }
 
-    /**
-     * Process all rules for the current user and move files to new location
-     * as approriate.
-     * 
-     * @return list of file moves performed
-     */
-    public List<FileMove> runRules() {
-        List<FileMove> ret = Lists.newArrayList();
-        DropboxClient client = DropboxClientFactory.create(this);
-        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
-
-        if (files.isEmpty()) {
-            Logger.info("Ran rules for %s, no files to process.", this);
-            return ret;
-        }
-
-        List<Rule> rules = Rule.findByOwner(this).fetch();
-        Logger.info("Running rules for %s", this);
-        
-        for (String file: files) {
-            String base = basename(file);
-            for (Rule r: rules) {
-                if (r.matches(base)) {
-                    Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
-                    boolean success = true;
-                    try {
-                        String dest = r.dest +
-                                      (r.dest.endsWith("/") ? "" : "/") +
-                                      base;
-                        client.move(file, dest);
-                    } catch (FileMoveCollisionException e) {
-                        success = false;
-                    }
-                    ret.add(new FileMove(r, base, success));
-                    break;
-                }
-            }
-        }
-
-        Logger.info("Done running rules for %s. %d moves performed", this, ret.size());
-        if (! ret.isEmpty()) {
-            Model.batch(FileMove.class).insert(ret);
-        }
-
-        // Delete old Move rows with 1% probability
-        if ((new Random().nextInt() % 100) == 0) {
-            FileMove.deleteStaleForUser(this.id);
-        }
-        
-        return ret;
-    }
-    
-    public Query<FileMove> getMoves() {
-        return FileMove.all().filter("owner", this.id).order("-when");
-    }
-
-    /**
-     * Create the Sortbox folder for this user if necessary. 
-     * @return true if a sortbox folder was created, false if nothing was done
-     * @throws TooManyRulesException 
-     */
-    public boolean createSortboxAndCannedRulesIfNecessary() throws TooManyRulesException {
-        DropboxClient client = DropboxClientFactory.create(this);
-        String sortboxPath = Dropbox.getRoot().getSortboxPath();
-        DbxMetadata file = client.getMetadata(sortboxPath);
-
-        if (file == null) {
-            Logger.info("Sortbox folder missing for user '%s' at path '%s'", this, sortboxPath);
-            createCannedRulesIfNecessary();
-            return client.mkdir(sortboxPath) != null;
-        }
-
-        return false;
-    }
-    
-	public void createCannedRulesIfNecessary() throws TooManyRulesException {	
-		List<Rule> rules = new ArrayList<Rule>(); 
-		if (Rule.findByOwner(this).count()==0) {
-			rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, this.id));
-			rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, this.id));
-			rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, this.id));
-			Rule.insert(rules);
-		}
-	}
-
-    private static String basename(String path) {
-        if (path == null) {
-            return null;
-        }
-        
-        File f = new File(path);
-        return f.getName();
-    }
-    
-    public static Query<User> all() {
-        return Model.all(User.class);
-    }
-    
     public static User findById(Long id) {
-        assert id != null : "id cannot be null";
-
-        // Play sometimes does not switch to the forcedCacheImpl so
-        // we switch it ourselves
-        if (cacheInit.compareAndSet(false, true)) {
-            if ((Cache.cacheImpl != Cache.forcedCacheImpl) &&
-                (Cache.forcedCacheImpl != null)) {
-                Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
-                            Cache.cacheImpl.getClass(),
-                            Cache.forcedCacheImpl.getClass());
-                Cache.cacheImpl = Cache.forcedCacheImpl;
+        Preconditions.checkNotNull(id, "id cannot be null");
+        String cacheKey = getCacheKey(id);
+        User user = (User) Cache.get(cacheKey);
+        if (user == null) {
+            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+            Query q = new Query(KIND);
+            q.addFilter("id", FilterOperator.EQUAL, id);
+            PreparedQuery pq = ds.prepare(q);
+            Entity entity = pq.asSingleEntity();
+            user = entity == null ? null : new User(entity);
+            if (user != null) {
+                Cache.add(cacheKey, user, "1h");
             }
         }
-
-        String key = getCacheKey(id);
-        User ret = (User) Cache.get(key);
-        if (ret == null) {
-	        ret = all().filter("id", id).get();
-	        if (ret != null) {
-	            Cache.add(key, ret, "1h");
-	        }
-        }
-        return ret;
+        return user;
     }
     
     public static User findOrCreateByDbxAccount(DbxAccount account, String token, String secret) {
         if (account == null || !account.notNull())
             return null;
-        User user = findById(account.uid);
-        if (user == null) {
-            user = new User(account, token, secret);
-            user.insert();
-        } else if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
-            // TODO: update other fields if stale
-            user.setToken(token);
-            user.setSecret(secret);
-            user.modified = new Date();
-            user.update();
+        
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        Key key = KeyFactory.createKey(KIND, account.uid);
+
+        Transaction tx = ds.beginTransaction();
+        try {
+            Entity entity = null;
+            User user = null;
+            try {
+                String cacheKey = getCacheKey(account.uid);
+                user = (User) Cache.get(cacheKey);
+                if (user == null) {
+                    entity = ds.get(key);
+                    user = new User(entity);
+                }
+                if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
+                    // TODO: update other fields if stale
+                    user.setToken(token);
+                    user.setSecret(secret);
+                    user.modified = new Date();
+                }
+            } catch (EntityNotFoundException e) {
+                user = new User(account, token, secret);
+                Logger.info("Created user: %s", user);
+            }
+            user.invalidate();
+            entity = user.toEntity();
+            ds.put(tx, entity);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        } 
+
+        try {
+            return new User(ds.get(key));
+        } catch (EntityNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        return user;
     }
 
     @Override
@@ -330,23 +268,4 @@ public class User extends Model implements Serializable {
     public void invalidate() {
         Cache.safeDelete(getCacheKey(this.id));
     }
-
-    @Override
-    public void delete() {
-        invalidate();
-        super.delete();
-    }
-
-    @Override
-    public void save() {
-        invalidate();
-        super.save();
-    }
-
-    @Override
-    public void update() {
-        invalidate();
-        super.update();
-    }
-    
 }

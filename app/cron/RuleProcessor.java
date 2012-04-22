@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 
 import controllers.TaskManager;
 
-import siena.Query;
 import tasks.ChunkedRuleProcessor;
 import tasks.Task;
 import tasks.TaskContext;

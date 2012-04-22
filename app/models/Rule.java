@@ -1,21 +1,29 @@
 package models;
 
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
+
+import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import play.Logger;
-import siena.Id;
-import siena.Model;
-import siena.Query;
-
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+
+import play.Logger;
+import rules.RuleType;
+import rules.RuleUtils;
 
 import controllers.Login;
 
@@ -26,61 +34,29 @@ import controllers.Login;
  * @author mustpax
  * @author syyang
  */
-public class Rule extends Model {
+public class Rule implements Serializable {
 
-    public static enum RuleType {
-        NAME_CONTAINS {
-            @Override
-            public boolean matches(String pattern, String fileName) {
-                if ((pattern  == null) ||
-                    (fileName == null)) {
-                    return false;
-                }
+    public static final String KIND = "Rule";
 
-                return fileName.toLowerCase().contains(pattern.toLowerCase());
-            }
-        },
-        GLOB {
-            @Override
-            public boolean matches(String pattern, String fileName) {
-                Matcher m = RuleUtils.getGlobPattern(pattern).matcher(fileName);
-                return m.matches();
-            }
-        },
-        EXT_EQ {
-            @Override 
-            public boolean matches(String pattern, String fileName) {
-                String ext = RuleUtils.getExtFromName(fileName);
-                if ((ext == null) ||
-                    (pattern == null)) {
-                    return false;
-                }
+    public static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {
+        @Override
+        public Key apply(Entity entity) {
+            return entity.getKey();
+        }
+    };
 
-                return ext.toLowerCase().equals(pattern.toLowerCase());
-            }
-        };
+    private static final Function<Entity, Rule> TO_RULE = new Function<Entity, Rule>() {
+        @Override
+        public Rule apply(Entity entity) {
+            return new Rule(entity);
+        }
+    };
 
-        /**
-         * Apply a match to a file based on the rule type.
-         * 
-         * @param pattern the pattern for the current rule
-         * @param fileName file name to match against rule
-         * @return true if given file name matches the current pattern
-         */
-        public abstract boolean matches(String pattern, String fileName);
-    }
-
-    @Id
     public Long id;
-
-    public RuleType type; 
-
+    public RuleType type;
     public String pattern;
-
     public String dest;
-
     public Integer rank;
-
     public Long owner;
 
     public Rule() {}
@@ -93,63 +69,47 @@ public class Rule extends Model {
         this.owner = owner;
     }
 
+    public Rule(Entity entity) {
+        this.id = entity.getKey().getId();
+        this.type = RuleType.fromDbValue((String) entity.getProperty("type"));
+        this.pattern = (String) entity.getProperty("pattern");
+        this.dest = (String) entity.getProperty("dest");
+        this.rank = ((Long) entity.getProperty("rank")).intValue();
+        this.owner = (Long) entity.getProperty("owner");
+    }
+
+    public Entity toEntity(User owner) {
+        Entity entity = new Entity(KIND, owner.getKey());
+        entity.setProperty("type", type.getDbValue());
+        entity.setProperty("pattern", pattern);
+        entity.setProperty("dest", dest);
+        entity.setProperty("rank", rank);
+        entity.setProperty("owner", owner.id);
+        return entity;
+    }
+
+    public static Rule findById(Long id) {
+        Preconditions.checkNotNull(id);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        Query q = new Query(KIND).addFilter("id", Query.FilterOperator.EQUAL, id);
+        PreparedQuery pq = ds.prepare(q);
+        Entity entity = pq.asSingleEntity();
+        return entity != null ? new Rule(entity) : null;
+    }
+
+    public static Iterator<Rule> findByOwner(User owner) {
+        Preconditions.checkNotNull(owner);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        Query q = new Query(KIND).setAncestor(owner.getKey());
+        PreparedQuery pq = ds.prepare(q);
+        return Iterators.transform(pq.asIterator(), TO_RULE);
+    }
+    
     public boolean matches(String fileName) {
         return type.matches(this.pattern, fileName);
     }
 
-    public static Query<Rule> all() {
-        return Model.all(Rule.class);
-    }
-    
-    public static Rule findById(Long id) {
-        return all().filter("id", id).get();
-    }
-    
-    public static Query<Rule> findByOwner(User owner) {
-        Query<Rule> query = all();
-        query.filter("owner", owner.id);
-        query.order("rank");
-        return query;
-    }
-
-    public static List<List<RuleError>> insert(List<Rule> rules) throws TooManyRulesException {
-        return insert(Login.getLoggedInUser(), rules);
-    }
-
-    public static List<List<RuleError>> insert(User owner, List<Rule> rules) throws TooManyRulesException {
-        Preconditions.checkNotNull(owner);
-        
-        if (rules != null && rules.size()>200) {
-        	throw new TooManyRulesException("The user had more than 200 rules defined" + owner);
-        }
-        
-        // let's delete the old rules for the owner
-        findByOwner(owner).delete();
-        
-        if (rules == null || rules.isEmpty()) {
-            return Collections.emptyList();
-        }
-        
-        int rank = 0;
-        List<Rule> toSave = Lists.newLinkedList();
-        List<List<RuleError>> allErrors = Lists.newLinkedList();
-        for (Rule rule : rules) {
-            rule.owner = owner.id;
-            List<RuleError> errors = rule.validate();
-            if (errors.isEmpty()) {
-	            rule.rank = rank++;
-	            toSave.add(rule);
-            }
-            allErrors.add(errors);
-        }
-
-        // TODO do not save on any errors?
-        Model.batch(Rule.class).insert(toSave);
-        Logger.info("Saved entities: %s:", toSave);
-        return allErrors;
-    }
-
-    private List<RuleError> validate() {
+    public @Nonnull List<RuleError> validate() {
         List<RuleError> ret = Lists.newLinkedList();
         if (type == null) {
             ret.add(new RuleError("type", "Missing or invalid type."));
@@ -214,10 +174,13 @@ public class Rule extends Model {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(User.class)
+        return Objects.toStringHelper(Rule.class)
+            .add("id", id)
             .add("rule type", type)
             .add("pattern", pattern)
-            .add("dest", dest)        
+            .add("dest", dest)
+            .add("rank", rank)
+            .add("owner", owner)
             .toString();
     }
 
@@ -229,13 +192,5 @@ public class Rule extends Model {
             this.field = field;
             this.msg = msg;
         }
-    }
-    
-    public static class TooManyRulesException extends Exception {
-
-		public TooManyRulesException(String string) {
-			
-		}
-    
     }
 }

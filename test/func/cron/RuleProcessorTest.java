@@ -10,12 +10,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import play.Logger;
-import play.modules.siena.SienaFixtures;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import tasks.ChunkedRuleProcessor;
 import unit.BaseTaskQueueTest;
+import unit.TestUtil;
 
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -37,18 +37,19 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     private static final int CHUNK_SIZE = 2;
 
     private LocalTaskQueue taskQueue;
-    
-    @BeforeClass
-    public static void loadFixtures() throws Exception {
-        SienaFixtures.deleteAllModels();
-        SienaFixtures.loadModels("data.yml");
-    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         
         this.taskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
+    
+        // create 4 users
+        int id = 100;
+        for (int i = 0; i < 4; i++) {
+            TestUtil.createUser(id);
+            id += 100;
+        }
     }
     
     @Override

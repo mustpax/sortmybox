@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import play.test.UnitTest;
+import unit.TestUtil;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -14,7 +15,7 @@ import dropbox.gson.DbxAccount;
  * 
  * @author syyang
  */
-public class UserTest extends UnitTest {
+public class UserTest extends BaseModelTest {
 
     private static final long ID = 67676767L;
     private static final String TOKEN = "abcd";
@@ -24,31 +25,11 @@ public class UserTest extends UnitTest {
 
     @Before
     @After
-    public void clean() {
+    public void clean() throws Exception {
         User user = User.findById(ID);
         if (user != null) {
-            user.delete();
+            TestUtil.deleteUser(user);
         }
-    }
-
-    @Test
-    public void testCRUD() throws Exception {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
-        assertNull(User.findById(ID));
-
-        // verify insert
-        user.insert();
-        assertEquals(user, User.findById(ID));
-
-        // verify update
-        String secret2 = SECRET + "2";
-        user.setSecret(secret2);
-        user.update();
-        assertEquals(user, User.findById(ID));
-
-        // verify delete
-        user.delete();
-        assertNull(User.findById(ID));
     }
 
     @Test

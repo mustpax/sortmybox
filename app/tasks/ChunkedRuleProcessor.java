@@ -6,12 +6,16 @@ import java.util.List;
 
 import models.User;
 import play.Logger;
-import siena.Query;
+import rules.RuleUtils;
 
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 
 import cron.RuleProcessor;
 
@@ -55,7 +59,7 @@ public class ChunkedRuleProcessor implements Task {
             lastKey = null; 
         }
 
-        List<User> users = getChunkQuery(lastKey, chunkSize).fetch();
+        List<User> users = getNextChunk(lastKey, chunkSize);
         if (users.isEmpty()) {
             Logger.info("Final chunk processed. No more users to enqueue. Last key: %d", lastKey);
         } else {
@@ -66,7 +70,7 @@ public class ChunkedRuleProcessor implements Task {
 
         int moves = 0;
         for (User user : users) {
-            moves += user.runRules().size();
+            moves += RuleUtils.runRules(user).size();
         }
 
         Logger.info("Processed chunk. " +
@@ -78,11 +82,14 @@ public class ChunkedRuleProcessor implements Task {
      * @return Query that returns users in increasing id order starting at the
      * last id from the previous chunk (exclusive lower bound)
      */
-    public static Query<User> getChunkQuery(Long lastKey, int chunkSize) {
-        Query<User> query = User.all().order("id").limit(chunkSize);
+    public static List<User> getNextChunk(Long lastKey, int chunkSize) {
+        Query q = new Query(User.KIND);
         if (lastKey != null) {
-            query = query.filter("id >", lastKey);
+            q.addFilter("id", FilterOperator.GREATER_THAN, lastKey);
         }
-        return query;    
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = ds.prepare(q);
+        List<Entity> entities = pq.asList(FetchOptions.Builder.withChunkSize(chunkSize));
+        return Lists.transform(entities, User.TO_USER);
     }
 }

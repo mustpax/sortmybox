@@ -1,32 +1,13 @@
 package unit.models;
 
 import play.test.*;
+import rules.RuleType;
+
 import org.junit.*;
 import models.*;
 import models.Rule;
-import models.Rule.RuleType;
  
 public class RuleTest extends UnitTest {
-
-    @Test
-    public void testCRUD() throws Exception {
-        Rule rule = new Rule(RuleType.GLOB, "a", "b", 1, 2L);
-        
-        // verify insert
-        rule.insert();
-        long id = rule.id;
-        assertEquals(rule, Rule.findById(id));
-
-        // verify update
-        RuleType type2 = RuleType.NAME_CONTAINS;
-        rule.type = type2;
-        rule.update();
-        assertEquals(rule, Rule.findById(id));
-
-        // verify delete
-        rule.delete();
-        assertNull(Rule.findById(id));
-    }
 
     @Test
     public void testNameContains() {

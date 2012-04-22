@@ -59,7 +59,7 @@ public interface DropboxClient {
      * @param path the full path of the directory to create
      * @return metadata for the newly created directory
      */
-    @Nullable public DbxMetadata mkdir(String path);
+    @Nullable DbxMetadata mkdir(String path);
 
     public static enum ListingType {
         DIRS(true, false),
