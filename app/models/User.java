@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -40,6 +41,8 @@ import dropbox.gson.DbxMetadata;
  * @author syyang
  */
 public class User extends Model implements Serializable {
+    private static AtomicBoolean cacheInit = new AtomicBoolean(false);
+
     private static String getCacheKey(Long id) {
         return String.format("user:%d", id);
     }
@@ -214,8 +217,20 @@ public class User extends Model implements Serializable {
     
     public static User findById(Long id) {
         assert id != null : "id cannot be null";
+
+        // Play sometimes does not switch to the forcedCacheImpl so
+        // we switch it ourselves
+        if (cacheInit.compareAndSet(false, true)) {
+            if ((Cache.cacheImpl != Cache.forcedCacheImpl) &&
+                (Cache.forcedCacheImpl != null)) {
+                Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
+                            Cache.cacheImpl.getClass(),
+                            Cache.forcedCacheImpl.getClass());
+                Cache.cacheImpl = Cache.forcedCacheImpl;
+            }
+        }
+
         String key = getCacheKey(id);
-        Logger.info("Cache manager %s", Cache.cacheImpl.getClass());
         User ret = (User) Cache.get(key);
         if (ret == null) {
 	        ret = all().filter("id", id).get();
