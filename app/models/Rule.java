@@ -88,13 +88,15 @@ public class Rule implements Serializable {
         return entity;
     }
 
-    public static Rule findById(Long id) {
+    public static Rule findById(User owner, Long id) {
         Preconditions.checkNotNull(id);
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Query q = new Query(KIND).addFilter("id", Query.FilterOperator.EQUAL, id);
-        PreparedQuery pq = ds.prepare(q);
-        Entity entity = pq.asSingleEntity();
-        return entity != null ? new Rule(entity) : null;
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Key key = KeyFactory.createKey(owner.getKey(), KIND, id);
+            return new Rule(ds.get(key));
+        } catch (EntityNotFoundException e) {
+            return null;
+        }
     }
 
     public static Iterator<Rule> findByOwner(User owner) {

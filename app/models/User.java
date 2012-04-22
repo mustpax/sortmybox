@@ -154,14 +154,13 @@ public class User implements Serializable {
         String cacheKey = getCacheKey(id);
         User user = (User) Cache.get(cacheKey);
         if (user == null) {
-            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-            Query q = new Query(KIND);
-            q.addFilter("id", FilterOperator.EQUAL, id);
-            PreparedQuery pq = ds.prepare(q);
-            Entity entity = pq.asSingleEntity();
-            user = entity == null ? null : new User(entity);
-            if (user != null) {
+            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+            try {
+                Key key = KeyFactory.createKey(KIND, id);
+                user = new User(ds.get(key));
                 Cache.add(cacheKey, user, "1h");
+            } catch (EntityNotFoundException e) {
+                return null;
             }
         }
         return user;
