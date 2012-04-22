@@ -1,8 +1,3 @@
-body {
-    padding-top: 120px;
-    padding-bottom: 40px;
-}
-
 .rules .rule .error {
     background: #FAE5E3;
 }
@@ -72,6 +67,7 @@ select[size] {
 }
 
 .hero-unit {
+    margin-top: 64px;
     text-align: center;
 }
 
