@@ -112,16 +112,23 @@ public class Rule extends Model {
         return query;
     }
 
-    public static List<List<RuleError>> insert(List<Rule> rules) {
+    public static List<List<RuleError>> insert(List<Rule> rules) throws TooManyRulesException {
         return insert(Login.getLoggedInUser(), rules);
     }
 
-    public static List<List<RuleError>> insert(User owner, List<Rule> rules) {
+    public static List<List<RuleError>> insert(User owner, List<Rule> rules) throws TooManyRulesException {
         Preconditions.checkNotNull(owner);
         
         if (rules == null || rules.isEmpty()) {
             return Collections.emptyList();
         }
+        
+        if(rules.size()>200) {
+        	throw new TooManyRulesException("The user had more than 200 rules defined" + owner);
+        }
+        
+        // let's delete the old rules for the owner
+        findByOwner(owner).delete();
         
         int rank = 0;
         List<Rule> toSave = Lists.newLinkedList();
@@ -222,5 +229,13 @@ public class Rule extends Model {
             this.field = field;
             this.msg = msg;
         }
+    }
+    
+    public static class TooManyRulesException extends Exception {
+
+		public TooManyRulesException(String string) {
+			
+		}
+    
     }
 }

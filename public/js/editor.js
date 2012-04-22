@@ -265,7 +265,13 @@
                              $.each(data, function(i, v) {
                                  addErrors(i, v);
                              });
-                         }
+                         },
+                error: function (badRequest) {
+					doneLoading();
+					if (badRequest.status===400){
+						alert("You have too many rules defined, please delete a few and try again.");
+					}
+            	}
             });
         });
 

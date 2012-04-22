@@ -5,6 +5,7 @@ import java.util.List;
 
 import models.Rule;
 import models.Rule.RuleError;
+import models.Rule.TooManyRulesException;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -21,12 +22,16 @@ public class Rules extends Controller {
         Type t = new TypeToken<List<Rule>>(){}.getType();
         List<Rule> ruleList = new Gson().fromJson(rules, t);
         User user = Login.getLoggedInUser();
-        Rule.findByOwner(user).delete();
-        List<List<RuleError>> errors = Rule.insert(user, ruleList);
-        if (! hasErrors(errors)) {
-            user.runRules();
-        }
-        renderJSON(errors);
+        
+        try{
+        	List<List<RuleError>> errors = Rule.insert(user, ruleList);
+	        if (! hasErrors(errors)) {
+	            user.runRules();
+	        }
+	        renderJSON(errors);
+        }catch (TooManyRulesException e) {
+        	badRequest();
+        }        
     }
 
     /**
