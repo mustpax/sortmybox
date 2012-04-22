@@ -1,6 +1,6 @@
 body {
-	padding-top: 120px;
-	padding-bottom: 40px;
+    padding-top: 120px;
+    padding-bottom: 40px;
 }
 
 .rules .rule .error {
@@ -68,7 +68,7 @@ select[size] {
 }
 
 .faq p {
-	font-size: 110%;
+    font-size: 110%;
 }
 
 .hero-unit {
