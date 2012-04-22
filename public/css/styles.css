@@ -79,7 +79,7 @@ select[size] {
     letter-spacing: normal;
 }
 
-.share-links {
+.share-links, .center {
     text-align: center;
 }
 
@@ -91,6 +91,14 @@ select[size] {
     position: absolute;
     top: -128px;
     left: 346px;
+}
+
+.moves li {
+    line-height: 24px;
+}
+
+#screenshots {
+    min-height: 550px;
 }
 
 /*
