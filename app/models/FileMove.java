@@ -28,18 +28,25 @@ public class FileMove {
         }
     };
 
+    private static final Function<FileMove, Entity> TO_ENTITY = new Function<FileMove, Entity>() {
+        @Override
+        public Entity apply(FileMove fileMove) {
+            return fileMove.toEntity();
+        }
+    };
+    
     public Long id;
     public String fromFile;
     public String toDir;
-    public Date when;
     public Long owner;
+    public Date when;
     public Boolean successful;
     
-    public FileMove(Rule rule, String from, boolean success) {
-        this.owner = rule.owner;
+    public FileMove(Long owner, Rule rule, String from, boolean success) {
         this.toDir = rule.dest;
         this.fromFile = from;
         this.when = new Date();
+        this.owner = owner;
         this.successful = success;
     }
     
@@ -52,12 +59,13 @@ public class FileMove {
         this.successful = (Boolean) entity.getProperty("successful");
     }
 
-    public Entity toEntity(User owner) {
-        Entity entity = new Entity(KIND, owner.getKey());
+    public Entity toEntity() {
+        Key parentKey = KeyFactory.createKey(User.KIND, owner);
+        Entity entity = new Entity(KIND, parentKey);
         entity.setProperty("fromFile", fromFile);
         entity.setProperty("toDir", toDir);
         entity.setProperty("when", when);
-        entity.setProperty("owner", owner.id);
+        entity.setProperty("owner", owner);
         entity.setProperty("successful", isSuccessful());
         return entity;
     }
@@ -107,11 +115,7 @@ public class FileMove {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
         Transaction tx = ds.beginTransaction();
         try {
-            ds.put(tx, Lists.transform(fileMoves, new Function<FileMove, Entity>() {
-                @Override public Entity apply(FileMove fileMove) {
-                    return fileMove.toEntity(owner);
-                }
-            }));
+            ds.put(tx, Lists.transform(fileMoves, TO_ENTITY));
             tx.commit();
         } finally {
             if (tx.isActive()) {

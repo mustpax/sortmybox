@@ -86,10 +86,7 @@ public class Application extends Controller {
                 rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
                 rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
                 rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
-                ds.put(tx, Lists.transform(rules, new Function<Rule, Entity>() {
-                    @Override public Entity apply(Rule rule) {
-                        return rule.toEntity(user);
-                    }}));
+                ds.put(tx, Lists.transform(rules, Rule.TO_ENTITY));
                 tx.commit();
             } finally {
                 if (tx.isActive()) {

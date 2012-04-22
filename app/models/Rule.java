@@ -45,6 +45,13 @@ public class Rule implements Serializable {
         }
     };
 
+    public static final Function<Rule, Entity> TO_ENTITY = new Function<Rule, Entity>() {
+        @Override
+        public Entity apply(Rule rule) {
+            return rule.toEntity();
+        }
+    };
+
     private static final Function<Entity, Rule> TO_RULE = new Function<Entity, Rule>() {
         @Override
         public Rule apply(Entity entity) {
@@ -78,13 +85,14 @@ public class Rule implements Serializable {
         this.owner = (Long) entity.getProperty("owner");
     }
 
-    public Entity toEntity(User owner) {
-        Entity entity = new Entity(KIND, owner.getKey());
+    public Entity toEntity() {
+        Key parentKey = KeyFactory.createKey(User.KIND, owner);
+        Entity entity = new Entity(KIND, parentKey);
         entity.setProperty("type", type.getDbValue());
         entity.setProperty("pattern", pattern);
         entity.setProperty("dest", dest);
         entity.setProperty("rank", rank);
-        entity.setProperty("owner", owner.id);
+        entity.setProperty("owner", owner);
         return entity;
     }
 

@@ -77,10 +77,7 @@ public class Rules extends Controller {
                 }
 
                 if (!toSave.isEmpty()) {
-                    List<Entity> entities = Lists.transform(toSave, new Function<Rule, Entity>() {
-                        @Override public Entity apply(Rule rule) {
-                            return rule.toEntity(user);
-                        }});
+                    List<Entity> entities = Lists.transform(toSave, Rule.TO_ENTITY);
                     ds.put(tx, entities);
   
                     tx.commit();

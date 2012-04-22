@@ -65,11 +65,11 @@ public class FileMoveTest extends BaseModelTest {
     
     public FileMove createMove(Date when, User owner) throws Exception {
         Rule r = new Rule(RuleType.EXT_EQ, "txt", "/txt", 0, owner.id);
-        FileMove m = new FileMove(r, "foo.txt", true);
+        FileMove m = new FileMove(owner.id, r, "foo.txt", true);
         m.when = when;
         
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Entity entity = m.toEntity(owner);
+        Entity entity = m.toEntity();
         ds.put(entity);
         return new FileMove(ds.get(entity.getKey()));
     }
