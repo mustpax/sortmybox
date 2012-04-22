@@ -119,16 +119,16 @@ public class Rule extends Model {
     public static List<List<RuleError>> insert(User owner, List<Rule> rules) throws TooManyRulesException {
         Preconditions.checkNotNull(owner);
         
-        if (rules == null || rules.isEmpty()) {
-            return Collections.emptyList();
-        }
-        
-        if(rules.size()>200) {
+        if (rules != null && rules.size()>200) {
         	throw new TooManyRulesException("The user had more than 200 rules defined" + owner);
         }
         
         // let's delete the old rules for the owner
         findByOwner(owner).delete();
+        
+        if (rules == null || rules.isEmpty()) {
+            return Collections.emptyList();
+        }
         
         int rank = 0;
         List<Rule> toSave = Lists.newLinkedList();

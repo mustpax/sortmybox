@@ -2,11 +2,15 @@ package models;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import models.Rule.RuleType;
+import models.Rule.TooManyRulesException;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -188,19 +192,31 @@ public class User extends Model implements Serializable {
     /**
      * Create the Sortbox folder for this user if necessary. 
      * @return true if a sortbox folder was created, false if nothing was done
+     * @throws TooManyRulesException 
      */
-    public boolean createSortboxIfNecessary() {
+    public boolean createSortboxAndCannedRulesIfNecessary() throws TooManyRulesException {
         DropboxClient client = DropboxClientFactory.create(this);
         String sortboxPath = Dropbox.getRoot().getSortboxPath();
         DbxMetadata file = client.getMetadata(sortboxPath);
 
         if (file == null) {
             Logger.info("Sortbox folder missing for user '%s' at path '%s'", this, sortboxPath);
+            createCannedRulesIfNecessary();
             return client.mkdir(sortboxPath) != null;
         }
 
         return false;
     }
+    
+	public void createCannedRulesIfNecessary() throws TooManyRulesException {	
+		List<Rule> rules = new ArrayList<Rule>(); 
+		if (Rule.findByOwner(this).count()==0) {
+			rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, this.id));
+			rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, this.id));
+			rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, this.id));
+			Rule.insert(rules);
+		}
+	}
 
     private static String basename(String path) {
         if (path == null) {
