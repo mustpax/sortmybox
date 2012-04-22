@@ -26,6 +26,9 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="/">Sortbox</a>
+	      <ul class="nav">
+            <li class="#{get 'faq'}#{/get}"><a href="@{Footer.faq()}">FAQ</a></li>
+	      </ul>
 	      <ul class="nav pull-right">
 	        #{if user}
 	            <li class="dropdown">
@@ -51,7 +54,6 @@
         <p>
           &copy; 2012 All Rights Reserved &middot;
           <a href="@{Footer.team()}">Team</a> &middot;
-          <a href="@{Footer.faq()}">FAQ</a> &middot;
           <a href="@{Footer.terms()}">Terms</a> &middot;
           <a href="@{Footer.privacy()}">Privacy</a> &middot;
           <a href="@{Footer.contact()}">Contact</a> &middot;
