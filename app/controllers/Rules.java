@@ -34,7 +34,7 @@ public class Rules extends Controller {
         Type t = new TypeToken<List<Rule>>(){}.getType();
         List<Rule> ruleList = new Gson().fromJson(rules, t);
         
-        if (ruleList.size() > MAX_NUM_RULES) {
+        if (ruleList != null && ruleList.size() > MAX_NUM_RULES) {
             //TODO:
             //  1. preemptively check the count on the client side
             //  2. we should display an appropriate error message
