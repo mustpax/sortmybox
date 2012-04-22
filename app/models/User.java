@@ -215,6 +215,7 @@ public class User extends Model implements Serializable {
     public static User findById(Long id) {
         assert id != null : "id cannot be null";
         String key = getCacheKey(id);
+        Logger.info("Cache manager %s", Cache.cacheImpl.getClass());
         User ret = (User) Cache.get(key);
         if (ret == null) {
 	        ret = all().filter("id", id).get();
