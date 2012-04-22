@@ -72,29 +72,29 @@ select[size] {
 }
 
 .hero-unit {
-  text-align: center;
+    text-align: center;
 }
 
 .hero-unit h1 {
-  line-height: 36px;
+    line-height: 36px;
 }
 
 .hero-unit h1 small {
-  letter-spacing: normal;
+    letter-spacing: normal;
 }
 
 .share-links {
-  text-align: center;
+    text-align: center;
 }
 
 .logo {
-  position: relative;
+    position: relative;
 }
 
 .logo img {
-  position: absolute;
-  top: -128px;
-  left: 346px;
+    position: absolute;
+    top: -128px;
+    left: 346px;
 }
 
 /*
