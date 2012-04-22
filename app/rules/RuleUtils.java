@@ -107,13 +107,12 @@ public class RuleUtils {
             return ret;
         }
 
-        Iterator<Rule> rules = Rule.findByOwner(user);
+        List<Rule> rules = Lists.newArrayList(Rule.findByOwner(user));
         Logger.info("Running rules for %s", user);
         
         for (String file: files) {
             String base = basename(file);
-            while (rules.hasNext()) {
-                Rule r = rules.next();
+            for (Rule r : rules) {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
                     boolean success = true;

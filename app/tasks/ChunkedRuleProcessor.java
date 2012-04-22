@@ -26,15 +26,15 @@ import cron.RuleProcessor;
  */
 public class ChunkedRuleProcessor implements Task {
     public static final String CHUNK = "Chunk";
-    public static final String LAST_KEY = "LAST_KEY";
+    public static final String LAST_KEY = "LastKey";
     
     public static TaskHandle submit(int chunk, int chunkSize, Long lastId) {
         Queue queue = TaskUtils.getQueue(ChunkedRuleProcessor.class);
         TaskOptions options = TaskUtils.newTaskOptions(ChunkedRuleProcessor.class);
-        options.param(ChunkedRuleProcessor.CHUNK, Integer.toString(chunk));
+        options.param(CHUNK, Integer.toString(chunk));
         options.param(RuleProcessor.CHUNK_SIZE, Integer.toString(chunkSize));
         if (lastId != null) {
-            options.param(ChunkedRuleProcessor.LAST_KEY, Long.toString(lastId));
+            options.param(LAST_KEY, Long.toString(lastId));
         }
         TaskHandle handle = queue.add(options);
         Logger.info("Enq'd new task. Chunk size: %d Task id: %s Last id: %d",

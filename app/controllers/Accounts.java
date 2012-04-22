@@ -17,6 +17,7 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import tasks.ChunkedRuleProcessor;
+import tasks.FileMoveDeleter;
 import tasks.TaskUtils;
 
 @With(Login.class)
@@ -60,9 +61,7 @@ public class Accounts extends Controller {
             Logger.info("Deleted user: %s", user);
 
             // 3. enqueue a delete task to delete file moves
-            //Queue queue = TaskUtils.getQueue(AccountDeleteTask.class);
-            //TaskOptions options = TaskUtils.newTaskOptions(FileMoveDeleteTask.class);
-            //TaskHandle handle = queue.add(options);
+            FileMoveDeleter.submit(user);
 
             tx.commit();
 
