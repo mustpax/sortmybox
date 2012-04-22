@@ -49,7 +49,6 @@ public class User implements Serializable {
     public Long id;
     public String name;
     public String email;
-    public Integer hash;
     public Date created;
     public Date modified;
     public Date lastSync;
@@ -73,7 +72,6 @@ public class User implements Serializable {
         this.id = (Long) entity.getProperty("id");
         this.name = (String) entity.getProperty("name");
         this.email = (String) entity.getProperty("email");        
-        this.hash = (Integer) entity.getProperty("rank");
         this.created = (Date) entity.getProperty("created");
         this.modified = (Date) entity.getProperty("modified");
         this.lastSync = (Date) entity.getProperty("lastSync");
@@ -87,7 +85,6 @@ public class User implements Serializable {
         entity.setProperty("id", id);
         entity.setProperty("name", name);
         entity.setProperty("email", email);
-        entity.setProperty("hash", hash);
         entity.setProperty("created", created);
         entity.setProperty("modified", modified);
         entity.setProperty("lastSync", lastSync);
@@ -219,7 +216,6 @@ public class User implements Serializable {
             .append(this.secret)
             .append(this.token)
             .append(this.email)
-            .append(this.hash)
             .append(this.created)
             .append(this.modified)
             .append(this.lastSync)
@@ -241,7 +237,6 @@ public class User implements Serializable {
             .append(this.secret, other.secret)
             .append(this.token, other.token)
             .append(this.email, other.email)
-            .append(this.hash, other.hash)
             .append(this.created, other.created)
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
@@ -254,7 +249,6 @@ public class User implements Serializable {
             .add("id", id)
             .add("name", name)
             .add("email", email)
-            .add("hash", hash)            
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)
