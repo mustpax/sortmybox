@@ -52,7 +52,8 @@
       <div class="row">
         <div class="span12">
         <p>
-          &copy; 2012 All Rights Reserved &middot;
+          <span class="easter">&copy;</span>
+          2012 All Rights Reserved &middot;
           <a href="@{Footer.team()}">Team</a> &middot;
           <a href="@{Footer.terms()}">Terms</a> &middot;
           <a href="@{Footer.privacy()}">Privacy</a> &middot;
@@ -74,6 +75,9 @@
         };
         $('.dropdown-toggle').dropdown();
         $('.carousel').carousel();
+        $('.easter').live('click', function() {
+            $(this).append('<i class="icon-refresh spin"></i>');
+        });
     </script>
     #{include 'js-templates.html' /}
 
