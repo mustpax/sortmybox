@@ -22,20 +22,19 @@ public class Accounts extends Controller {
 		render(user);
 	}
 
-	public static void settings(Boolean periodicSort) {
+	public static void saveSettings(boolean periodicSort) {
+	    checkAuthenticity();
 	    User user = Login.getLoggedInUser();
-
-	    if ("POST".equals(request.method)) {
-	        assert periodicSort != null : "periodicSort param can't be null";
-	        user.periodicSort = periodicSort;
-	        User.update(user);
-            flash.success("Settings saved successfully.");
-            Logger.info("Settings updated for user: %s", user);
-            render(user);
-	    } else {
-	        flash.clear();
-	        render(user);
-	    }
+	    user.periodicSort = periodicSort;
+	    User.update(user);
+	    flash.success("Settings saved successfully.");
+	    Logger.info("Settings updated for user: %s", user);
+	    settings();
+	}
+	
+	public static void settings() {
+	    User user = Login.getLoggedInUser();
+	    render(user);
 	}
 
 	public static void confirmDelete() {
