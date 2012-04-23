@@ -15,8 +15,12 @@ def main():
     src = 'war/WEB-INF/appengine-web.xml.format'
     target = 'war/WEB-INF/appengine-web.xml'
     branch = get_branch()
-    namespace = namespaces[get_branch()]
-    namespace = namespace if namespace else 'staging'
+    namespace = 'staging'
+    try:
+        namespace = namespaces[get_branch()]
+    except KeyError:
+        pass
+
 
     def format(line):
         return line.format(namespace=namespace)

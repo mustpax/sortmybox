@@ -64,7 +64,7 @@ public class Login extends Controller {
                                 request.url));
     }
 
-    @Before(unless={"login", "auth", "logout", "offline"})
+    @Before(unless={"login", "auth", "logout", "offline"}, priority=1000)
     static void checkAccess() throws Throwable {
         if (!isLoggedIn()) {
             if ("GET".equals(request.method)) {
@@ -85,13 +85,15 @@ public class Login extends Controller {
         }
     }
 
-    @Before(priority=100)
+    @Before(priority=1)
     static void setNamespace() {
-        Logger.info("Updating namespace.");
-        String namespace = System.getenv("NAMESPACE");
-        if (namespace != null && ! namespace.isEmpty()) {
-            Logger.info("Namespace: %s", namespace);
-            NamespaceManager.set(namespace);
+        if (NamespaceManager.get() == null) {
+            Logger.info("Updating namespace.");
+            String namespace = System.getenv("NAMESPACE");
+            if (namespace != null && ! namespace.isEmpty()) {
+                Logger.info("Namespace: %s", namespace);
+                NamespaceManager.set(namespace);
+            }
         }
     }
     
@@ -182,7 +184,7 @@ public class Login extends Controller {
         try {
             User user = User.findById(Long.valueOf(uid));
             if (user == null) {
-                Logger.warn("User missing. Uid: %s", uid);
+                Logger.warn("Session has uid, but user missing from datastore. Uid: %s", uid);
             }
             return user;
         } catch (NumberFormatException e) {
