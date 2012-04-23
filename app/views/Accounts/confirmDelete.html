@@ -16,6 +16,7 @@
 <div class="row">
     <div class="span8 offset2">
       <form class="well" action="@{delete()}" method="POST">
+        #{authenticityToken/}
         <h3>Are you sure you want to delete your Sortbox account?</h3></br>
         <p>If you are having an issue and think if we might be able to help, please try <a href="/contact">contacting support</a> first.</p>
         <p>Are you sure you want to delete your Sortbox account? Your sort rules and activity history will be deleted permanently.</p></br>

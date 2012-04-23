@@ -43,6 +43,7 @@ public class Accounts extends Controller {
 	}
 	
     public static void delete() {
+        checkAuthenticity();
         User user = Login.getLoggedInUser();
 
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
