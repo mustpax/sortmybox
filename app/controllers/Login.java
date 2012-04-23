@@ -1,22 +1,22 @@
 package controllers;
 
 import java.net.URLEncoder;
-import java.util.Arrays;
-
-import com.google.common.base.Joiner;
-import common.request.Headers;
 
 import models.User;
-
 import play.Logger;
-import play.Play;
 import play.libs.OAuth;
 import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-import play.templates.JavaExtensions;
-import dropbox.Dropbox;
+import play.mvc.With;
+
+import com.google.appengine.api.NamespaceManager;
+import com.google.appengine.api.utils.SystemProperty;
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Joiner;
+import common.request.Headers;
+
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
@@ -82,6 +82,16 @@ public class Login extends Controller {
         check = getControllerInheritedAnnotation(Check.class);
         if(check != null) {
             check(check);
+        }
+    }
+
+    @Before(priority=100)
+    static void setNamespace() {
+        Logger.info("Updating namespace.");
+        String namespace = System.getenv("NAMESPACE");
+        if (namespace != null && ! namespace.isEmpty()) {
+            Logger.info("Namespace: %s", namespace);
+            NamespaceManager.set(namespace);
         }
     }
     

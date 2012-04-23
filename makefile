@@ -1,5 +1,6 @@
 # Makefile for the anza project
 all: deps
+	build/prep-webxml.py
 
 run: all
 	play run
@@ -11,13 +12,14 @@ deps: .lastdepsrun
 	play ec
 	date > .lastdepsrun
 
-deploy:
+deploy: all
 	build/checkbranch.sh prod
 	-play gae:deploy
 	git push origin prod
 
 clean:
 	play clean
+
 
 superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
