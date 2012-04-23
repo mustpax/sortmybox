@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 namespaces = {
         'prod'   : 'prod',
-        'master' : 'staging'
+        'staging' : 'staging'
 }
 
 def get_branch():

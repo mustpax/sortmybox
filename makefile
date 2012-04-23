@@ -12,6 +12,11 @@ deps: .lastdepsrun
 	play ec
 	date > .lastdepsrun
 
+stage: all
+	build/checkbranch.sh staging
+	-play gae:deploy
+	git push origin staging
+
 deploy: all
 	build/checkbranch.sh prod
 	-play gae:deploy
