@@ -84,6 +84,7 @@ public class ChunkedRuleProcessor implements Task {
      */
     public static List<User> getNextChunk(Long lastKey, int chunkSize) {
         Query q = new Query(User.KIND);
+        q.addFilter("periodicSort", FilterOperator.EQUAL, Boolean.TRUE);
         if (lastKey != null) {
             q.addFilter("id", FilterOperator.GREATER_THAN, lastKey);
         }

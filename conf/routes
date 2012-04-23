@@ -10,7 +10,7 @@ GET     /dirs                                   Application.dirs
 # Account
 GET     /account/info                           Accounts.info
 GET     /account/settings                       Accounts.settings
-POST    /account/settings                       Accounts.save
+POST    /account/settings                       Accounts.settings
 GET     /account/delete                         Accounts.confirmDelete
 POST    /account/delete                         Accounts.delete
 

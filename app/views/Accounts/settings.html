@@ -1,6 +1,17 @@
 #{extends 'main.html' /}
 #{set title:'Settings'/}
 
+#{if flash.success}
+<div class="row">
+  <div class="span12">
+    <div class="alert alert-info alert-created">
+      <a class="close" data-dismiss="alert">×</a>
+      <h4 class="alert-heading">${flash.success}</h4>
+    </div>
+  </div>
+</div>
+#{/if}
+
 <ul class="nav nav-tabs">
   <li>
     <a href="@{info()}">Account info</a>
@@ -15,14 +26,15 @@
 
 <div class="row">
  <div class="span8 offset2">
-  <form class="form-horizontal">
+  <form class="form-horizontal" action="@{settings}" method="POST">
    <fieldset>
     <div class="control-group">
-     <label class="control-label" for="optionsCheckbox2">Enable
+     <label class="control-label" for="periodicSort">Enable
       periodic sort</label>
      <div class="controls">
-      <label class="checkbox"> <input type="checkbox"
-       id="optionsCheckbox2" value="option1" checked> </label>
+       <label class="checkbox">
+         <input type="checkbox" id="periodicSort" name="periodicSort" value="true" ${user.periodicSort ? "checked" : ""}>
+         <input type="hidden" name="periodicSort" value="false"/>
      </div>
     </div>
     <div class="form-actions">

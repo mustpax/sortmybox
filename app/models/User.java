@@ -49,6 +49,7 @@ public class User implements Serializable {
     public Long id;
     public String name;
     public String email;
+    public Boolean periodicSort;
     public Date created;
     public Date modified;
     public Date lastSync;
@@ -58,6 +59,7 @@ public class User implements Serializable {
     
     public User() {
         this.created = this.modified = new Date();
+        this.periodicSort = true;
     }
 
     public User(DbxAccount account, String token, String secret) {
@@ -71,7 +73,8 @@ public class User implements Serializable {
     public User(Entity entity) {
         this.id = (Long) entity.getProperty("id");
         this.name = (String) entity.getProperty("name");
-        this.email = (String) entity.getProperty("email");        
+        this.email = (String) entity.getProperty("email");
+        this.periodicSort = (Boolean) entity.getProperty("periodicSort");
         this.created = (Date) entity.getProperty("created");
         this.modified = (Date) entity.getProperty("modified");
         this.lastSync = (Date) entity.getProperty("lastSync");
@@ -85,6 +88,7 @@ public class User implements Serializable {
         entity.setProperty("id", id);
         entity.setProperty("name", name);
         entity.setProperty("email", email);
+        entity.setProperty("periodicSort", periodicSort);
         entity.setProperty("created", created);
         entity.setProperty("modified", modified);
         entity.setProperty("lastSync", lastSync);
@@ -208,6 +212,15 @@ public class User implements Serializable {
         }
     }
 
+    public static void update(User user) {
+        Preconditions.checkNotNull(user, "user can't be null");
+        // update the modified date
+        user.modified = new Date();
+        user.invalidate();
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        ds.put(user.toEntity());
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -216,6 +229,7 @@ public class User implements Serializable {
             .append(this.secret)
             .append(this.token)
             .append(this.email)
+            .append(this.periodicSort)
             .append(this.created)
             .append(this.modified)
             .append(this.lastSync)
@@ -237,6 +251,7 @@ public class User implements Serializable {
             .append(this.secret, other.secret)
             .append(this.token, other.token)
             .append(this.email, other.email)
+            .append(this.periodicSort, other.periodicSort)
             .append(this.created, other.created)
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
@@ -249,6 +264,7 @@ public class User implements Serializable {
             .add("id", id)
             .add("name", name)
             .add("email", email)
+            .add("periodicSort", periodicSort)
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)

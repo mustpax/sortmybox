@@ -1,14 +1,8 @@
 package controllers;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.TaskHandle;
-import com.google.appengine.api.taskqueue.TaskOptions;
+import java.util.Date;
+
+import com.google.appengine.api.datastore.*;
 import com.google.common.collect.Iterables;
 
 import models.Rule;
@@ -23,16 +17,25 @@ import tasks.TaskUtils;
 @With(Login.class)
 public class Accounts extends Controller {
 
-	private static final String DELETED_ACCOUNT = "deletedAccount";
-	
 	public static void info() {
 		User user = Login.getLoggedInUser();
 		render(user);
 	}
 
-	public static void settings() {
-		User user = Login.getLoggedInUser();
-		render(user);
+	public static void settings(Boolean periodicSort) {
+	    User user = Login.getLoggedInUser();
+
+	    if ("POST".equals(request.method)) {
+	        assert periodicSort != null : "periodicSort param can't be null";
+	        user.periodicSort = periodicSort;
+	        User.update(user);
+            flash.success("Settings saved successfully.");
+            Logger.info("Settings updated for user: %s", user);
+            render(user);
+	    } else {
+	        flash.clear();
+	        render(user);
+	    }
 	}
 
 	public static void confirmDelete() {
@@ -66,7 +69,7 @@ public class Accounts extends Controller {
             tx.commit();
 
             session.clear();
-            flash.put(DELETED_ACCOUNT, "true");
+            flash.success("Account deleted successfully.");
             Login.login();
         } finally {
             if (tx.isActive()) {
