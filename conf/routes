@@ -10,9 +10,9 @@ GET     /dirs                                   Application.dirs
 # Account
 GET     /account/info                           Accounts.info
 GET     /account/settings                       Accounts.settings
-POST    /account/settings                       Accounts.saveSettings
-GET     /account/delete                         Accounts.confirmDelete
-POST    /account/delete                         Accounts.delete
+POST    /account/settings                       Accounts.settingsPost
+GET     /account/delete                         Accounts.delete
+POST    /account/delete                         Accounts.deletePost
 
 # Footer
 GET     /team                                   Footer.team

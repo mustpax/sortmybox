@@ -22,7 +22,7 @@ public class Accounts extends Controller {
 		render(user);
 	}
 
-	public static void saveSettings(boolean periodicSort) {
+	public static void settingsPost(boolean periodicSort) {
 	    checkAuthenticity();
 	    User user = Login.getLoggedInUser();
 	    user.periodicSort = periodicSort;
@@ -37,12 +37,12 @@ public class Accounts extends Controller {
 	    render(user);
 	}
 
-	public static void confirmDelete() {
+	public static void delete() {
 		User user = Login.getLoggedInUser();
 		render(user);
 	}
 	
-    public static void delete() {
+    public static void deletePost() {
         checkAuthenticity();
         User user = Login.getLoggedInUser();
 
