@@ -26,7 +26,7 @@ public class Accounts extends Controller {
 	    checkAuthenticity();
 	    User user = Login.getLoggedInUser();
 	    user.periodicSort = periodicSort;
-	    User.update(user);
+	    user.update();
 	    flash.success("Settings saved successfully.");
 	    Logger.info("Settings updated for user: %s", user);
 	    settings();

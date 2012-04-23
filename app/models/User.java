@@ -159,7 +159,7 @@ public class User implements Serializable {
             try {
                 Key key = KeyFactory.createKey(KIND, id);
                 user = new User(ds.get(key));
-                Cache.add(cacheKey, user, "1h");
+                Cache.set(cacheKey, user, "1h");
             } catch (EntityNotFoundException e) {
                 return null;
             }
@@ -167,58 +167,45 @@ public class User implements Serializable {
         return user;
     }
     
-    public static User findOrCreateByDbxAccount(DbxAccount account, String token, String secret) {
-        if (account == null || !account.notNull())
+    public static User upsert(DbxAccount account, String token, String secret) {
+        if (account == null || !account.notNull()) {
             return null;
-        
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Key key = KeyFactory.createKey(KIND, account.uid);
-
-        Transaction tx = ds.beginTransaction();
-        try {
-            Entity entity = null;
-            User user = null;
-            try {
-                String cacheKey = getCacheKey(account.uid);
-                user = (User) Cache.get(cacheKey);
-                if (user == null) {
-                    entity = ds.get(key);
-                    user = new User(entity);
-                }
-                if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
-                    // TODO: update other fields if stale
-                    user.setToken(token);
-                    user.setSecret(secret);
-                    user.modified = new Date();
-                }
-            } catch (EntityNotFoundException e) {
-                user = new User(account, token, secret);
-                Logger.info("Created user: %s", user);
-            }
-            user.invalidate();
-            entity = user.toEntity();
-            ds.put(tx, entity);
-            tx.commit();
-        } finally {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-        } 
-
-        try {
-            return new User(ds.get(key));
-        } catch (EntityNotFoundException e) {
-            throw new RuntimeException(e);
         }
+
+        User user = findById(account.uid);
+        if (user == null) {
+            user = new User(account, token, secret);
+            Logger.info("Dropbox user not found in datastore, creating new one: %s",
+	                    user);
+            user.update(false);
+        }
+
+        if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
+            // TODO: update other fields if stale
+            Logger.info("User has new Dropbox oauth credentials: %s",
+		                user);
+            user.setToken(token);
+            user.setSecret(secret);
+            user.update();
+        }
+        
+        return user;
     }
 
-    public static void update(User user) {
-        Preconditions.checkNotNull(user, "user can't be null");
-        // update the modified date
-        user.modified = new Date();
-        user.invalidate();
+    
+    public void update() {
+        update(true);
+    }
+    
+    private void update(boolean updateModstamp) {
+        if (updateModstamp) {
+            // update the modified date
+            this.modified = new Date();
+        }
+
+        this.invalidate();
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        ds.put(user.toEntity());
+        ds.put(this.toEntity());
     }
 
     @Override

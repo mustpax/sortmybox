@@ -35,13 +35,13 @@ public class UserTest extends BaseModelTest {
     @Test
     public void testFindOrCreateByDbxAccount() throws Exception {
         // if DbxAccount is null, findOrCreateByDbxAccount should just return null
-        assertNull(User.findOrCreateByDbxAccount(null, TOKEN, SECRET));
+        assertNull(User.upsert(null, TOKEN, SECRET));
 
         DbxAccount account = new DbxAccount();
         account.uid = ID;
         account.name = NAME;
 
-        assertNotNull(User.findOrCreateByDbxAccount(account, TOKEN, SECRET).id);
+        assertNotNull(User.upsert(account, TOKEN, SECRET).id);
     }
     
     /**
@@ -66,13 +66,13 @@ public class UserTest extends BaseModelTest {
         account.uid = ID;
         account.name = NAME;
 
-        User u = User.findOrCreateByDbxAccount(account, TOKEN, SECRET);
+        User u = User.upsert(account, TOKEN, SECRET);
         assertNotNull(u.modified);
         assertNotNull(u.created);
         assertEquals(u.modified, u.created);
         
         // Updating token and secret should update modification date but not creation date
-        u = User.findOrCreateByDbxAccount(account, TOKEN + "x", SECRET + "x");
+        u = User.upsert(account, TOKEN + "x", SECRET + "x");
         assertNotNull(u.modified);
         assertNotNull(u.created);
         assertTrue(u.modified.after(u.created));

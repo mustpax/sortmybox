@@ -156,7 +156,7 @@ public class Login extends Controller {
     private static User upsertUser(String token, String secret) {
         DropboxClient client = DropboxClientFactory.create(token, secret);
         DbxAccount account = client.getAccount();
-        return User.findOrCreateByDbxAccount(account, token, secret);
+        return User.upsert(account, token, secret);
     }
     
     /**
