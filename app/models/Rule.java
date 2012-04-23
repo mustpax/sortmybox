@@ -110,7 +110,8 @@ public class Rule implements Serializable {
     public static Iterator<Rule> findByOwner(User owner) {
         Preconditions.checkNotNull(owner);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Query q = new Query(KIND).setAncestor(owner.getKey());
+        Query q = new Query(KIND).setAncestor(owner.getKey())
+                                 .addSort("rank");
         PreparedQuery pq = ds.prepare(q);
         return Iterators.transform(pq.asIterator(), TO_RULE);
     }

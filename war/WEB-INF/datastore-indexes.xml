@@ -3,4 +3,7 @@
     <datastore-index kind="FileMove" ancestor="true" source="manual">
         <property name="when" direction="desc"/>
     </datastore-index>
+    <datastore-index kind="Rule" ancestor="true" source="auto">
+        <property name="rank" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>
