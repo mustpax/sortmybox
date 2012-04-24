@@ -12,7 +12,7 @@ def get_branch():
              .split('/')[-1]
 
 def main():
-    src = 'war/WEB-INF/appengine-web.xml.format'
+    src = 'war/WEB-INF/appengine-web-template.xml'
     target = 'war/WEB-INF/appengine-web.xml'
     branch = get_branch()
     namespace = 'staging'
