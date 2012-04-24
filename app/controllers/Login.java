@@ -117,7 +117,7 @@ public class Login extends Controller {
             redirectToOriginalURL();
         } else {
             flash.keep(REDIRECT_URL);
-            response.cacheFor("1hr");
+            response.cacheFor("1h");
             render();
         }
     }

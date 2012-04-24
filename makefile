@@ -1,5 +1,5 @@
 alljs = public/js/all.js
-jsfiles = public/js/json2.js public/js/jquery-1.6.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js
+jsfiles = public/js/json2.js public/js/jquery-1.7.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js
 
 all: deps js
 	build/prep-webxml.py
@@ -31,6 +31,7 @@ deploy: all
 
 clean:
 	play clean
+	rm $(alljs)
 
 
 superclean:
