@@ -35,9 +35,9 @@ public class FileMoveDeleter implements Task {
         Preconditions.checkNotNull(user);
         Date endDate = new Date();
         Queue queue = TaskUtils.getQueue(FileMoveDeleter.class);
-        TaskOptions options = TaskUtils.newTaskOptions(FileMoveDeleter.class);
-        options.param(pUSER_ID, String.valueOf(user.id));
-        options.param(pEND_DATE, String.valueOf(endDate.getTime()));
+        TaskOptions options = TaskUtils.newTaskOptions(FileMoveDeleter.class)
+            .param(pUSER_ID, String.valueOf(user.id))
+            .param(pEND_DATE, String.valueOf(endDate.getTime()));
         TaskHandle handle = queue.add(options);
         Logger.info("Enqueued delete task. User id: %s End date: %s", user.id, endDate);
         return handle;

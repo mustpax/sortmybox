@@ -34,11 +34,11 @@ public class ChunkedRuleProcessor implements Task {
 
     public static TaskHandle submit(int chunkId, long startId, long lastId, int chunkSize) {
         Queue queue = TaskUtils.getQueue(ChunkedRuleProcessor.class);
-        TaskOptions options = TaskUtils.newTaskOptions(ChunkedRuleProcessor.class);
-        options.param(pCHUNK_ID, Integer.toString(chunkId));
-        options.param(pSTART_ID, Long.toString(startId));
-        options.param(pLAST_ID, Long.toString(lastId));
-        options.param(pCHUNK_SIZE, Long.toString(chunkSize));
+        TaskOptions options = TaskUtils.newTaskOptions(ChunkedRuleProcessor.class)
+            .param(pCHUNK_ID, Integer.toString(chunkId))
+            .param(pSTART_ID, Long.toString(startId))
+            .param(pLAST_ID, Long.toString(lastId))
+            .param(pCHUNK_SIZE, Long.toString(chunkSize));
         TaskHandle handle = queue.add(options);
         Logger.info("Enq'd new task. Task id: %s Start id: %d Last id: %d",
 	        	    handle.getName(), startId, lastId);
