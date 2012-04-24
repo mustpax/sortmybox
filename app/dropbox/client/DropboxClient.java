@@ -48,7 +48,7 @@ public interface DropboxClient {
     /**
      * Get all files, excluding directories, inside the given directory.
      * 
-     * @param path path to the directory to check with the leading /
+     * @param path path to the directory, leading / optional
      * @param listingType which types of entries to return
      * @return set of files (not directories) inside the directory
      */
