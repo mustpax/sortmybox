@@ -19,7 +19,7 @@ import cron.Job;
  * The GET request is made by cron service.
  * <p>
  * The job to run is determined from the request url. For example, the request url 
- * <code>/cron/foo/bar</code> will be interpreted as to run <code>cron.fool.bar</code>.
+ * <code>/cron/foo/bar</code> will be interpreted as to run <code>fool.bar</code>.
  * 
  * @author syyang
  */
@@ -61,7 +61,7 @@ public class CronManager extends Controller {
      */
     public static String getJobClassName(String jobPath) {
         Preconditions.checkNotNull(jobPath, "request url can't be null");
-        return "cron." + jobPath.replace('/', '.');
+        return jobPath.replace('/', '.');
     }
     
     @Before

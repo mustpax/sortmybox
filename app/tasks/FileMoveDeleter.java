@@ -61,7 +61,7 @@ public class FileMoveDeleter implements Task {
 
         int total = 0;
         while (true) {
-            List<Entity> entities = pq.asList(FetchOptions.Builder.withChunkSize(CHUNK_SIZE));
+            List<Entity> entities = pq.asList(FetchOptions.Builder.withLimit(CHUNK_SIZE));
             if (entities.isEmpty()) {
                 break;
             }

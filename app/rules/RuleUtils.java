@@ -1,6 +1,7 @@
 package rules;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -130,6 +131,10 @@ public class RuleUtils {
             }
         }
 
+        // update the last sync date
+        user.lastSync = new Date();
+        user.update();
+        
         Logger.info("Done running rules for %s. %d moves performed", user, ret.size());
         if (! ret.isEmpty()) {
             FileMove.insert(user, ret);

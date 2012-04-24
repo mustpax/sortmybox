@@ -44,7 +44,7 @@ public class User implements Serializable {
         return String.format("user:%d", id);
     }
 
-    public static final String KIND = "User";
+    public static final String KIND = User.class.getSimpleName();
 
     public Long id;
     public String name;
@@ -71,7 +71,7 @@ public class User implements Serializable {
     }
     
     public User(Entity entity) {
-        this.id = (Long) entity.getProperty("id");
+        this.id = entity.getKey().getId();
         this.name = (String) entity.getProperty("name");
         this.email = (String) entity.getProperty("email");
         this.periodicSort = (Boolean) entity.getProperty("periodicSort");
