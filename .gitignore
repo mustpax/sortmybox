@@ -53,3 +53,4 @@ test-result/
 /.lastdepsrun
 
 conf/secret.conf
+public/js/all.js

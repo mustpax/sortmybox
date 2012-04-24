@@ -1,9 +1,16 @@
-# Makefile for the anza project
-all: deps
+alljs = public/js/all.js
+jsfiles = public/js/json2.js public/js/jquery-1.6.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js
+
+all: deps js
 	build/prep-webxml.py
 
 run: all
 	play run
+
+js: $(alljs)
+
+$(alljs): $(jsfiles)
+	cat $(jsfiles) > $@
 
 deps: .lastdepsrun
 

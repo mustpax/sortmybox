@@ -62,11 +62,16 @@
         </p>
       </div>
     </div>
-    <script src="@{'/public/js/json2.js'}"></script>
-    <script src="@{'/public/js/underscore.js'}"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-    <script>window.jQuery || document.write("<script src='@{'/public/js/jquery-1.6.2.min.js'}'>\x3C/script>")</script>
-    <script src="@{'/public/js/bootstrap.min.js'}"></script>
+    #{if play.mode.isDev() }
+	    <script src="@{'/public/js/json2.js'}"></script>
+	    <script src="@{'/public/js/underscore.js'}"></script>
+	    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	    <script>window.jQuery || document.write("<script src='@{'/public/js/jquery-1.6.2.min.js'}'>\x3C/script>")</script>
+	    <script src="@{'/public/js/bootstrap.min.js'}"></script>
+    #{/if}
+    #{else}
+	    <script src="@{'/public/js/all.js'}"></script>
+    #{/else}
     
     <script>
 	    window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
