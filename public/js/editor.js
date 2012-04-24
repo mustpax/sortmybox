@@ -60,6 +60,9 @@
                 curReq = null;
                 dirCache[path] = dirs;
                 cb(dirs);
+            },
+            error: function() {
+                cb();
             }
         });
         
@@ -130,16 +133,20 @@
         if (isLoading) {
             exp.append(loading());
         } else {
-            dirs.sort();
-            if (_.isEmpty(dirs)) {
-                exp.append($("<li><a><em>No more folders</em></a></li>"));
+            if (_.isUndefined(dirs)){
+                exp.append($("<li><a><em>Can't list folder contents</em></a></li>"));
             } else {
-	            $.each(dirs, function(i, v) {
-	                exp.append(template('exp-folder', {
-	                    path: basename(v),
-	                    dataPath: v
-	                }));
-	            });
+	            dirs.sort();
+	            if (_.isEmpty(dirs)) {
+	                exp.append($("<li><a><em>No more folders</em></a></li>"));
+	            } else {
+		            $.each(dirs, function(i, v) {
+		                exp.append(template('exp-folder', {
+		                    path: basename(v),
+		                    dataPath: v
+		                }));
+		            });
+	            }
             }
         }
     };
@@ -151,7 +158,7 @@
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
-    }, 100);
+    }, 1500);
     
     $('.rule .dest').live('keyup focus change', dirUpdater);
 

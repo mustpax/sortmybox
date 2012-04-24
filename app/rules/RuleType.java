@@ -31,7 +31,7 @@ public enum RuleType {
                 return false;
             }
 
-            return ext.toLowerCase().equals(pattern.toLowerCase());
+            return ext.equalsIgnoreCase(pattern);
         }
     };
     

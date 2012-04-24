@@ -52,7 +52,7 @@ class DropboxClientImpl implements DropboxClient {
     @Override
     public DbxMetadata getMetadata(String path) {
         Preconditions.checkNotNull(path, "Path missing.");
-        Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
+        path = path.startsWith("/") ? path : "/" + path;
 
         WSRequest ws = new WSRequestFactory(DropboxURLs.METADATA, token, secret)
             .addPath(Dropbox.getRoot(), path)

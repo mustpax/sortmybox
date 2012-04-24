@@ -54,7 +54,7 @@ public class RuleUtils {
                 out.append(c);
             }
         }
-        return Pattern.compile(out.toString());
+        return Pattern.compile(out.toString(), Pattern.CASE_INSENSITIVE);
     }
     
     /**
