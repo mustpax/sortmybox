@@ -151,7 +151,7 @@
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
-    }, 100);
+    }, 1500);
     
     $('.rule .dest').live('keyup focus change', dirUpdater);
 
