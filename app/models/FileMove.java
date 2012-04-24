@@ -19,7 +19,7 @@ import rules.RuleType;
 
 public class FileMove {
 
-    public static final String KIND = "FileMove";
+    public static final String KIND = FileMove.class.getSimpleName();
     public static final int RETENTION_DAYS = 3;
 
     public static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {

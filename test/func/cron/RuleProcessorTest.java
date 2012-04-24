@@ -13,7 +13,8 @@ import play.Logger;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import tasks.ChunkedRuleProcessor;
+import rules.ChunkedRuleProcessor;
+import rules.RuleProcessor;
 import unit.BaseTaskQueueTest;
 import unit.TestUtil;
 
@@ -24,7 +25,6 @@ import com.google.appengine.api.taskqueue.dev.QueueStateInfo.TaskStateInfo;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.common.collect.Maps;
 
-import cron.RuleProcessor;
 
 /**
  * Functional tests for {@link RuleProcessor}.
@@ -71,7 +71,7 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
         
         // 2. Verify the number of enqueued tasks.
         QueueStateInfo queueInfo = getQueueStateInfo();
-        assertEquals(1, queueInfo.getCountTasks());
+        assertEquals(2, queueInfo.getCountTasks());
         
         // 3. Manually processes the tasks
         for (TaskStateInfo taskInfo : queueInfo.getTaskInfo()) {

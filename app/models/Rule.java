@@ -36,7 +36,7 @@ import controllers.Login;
  */
 public class Rule implements Serializable {
 
-    public static final String KIND = "Rule";
+    public static final String KIND = Rule.class.getSimpleName();
 
     public static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {
         @Override
