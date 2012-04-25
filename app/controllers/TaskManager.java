@@ -28,7 +28,7 @@ public class TaskManager extends Controller {
     public static void process() {
         if (Play.mode.isProd() && !isRequestFromQueueService()) {
             Logger.warn("TaskManager:request is not from queue service.");
-            return;
+            forbidden();
         }
         
         Task task = null;
@@ -38,7 +38,7 @@ public class TaskManager extends Controller {
             task = ReflectionUtils.newInstance(Task.class, context.getTaskClassName());
         } catch (Exception e) {
             Logger.error("TaskManager failed to instantiate: " + request.url, e);
-            return;
+            error(e);
         }
 
         process(task, context);
