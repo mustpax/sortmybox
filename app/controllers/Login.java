@@ -9,11 +9,8 @@ import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-import play.mvc.With;
 
 import com.google.appengine.api.NamespaceManager;
-import com.google.appengine.api.utils.SystemProperty;
-import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Joiner;
 import common.request.Headers;
 
@@ -202,7 +199,7 @@ public class Login extends Controller {
     static void redirectToOriginalURL() {
         String url = flash.get(REDIRECT_URL);
         if(url == null) {
-            url = "/";
+            Application.index();
         }
         redirect(url);
     }

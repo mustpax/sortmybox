@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-GET     /                                       Application.index
+GET     /rules                                  Application.index
 POST    /run-rules                              Application.process
 GET     /dirs                                   Application.dirs
 
@@ -33,7 +33,7 @@ GET     /cron/{<.*>jobPath}                     CronManager.process
 
 # Authorization
 GET     /auth                                   Login.auth
-GET     /login                                  Login.login
+GET     /                                       Login.login
 GET     /logout                                 Login.logout
 GET     /offline                                Login.offline
 
