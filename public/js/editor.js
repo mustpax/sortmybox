@@ -272,6 +272,12 @@
                              $.each(data, function(i, v) {
                                  addErrors(i, v);
                              });
+                             var msg = $('.save').popover({ title: "Success!", 
+                             						        content:"Your rules will run every 15 minutes.",
+                             						        trigger:"manual"}).popover('show');
+                             setTimeout(function(){
+                                msg.popover("hide");
+                             }, 2000);						      
                          },
                 error: function (badRequest) {
 					doneLoading();
