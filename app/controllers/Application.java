@@ -85,7 +85,7 @@ public class Application extends Controller {
                 rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
                 rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
                 Datastore.put(rules);
-                ofy.getTxn().commit();
+                Datastore.commit();
                 createdCannedRules = true;
             }
         } finally {
