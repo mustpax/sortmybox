@@ -9,9 +9,9 @@ their correct location based on sorting rules that *you* create.
 
 ## How to use Sortbox
 
-1) Log in to Sortbox at http://www.sortmybox.com
-2) Save files in to the <code>Sortbox</code> folder inside your Dropbox folder.
-3) Watch your files get moved magically.
+1. Log in to Sortbox at http://www.sortmybox.com
+2. Save files in to the <code>Sortbox</code> folder inside your Dropbox folder.
+3. Watch your files get moved magically.
 
 ## Credits
 
