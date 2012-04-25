@@ -152,8 +152,13 @@ public class User extends ObjectifyModel implements Serializable {
     }
     
     public Key<User> save() {
-        this.invalidate();
+        invalidate();
         return Datastore.put(this);
+    }
+
+    public void delete() {
+        invalidate();
+        Datastore.delete(this);
     }
 
     @PrePersist

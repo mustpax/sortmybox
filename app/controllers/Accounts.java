@@ -53,8 +53,7 @@ public class Accounts extends Controller {
             Logger.info("Deleted rules for user: %s", user);
 
             // 2. delete user
-            user.invalidate();
-            Datastore.delete(user);
+            user.delete();
             Logger.info("Deleted user: %s", user);
 
             // 3. enqueue a delete task to delete file moves
