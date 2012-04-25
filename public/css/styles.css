@@ -104,6 +104,10 @@ select[size] {
     min-height: 550px;
 }
 
+.account-info dd {
+    margin-bottom: 30px;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
