@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.Serializable;
 import java.util.List;
 
 import models.FileMove;
@@ -30,10 +31,10 @@ public class Application extends Controller {
     
     public static void index() {
         User user = Login.getLoggedInUser();
-        boolean didInit = initSortbox(user);
+        InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
         List<FileMove> moves = Lists.newArrayList(FileMove.findByUser(user).limit(MAX_FILE_MOVES));
-        render(user, rules, moves, didInit);
+        render(user, rules, moves, initResult);
     }
     
     public static void dirs(String path) {
@@ -47,42 +48,64 @@ public class Application extends Controller {
     }
     
     /**
-     * @param user
-     * @return true if a sortbox folder was created
+     * @param user the logged in user
+     * @return InitResult the result of initialization
      */
-    private static boolean initSortbox(User user) {
+    private static InitResult initSortbox(User user) {
+        boolean createdSortboxDir = false;
+        boolean createdCannedRules = false;
         DropboxClient client = DropboxClientFactory.create(user);
         String sortboxPath = Dropbox.getRoot().getSortboxPath();
         DbxMetadata file = client.getMetadata(sortboxPath);
-        if (file != null) {
-            return false;
-        } else {
+        if (file == null) {
             // 1. create missing Sortbox folder
             Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
-            boolean didCreate = client.mkdir(sortboxPath) != null;
-            if (didCreate) {
+            createdSortboxDir = client.mkdir(sortboxPath) != null;
+            if (createdSortboxDir) {
                 // 2. create canned rules
-                createCannedRules(user);
+                createdCannedRules = createCannedRules(user);
             }
-            return didCreate;
         }
+        return new InitResult(createdSortboxDir, createdCannedRules);
     }
 
-    private static void createCannedRules(final User user) {
+    /**
+     * Creates default set of rules if no rules exist in the Sortbox folder.
+     * 
+     * @param user the logged in user
+     * @return true if canned rules are created
+     */
+    private static boolean createCannedRules(final User user) {
+        boolean createdCannedRules = false;
         Objectify ofy = Datastore.beginTxn();
         try {
-            if (Rule.ruleExists(user.id)) {
+            if (!Rule.ruleExists(user.id)) {
                 List<Rule> rules = Lists.newArrayListWithCapacity(3);
                 rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
                 rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
                 rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
                 Datastore.put(rules);
                 ofy.getTxn().commit();
+                createdCannedRules = true;
             }
         } finally {
             if (ofy.getTxn().isActive()) {
                 ofy.getTxn().rollback();
             }
+        }
+        return createdCannedRules;
+    }
+    
+    public static class InitResult implements Serializable {
+        /** whether the app newly created the Sortbox directory */
+        final boolean createdSortboxDir;
+
+        /** whether the app populated canned rules */
+        final boolean createdCannedRules;
+        
+        InitResult(boolean createdSortboxDir, boolean createdCannedRules) {
+            this.createdSortboxDir = createdSortboxDir;
+            this.createdCannedRules = createdCannedRules;
         }
     }
 }
