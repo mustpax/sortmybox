@@ -97,6 +97,8 @@ public class RuleUtils {
      * @return list of file moves performed
      */
     public static List<FileMove> runRules(User user) {
+        user.updateLastSyncDate();
+
         List<FileMove> fileMoves = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(user);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
@@ -128,8 +130,6 @@ public class RuleUtils {
                 }
             }
         }
-
-        user.updateLastSyncDate();
         
         Logger.info("Done running rules for %s. %d moves performed", user, fileMoves.size());
         if (!fileMoves.isEmpty()) {

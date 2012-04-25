@@ -54,9 +54,6 @@ public class ChunkedRuleProcessor implements Task {
         while (itr.hasNext()) {
             User user = itr.next();
             moves += RuleUtils.runRules(user).size();
-            
-            // update last sync date
-            user.updateLastSyncDate();
             numUsers++;
         }
 

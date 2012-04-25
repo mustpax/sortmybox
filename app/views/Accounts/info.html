@@ -21,7 +21,12 @@
       <dt>Periodic sort</dt>
       <dd>${user.periodicSort ? "Enabled" : "Disabled"}</dd>
       <dt>Last sync</dt>
+      #{if user.lastSync}
       <dd>${user.lastSync}</dd>
+      #{/if}
+      #{else}
+      <dd><em>None yet</em></dd>
+      #{/else}
       <dt>Created date</dt>
       <dd>${user.created}</dd>
       <dt>Last modified</dt>

@@ -104,6 +104,10 @@ select[size] {
     min-height: 550px;
 }
 
+.account-info dt {
+    margin-bottom: 30px;
+}
+
 .account-info dd {
     margin-bottom: 30px;
 }
