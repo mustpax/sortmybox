@@ -37,11 +37,9 @@ public class Rule extends ObjectifyModel implements Serializable {
 
     private static final int MAX_RULES_TO_FETCH = 10;
 
-    private static final Comparator<Rule> COMPARATOR = new Comparator<Rule>() {
+    private static final Comparator<Rule> RANK_COMPARATOR = new Comparator<Rule>() {
         @Override public int compare(Rule rule1, Rule rule2) {
-            Preconditions.checkNotNull(rule1);
-            Preconditions.checkNotNull(rule2);
-            Preconditions.checkArgument(rule1.rank != rule2.rank, "Rank should be unique");
+            assert rule1 != null && rule2 != null : "rules can't be null";
             return Ints.compare(rule1.rank, rule2.rank);
         }
     };
@@ -80,7 +78,7 @@ public class Rule extends ObjectifyModel implements Serializable {
                 .ancestor(Datastore.key(User.class, userId))
                 .limit(MAX_RULES_TO_FETCH).iterator();
         List<Rule> rules = Lists.newArrayList(itr);
-        Collections.sort(rules, COMPARATOR);
+        Collections.sort(rules, RANK_COMPARATOR);
         return rules;
     }
 
