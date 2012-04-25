@@ -69,6 +69,7 @@ select[size] {
 .hero-unit {
     margin-top: 64px;
     text-align: center;
+    background-color: #CAE0FD;
 }
 
 .hero-unit h1 {
@@ -77,6 +78,8 @@ select[size] {
 
 .hero-unit h1 small {
     letter-spacing: normal;
+    color: #333;
+    font-weight: 200;
 }
 
 .share-links, .center {
