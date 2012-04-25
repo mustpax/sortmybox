@@ -1,13 +1,14 @@
 package rules;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import models.FileMove;
+import models.Rule;
+import models.User;
 import play.Logger;
 
 import com.google.common.collect.Lists;
@@ -16,9 +17,6 @@ import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
-import models.FileMove;
-import models.Rule;
-import models.User;
 
 public class RuleUtils {
 
@@ -99,16 +97,16 @@ public class RuleUtils {
      * @return list of file moves performed
      */
     public static List<FileMove> runRules(User user) {
-        List<FileMove> ret = Lists.newArrayList();
+        List<FileMove> fileMoves = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(user);
         Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
 
         if (files.isEmpty()) {
             Logger.info("Ran rules for %s, no files to process.", user);
-            return ret;
+            return fileMoves;
         }
 
-        List<Rule> rules = Lists.newArrayList(Rule.findByOwner(user));
+        List<Rule> rules = Rule.findByUserId(user.id);
         Logger.info("Running rules for %s", user);
         
         for (String file: files) {
@@ -125,27 +123,25 @@ public class RuleUtils {
                     } catch (FileMoveCollisionException e) {
                         success = false;
                     }
-                    ret.add(new FileMove(user.id, r, base, success));
+                    fileMoves.add(new FileMove(user.id, r, base, success));
                     break;
                 }
             }
         }
 
-        // update the last sync date
-        user.lastSync = new Date();
-        user.update();
+        user.updateLastSyncDate();
         
-        Logger.info("Done running rules for %s. %d moves performed", user, ret.size());
-        if (! ret.isEmpty()) {
-            FileMove.insert(user, ret);
+        Logger.info("Done running rules for %s. %d moves performed", user, fileMoves.size());
+        if (!fileMoves.isEmpty()) {
+            FileMove.save(fileMoves);
         }
 
         // Delete old Move rows with 1% probability
         if ((new Random().nextInt() % 100) == 0) {
-            FileMove.truncateFileMoves(user);
+            FileMove.truncateFileMoves(user.id);
         }
         
-        return ret;
+        return fileMoves;
     }
     
     private static String basename(String path) {

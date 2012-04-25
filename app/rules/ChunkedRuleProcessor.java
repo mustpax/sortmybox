@@ -1,24 +1,19 @@
 package rules;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 
 import models.User;
 import play.Logger;
+import play.modules.objectify.Datastore;
 import tasks.Task;
 import tasks.TaskContext;
 import tasks.TaskUtils;
 
-import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 
 /**
  * Applies the rules to a chunk of users. 
@@ -52,23 +47,30 @@ public class ChunkedRuleProcessor implements Task {
         long lastId = Long.valueOf(context.getParam(pLAST_ID));
         int chunkSize = Integer.valueOf(context.getParam(pCHUNK_SIZE));
 
-        Key startKey = KeyFactory.createKey(User.KIND, startId);
-        Key lastKey = KeyFactory.createKey(User.KIND, lastId);
-
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Query q = new Query(User.KIND)
-            .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, startKey)
-            .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, lastKey)
-            .addFilter("periodicSort", FilterOperator.EQUAL, Boolean.TRUE);
-        PreparedQuery pq = ds.prepare(q);
-        List<Entity> entities = pq.asList(FetchOptions.Builder.withLimit(chunkSize));
-        List<User> users = Lists.transform(entities, User.TO_USER);
+        Iterable<User> users = getUsersForKeyRange(startId, lastId, chunkSize);
+        Iterator<User> itr = users.iterator();
         int moves = 0;
-        for (User user : users) {
+        int numUsers = 0;
+        while (itr.hasNext()) {
+            User user = itr.next();
             moves += RuleUtils.runRules(user).size();
+            
+            // update last sync date
+            user.updateLastSyncDate();
+            numUsers++;
         }
 
         Logger.info("Processed chunk. Task id: %s Chunk: %d Chunk size: %d Start id: %d Last id: %d Processed users: %d Files moved: %d",
-                    context.getTaskId(), chunkId, chunkSize, startId, lastId, users.size(), moves);
+                    context.getTaskId(), chunkId, chunkSize, startId, lastId, numUsers, moves);
+    }
+
+    private static Iterable<User> getUsersForKeyRange(long startId, long lastId, int maxNum) {
+        final String KIND = User.class.getSimpleName();
+        return Datastore.query(User.class)
+            .filter(Entity.KEY_RESERVED_PROPERTY + " >=", KeyFactory.createKey(KIND, startId))
+            .filter(Entity.KEY_RESERVED_PROPERTY + " <=", KeyFactory.createKey(KIND, lastId))
+            .filter("periodicSort =", true)
+            .limit(maxNum)
+            .fetch();
     }
 }

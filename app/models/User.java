@@ -2,29 +2,28 @@ package models;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Iterator;
+
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.repackaged.com.google.common.base.Throwables;
-import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.gdata.util.common.base.Preconditions;
 
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
+import play.modules.objectify.Datastore;
+import play.modules.objectify.ObjectifyModel;
+
+import com.google.common.base.Objects;
+import com.google.gdata.util.common.base.Preconditions;
+import com.googlecode.objectify.Key;
 
 import dropbox.gson.DbxAccount;
 
-import rules.RuleType;
-
-public class User implements Serializable {
+public class User extends ObjectifyModel implements Serializable {
 
     static {
         if ((Cache.cacheImpl != Cache.forcedCacheImpl) && (Cache.forcedCacheImpl != null)) {
@@ -35,18 +34,11 @@ public class User implements Serializable {
         }
     }
 
-    public static final Function<Entity, User> TO_USER = new Function<Entity, User>() {
-        @Override public User apply(Entity entity) {
-            return new User(entity);
-        }};
-
     private static String getCacheKey(Long id) {
         return String.format("user:%d", id);
     }
 
-    public static final String KIND = User.class.getSimpleName();
-
-    public Long id;
+    @Id public Long id;
     public String name;
     public String email;
     public Boolean periodicSort;
@@ -58,7 +50,7 @@ public class User implements Serializable {
     private String secret;
     
     public User() {
-        this.created = this.modified = new Date();
+        this.created = new Date();
         this.periodicSort = true;
     }
 
@@ -68,42 +60,6 @@ public class User implements Serializable {
         this.name = account.name;
         setToken(token);
         setSecret(secret);
-    }
-    
-    public User(Entity entity) {
-        this.id = entity.getKey().getId();
-        this.name = (String) entity.getProperty("name");
-        this.email = (String) entity.getProperty("email");
-        this.periodicSort = (Boolean) entity.getProperty("periodicSort");
-        this.created = (Date) entity.getProperty("created");
-        this.modified = (Date) entity.getProperty("modified");
-        this.lastSync = (Date) entity.getProperty("lastSync");
-        
-        this.token = (String) entity.getProperty("token");
-        this.secret = (String) entity.getProperty("secret");
-    }
-    
-    public Entity toEntity() {
-        Entity entity = new Entity(getKey());
-        entity.setProperty("id", id);
-        entity.setProperty("name", name);
-        entity.setProperty("email", email);
-        entity.setProperty("periodicSort", periodicSort);
-        entity.setProperty("created", created);
-        entity.setProperty("modified", modified);
-        entity.setProperty("lastSync", lastSync);
-        
-        entity.setProperty("token", token);
-        entity.setProperty("secret", secret);
-        return entity;
-    }
-
-    public String getKind() {
-        return KIND;
-    }
-
-    public Key getKey() {
-        return KeyFactory.createKey(KIND, id);
     }
     
     /**
@@ -150,24 +106,24 @@ public class User implements Serializable {
         }
     }
 
-    public static User findById(Long id) {
+    /**
+     * @param id the user id
+     * @return fully loaded user for the given id, null if nout found.
+     */
+    public static User findById(long id) {
         Preconditions.checkNotNull(id, "id cannot be null");
         String cacheKey = getCacheKey(id);
         User user = (User) Cache.get(cacheKey);
         if (user == null) {
-            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-            try {
-                Key key = KeyFactory.createKey(KIND, id);
-                user = new User(ds.get(key));
-                Cache.set(cacheKey, user, "1h");
-            } catch (EntityNotFoundException e) {
-                return null;
+            user = Datastore.find(User.class, id, false);
+            if (user != null) {
+              Cache.set(cacheKey, user, "1h");
             }
         }
         return user;
     }
-    
-    public static User upsert(DbxAccount account, String token, String secret) {
+
+    public static User getOrCreateUser(DbxAccount account, String token, String secret) {
         if (account == null || !account.notNull()) {
             return null;
         }
@@ -175,37 +131,34 @@ public class User implements Serializable {
         User user = findById(account.uid);
         if (user == null) {
             user = new User(account, token, secret);
-            Logger.info("Dropbox user not found in datastore, creating new one: %s",
-	                    user);
-            user.update(false);
+            Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
+            user.save();
         }
 
         if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
             // TODO: update other fields if stale
-            Logger.info("User has new Dropbox oauth credentials: %s",
-		                user);
+            Logger.info("User has new Dropbox oauth credentials: %s", user);
             user.setToken(token);
             user.setSecret(secret);
-            user.update();
+            user.save();
         }
         
         return user;
     }
 
-    
-    public void update() {
-        update(true);
+    public void updateLastSyncDate() {
+        lastSync = new Date();
+        save();
     }
     
-    private void update(boolean updateModstamp) {
-        if (updateModstamp) {
-            // update the modified date
-            this.modified = new Date();
-        }
-
+    public Key<User> save() {
         this.invalidate();
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        ds.put(this.toEntity());
+        return Datastore.put(this);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        modified = new Date();
     }
 
     @Override

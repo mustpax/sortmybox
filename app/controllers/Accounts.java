@@ -1,17 +1,15 @@
 package controllers;
 
-import java.util.Date;
-
-import com.google.appengine.api.datastore.*;
-import com.google.common.collect.Iterables;
-
 import models.Rule;
 import models.User;
 import play.Logger;
+import play.modules.objectify.Datastore;
 import play.mvc.Controller;
 import play.mvc.With;
 import tasks.FileMoveDeleter;
-import tasks.TaskUtils;
+
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 
 @With(Login.class)
 public class Accounts extends Controller {
@@ -25,7 +23,7 @@ public class Accounts extends Controller {
 	    checkAuthenticity();
 	    User user = Login.getLoggedInUser();
 	    user.periodicSort = periodicSort;
-	    user.update();
+	    user.save();
 	    flash.success("Settings saved successfully.");
 	    Logger.info("Settings updated for user: %s", user);
 	    settings();
@@ -45,34 +43,32 @@ public class Accounts extends Controller {
         checkAuthenticity();
         User user = Login.getLoggedInUser();
 
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Transaction tx = ds.beginTransaction();
+        Objectify ofy = Datastore.beginTxn();
         try {
             // 1. delete rules
-            Query q = new Query(Rule.KIND)
-                .setAncestor(user.getKey())
-                .setKeysOnly();
-            PreparedQuery pq = ds.prepare(tx, q);
-            ds.delete(tx, Iterables.transform(pq.asIterable(), Rule.TO_KEY));
+            Iterable<Key<Rule>> ruleKeys = Datastore.query(Rule.class)
+                .ancestor(Datastore.key(User.class, user.id))
+                .fetchKeys();
+            Datastore.delete(ruleKeys);
             Logger.info("Deleted rules for user: %s", user);
 
             // 2. delete user
-            Entity entity = user.toEntity();
             user.invalidate();
-            ds.delete(tx, entity.getKey());
+            Datastore.delete(user);
             Logger.info("Deleted user: %s", user);
 
             // 3. enqueue a delete task to delete file moves
             FileMoveDeleter.submit(user);
 
-            tx.commit();
+            // 4. commit the txn.
+            Datastore.commit();
 
             session.clear();
             flash.success("Account deleted successfully.");
             Login.login();
         } finally {
-            if (tx.isActive()) {
-                tx.rollback();
+            if (ofy.getTxn().isActive()) {
+                ofy.getTxn().rollback();
             }
         }
     }

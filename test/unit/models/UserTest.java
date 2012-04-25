@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import play.test.UnitTest;
 import unit.TestUtil;
 import dropbox.gson.DbxAccount;
 
@@ -34,14 +33,14 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testFindOrCreateByDbxAccount() throws Exception {
-        // if DbxAccount is null, findOrCreateByDbxAccount should just return null
-        assertNull(User.upsert(null, TOKEN, SECRET));
+        // if DbxAccount is null, getOrCreateUser should just return null
+        assertNull(User.getOrCreateUser(null, TOKEN, SECRET));
 
         DbxAccount account = new DbxAccount();
         account.uid = ID;
         account.name = NAME;
 
-        assertNotNull(User.upsert(account, TOKEN, SECRET).id);
+        assertNotNull(User.getOrCreateUser(account, TOKEN, SECRET).id);
     }
     
     /**
@@ -66,13 +65,13 @@ public class UserTest extends BaseModelTest {
         account.uid = ID;
         account.name = NAME;
 
-        User u = User.upsert(account, TOKEN, SECRET);
+        User u = User.getOrCreateUser(account, TOKEN, SECRET);
         assertNotNull(u.modified);
         assertNotNull(u.created);
-        assertEquals(u.modified, u.created);
+        assertFalse(u.modified.before(u.created));
         
         // Updating token and secret should update modification date but not creation date
-        u = User.upsert(account, TOKEN + "x", SECRET + "x");
+        u = User.getOrCreateUser(account, TOKEN + "x", SECRET + "x");
         assertNotNull(u.modified);
         assertNotNull(u.created);
         assertTrue(u.modified.after(u.created));

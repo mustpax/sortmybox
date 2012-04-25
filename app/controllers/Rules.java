@@ -6,23 +6,16 @@ import java.util.List;
 import models.Rule;
 import models.Rule.RuleError;
 import models.User;
+import play.modules.objectify.Datastore;
 import play.mvc.Controller;
 import play.mvc.With;
 import rules.RuleUtils;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Transaction;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 
 @With(Login.class)
 public class Rules extends Controller {
@@ -48,24 +41,23 @@ public class Rules extends Controller {
 
         final User user = Login.getLoggedInUser();
 
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Transaction tx = ds.beginTransaction();
+        Objectify ofy = Datastore.beginTxn();
         try {
-            Query q = new Query(Rule.KIND)
-                .setAncestor(user.getKey())
-                .setKeysOnly();
-            PreparedQuery pq = ds.prepare(tx, q);
-
+            Iterable<Key<Rule>> ruleKeys = Datastore
+                .query(Rule.class)
+                .ancestor(Datastore.key(User.class, user.id))
+                .fetchKeys();
+            
             // delete existing rules
-            ds.delete(tx, Iterables.transform(pq.asIterable(), Rule.TO_KEY));
+            Datastore.delete(ruleKeys);
 
             if (ruleList.isEmpty()) {
                 // in effect we are clearing all rules
-                tx.commit();
+                Datastore.commit();
             } else {
                 int rank = 0;
                 for (Rule rule : ruleList) {
-                    rule.owner = user.id;
+                    rule.owner = user.getKey();
                     List<RuleError> errors = rule.validate();
                     if (errors.isEmpty()) {
                         rule.rank = rank++;
@@ -75,17 +67,14 @@ public class Rules extends Controller {
                     }
                     allErrors.add(errors);
                 }
-
                 if (!toSave.isEmpty()) {
-                    List<Entity> entities = Lists.transform(toSave, Rule.TO_ENTITY);
-                    ds.put(tx, entities);
-  
-                    tx.commit();
+                    Datastore.put(toSave);
+                    Datastore.commit();
                 }
             }
         } finally {
-            if (tx.isActive()) {
-                tx.rollback();
+            if (ofy.getTxn().isActive()) {
+                ofy.getTxn().rollback();
             }
         }
 

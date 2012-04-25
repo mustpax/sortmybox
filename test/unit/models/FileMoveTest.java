@@ -9,19 +9,13 @@ import models.Rule;
 import models.User;
 
 import org.joda.time.DateTime;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.common.collect.Iterables;
-
-import play.Logger;
-import play.test.UnitTest;
+import play.modules.objectify.Datastore;
 import rules.RuleType;
 import unit.TestUtil;
+
+import com.google.common.collect.Iterables;
 
 public class FileMoveTest extends BaseModelTest {
     
@@ -47,19 +41,19 @@ public class FileMoveTest extends BaseModelTest {
 
         // Check that all moves exist
         for (FileMove m: Iterables.concat(retained, deleted)) {
-            User user = User.findById(m.owner);
-            assertNotNull(FileMove.findById(user, m.id));
+            User user = User.findById(m.owner.getId());
+            assertNotNull(FileMove.findById(user.id, m.id));
         }
 
-        FileMove.truncateFileMoves(user);
+        FileMove.truncateFileMoves(user.id);
 
         for (FileMove m: retained) {
-            User user = User.findById(m.owner);
-            assertNotNull(FileMove.findById(user, m.id));
+            User user = User.findById(m.owner.getId());
+            assertNotNull(FileMove.findById(user.id, m.id));
         }
         for (FileMove m: deleted) {
-            User user = User.findById(m.owner);
-            assertNull(FileMove.findById(user, m.id));
+            User user = User.findById(m.owner.getId());
+            assertNull(FileMove.findById(user.id, m.id));
         }
     }
     
@@ -67,11 +61,8 @@ public class FileMoveTest extends BaseModelTest {
         Rule r = new Rule(RuleType.EXT_EQ, "txt", "/txt", 0, owner.id);
         FileMove m = new FileMove(owner.id, r, "foo.txt", true);
         m.when = when;
-        
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Entity entity = m.toEntity();
-        ds.put(entity);
-        return new FileMove(ds.get(entity.getKey()));
+        Datastore.put(m);
+        return m;
     }
         
     public FileMove createMove(Date when) throws Exception {

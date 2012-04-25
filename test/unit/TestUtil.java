@@ -1,10 +1,7 @@
 package unit;
 
 import models.User;
-
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
+import play.modules.objectify.Datastore;
 
 public class TestUtil {
 
@@ -15,15 +12,11 @@ public class TestUtil {
     }
 
     public static User createUser(User user) throws Exception {
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService(); 
-        Entity entity = user.toEntity();
-        ds.put(entity);
-        return new User(ds.get(entity.getKey()));
+        Datastore.put(user);
+        return user;
     }
 
     public static void deleteUser(User user) throws Exception {
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        Entity entity = user.toEntity();
-        ds.delete(entity.getKey());
+        Datastore.delete(user);
     }
 }

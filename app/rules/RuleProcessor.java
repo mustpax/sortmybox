@@ -1,31 +1,16 @@
 package rules;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
-import play.Logger;
-
-import models.FileMove;
 import models.User;
+import play.Logger;
+import play.modules.objectify.Datastore;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.TaskHandle;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.common.collect.Lists;
+import com.googlecode.objectify.Key;
 
-import controllers.TaskManager;
 import cron.Job;
-
-import tasks.Task;
-import tasks.TaskContext;
-import tasks.TaskUtils;
 
 /**
  * A scheduled task for applying rules in background.
@@ -42,31 +27,39 @@ public class RuleProcessor implements Job {
         int chunkSize = jobData.containsKey(CHUNK_SIZE) ?
                 Integer.parseInt(jobData.get(CHUNK_SIZE)) : DEFAULT_CHUNK_SIZE;
 
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(User.KIND)
-            .addFilter("periodicSort", FilterOperator.EQUAL, Boolean.TRUE)
-            .addSort(Entity.KEY_RESERVED_PROPERTY)
-            .setKeysOnly();
-        PreparedQuery pq = ds.prepare(q);
+        Iterator<Key<User>> userKeys = getAllUserKeys().iterator();
         
-        int chunkId = 0;
         int numMessages = 0;
-        int offset = 0;
-        while (true) {
-            FetchOptions options = FetchOptions.Builder
-                .withLimit(chunkSize)
-                .offset(offset);
-            List<Entity> entities = pq.asList(options);
-            if (entities.isEmpty()) {
-                break;
+        int count = 1;
+        Long startId = null;
+        Long lastId = null;
+
+        Key<User> userKey;
+        while (userKeys.hasNext()) {
+            userKey = userKeys.next();
+            if (startId == null) {
+                startId = lastId = userKey.getId();
             }
-            long startId = new User(entities.get(0)).id;
-            long lastId = new User(entities.get(entities.size() - 1)).id;
-            ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
-            offset += entities.size();
+            if (count % chunkSize == 0) {
+                lastId = userKey.getId();
+                ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
+                startId = lastId = null;
+            }
+            count++;
         }
+        if (startId != null) {
+            ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
+        }
+
         Logger.info("Enqueued chunkRuleProcessor messages. Chunk size: %d Num messages: %d",
-                chunkSize, chunkId);
+                chunkSize, numMessages);
+    }
+
+    private static Iterable<Key<User>> getAllUserKeys() {
+        return Datastore.query(User.class)
+            .filter("periodicSort =", true)
+            .order(Entity.KEY_RESERVED_PROPERTY)
+            .fetchKeys();
     }
     
 }

@@ -1,35 +1,24 @@
 package tasks;
 
 import java.util.Date;
-import java.util.List;
-
-import play.Logger;
 
 import models.FileMove;
-import models.Rule;
 import models.User;
+import play.Logger;
+import play.modules.objectify.Datastore;
 
-import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import com.googlecode.objectify.Key;
 
 public class FileMoveDeleter implements Task {
 
     private static final String pUSER_ID = "UserId";
     private static final String pEND_DATE = "EndDate";
 
-    private static final int CHUNK_SIZE = 1;
-
-    private static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {
-        @Override public Key apply(Entity entity) {
-            return entity.getKey();
-        }
-    };
+    private static final int CHUNK_SIZE = 100;
     
     public static TaskHandle submit(User user) {
         Preconditions.checkNotNull(user);
@@ -50,26 +39,24 @@ public class FileMoveDeleter implements Task {
         
         long userId = Long.parseLong(context.getParam(pUSER_ID));
         Date endDate = new Date(Long.parseLong(context.getParam(pEND_DATE)));
-        
-        Key parentKey = KeyFactory.createKey(User.KIND, userId);
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(FileMove.KIND)
-            .setAncestor(parentKey)
-            .addFilter("when", FilterOperator.LESS_THAN_OR_EQUAL, endDate)
-            .setKeysOnly();
-        PreparedQuery pq = ds.prepare(q);
 
-        int total = 0;
+        int numChunks = 0;
         while (true) {
-            List<Entity> entities = pq.asList(FetchOptions.Builder.withLimit(CHUNK_SIZE));
-            if (entities.isEmpty()) {
+            Iterable<Key<FileMove>> fileMoveKeys = Datastore
+                .query(FileMove.class)
+                .ancestor(Datastore.key(User.class, userId))
+                .limit(CHUNK_SIZE)
+                .fetchKeys();
+
+            if (!fileMoveKeys.iterator().hasNext()) {
                 break;
             }
-            ds.delete(Lists.transform(entities, TO_KEY));
-            total += entities.size();
+
+            Datastore.delete(fileMoveKeys);
+            numChunks++;
         }
         
-        Logger.info("Finished deleting file moves. User id: %s End date: %s Total: %d", userId, endDate, total);
+        Logger.info("Finished deleting file moves. User id: %s End date: %s Chunk size: %d Chunks %d", userId, endDate, CHUNK_SIZE, numChunks);
     }
 
 }
