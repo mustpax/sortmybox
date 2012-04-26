@@ -5,4 +5,10 @@
         <description>Runs RuleProcessor job</description>
         <schedule>every 15 minutes</schedule>
     </cron>
+    <cron>
+        <url>/cron/cron/FileMoveSweeper</url>
+        <description>Runs FileMoveSweeper</description>
+        <schedule>every day 3:00</schedule>
+        <timezone>America/Los_Angeles</timezone>
+    </cron>
 </cronentries>

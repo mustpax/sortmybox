@@ -2,7 +2,6 @@ package rules;
 
 import java.io.File;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -136,11 +135,6 @@ public class RuleUtils {
             FileMove.save(fileMoves);
         }
 
-        // Delete old Move rows with 1% probability
-        if ((new Random().nextInt() % 100) == 0) {
-            FileMove.truncateFileMoves(user.id);
-        }
-        
         return fileMoves;
     }
     

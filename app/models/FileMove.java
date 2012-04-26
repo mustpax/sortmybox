@@ -20,7 +20,7 @@ import com.googlecode.objectify.annotation.Parent;
 
 public class FileMove extends ObjectifyModel implements Serializable {
 
-    public static final int RETENTION_DAYS = 3;
+    public static final int RETENTION_DAYS = 7;
     
     @Id public Long id;
     @Required @Parent public Key<User> owner;
