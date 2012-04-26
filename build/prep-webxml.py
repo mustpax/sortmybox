@@ -15,7 +15,11 @@ def main():
     src = 'war/WEB-INF/appengine-web-template.xml'
     target = 'war/WEB-INF/appengine-web.xml'
     branch = get_branch()
-    bindings = namespaces[get_branch()]
+    try:
+        bindings = namespaces[get_branch()]
+    except KeyError:
+        bindings = { 'suffix'    : 'dev',
+                     'namespace' : 'dev' }
 
     def format(line):
         return line.format(**bindings)
