@@ -157,12 +157,12 @@ public class User extends ObjectifyModel implements Serializable {
     }
 
     public void delete() {
-        invalidate();
         Datastore.delete(this);
     }
 
     @PrePersist
     public void prePersist() {
+        invalidate();
         modified = new Date();
     }
 
