@@ -40,6 +40,7 @@ public class User extends ObjectifyModel implements Serializable {
 
     @Id public Long id;
     public String name;
+    public String nameLower;
     public String email;
     public Boolean periodicSort;
     public Date created;
@@ -58,6 +59,7 @@ public class User extends ObjectifyModel implements Serializable {
         this();
         this.id = account.uid;
         this.name = account.name;
+        this.nameLower = name.toLowerCase();
         setToken(token);
         setSecret(secret);
     }
@@ -106,6 +108,11 @@ public class User extends ObjectifyModel implements Serializable {
         }
     }
 
+    public boolean isAdmin() {
+        // FIXME(syyang): derive from a static listing of admin users
+        return true;
+    }
+
     /**
      * @param id the user id
      * @return fully loaded user for the given id, null if nout found.
@@ -133,16 +140,27 @@ public class User extends ObjectifyModel implements Serializable {
             user = new User(account, token, secret);
             Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
             user.save();
+        } else {
+            boolean shouldSave = false;
+
+            if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
+                // TODO: update other fields if stale
+                Logger.info("User has new Dropbox oauth credentials: %s", user);
+                user.setToken(token);
+                user.setSecret(secret);
+                shouldSave = true;
+            }
+
+            if (user.nameLower == null) {
+                user.nameLower = user.name.toLowerCase();
+                shouldSave = true;
+            }
+
+            if (shouldSave) {
+                user.save();
+            }
         }
 
-        if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
-            // TODO: update other fields if stale
-            Logger.info("User has new Dropbox oauth credentials: %s", user);
-            user.setToken(token);
-            user.setSecret(secret);
-            user.save();
-        }
-        
         return user;
     }
 
@@ -171,6 +189,7 @@ public class User extends ObjectifyModel implements Serializable {
         return new HashCodeBuilder()
             .append(this.id)
             .append(this.name)
+            .append(this.nameLower)
             .append(this.secret)
             .append(this.token)
             .append(this.email)
@@ -193,6 +212,7 @@ public class User extends ObjectifyModel implements Serializable {
         return new EqualsBuilder()
             .append(this.id, other.id)
             .append(this.name, other.name)
+            .append(this.nameLower, other.nameLower)            
             .append(this.secret, other.secret)
             .append(this.token, other.token)
             .append(this.email, other.email)
@@ -208,6 +228,7 @@ public class User extends ObjectifyModel implements Serializable {
         return Objects.toStringHelper(User.class)
             .add("id", id)
             .add("name", name)
+            .add("nameLower", nameLower)
             .add("email", email)
             .add("periodicSort", periodicSort)
             .add("created_date", created)

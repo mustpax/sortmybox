@@ -21,6 +21,9 @@ GET     /privacy                                Footer.privacy
 GET     /contact                                Footer.contact
 GET     /faq                                	Footer.faq
 
+# Admin
+GET    /admin/userSearch                        Admin.userSearch
+
 # Rules
 POST    /rules                                  Rules.update
 

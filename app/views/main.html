@@ -31,6 +31,7 @@
 	      </ul>
 	      <ul class="nav pull-right">
 	        #{if user}
+	            <li class="#{get 'admin'}#{/get}"><a href="@{Admin.userSearch()}">Admin</a></li>
 	            <li class="dropdown">
 	              <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
 	              <ul class="dropdown-menu">
