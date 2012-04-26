@@ -112,6 +112,10 @@ select[size] {
     margin-bottom: 30px;
 }
 
+.navbar .container {
+    width: 940px;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
