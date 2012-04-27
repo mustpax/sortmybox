@@ -33,7 +33,20 @@ public class Admin extends Controller {
             
             if (!normalized.isEmpty()) {
                 ranSearch = true;
+
+                // 1. look up by user id
+                User userById = null;
+                try {
+                    Long userId = Long.parseLong(query);
+                    userById = User.findById(userId);
+                    if (userById != null) {
+                        results.add(userById);
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore. the query term is not a user id.
+                }
                 
+                // 2. look up by user name
                 Iterator<User> itr = Datastore
                     .query(User.class)
                     .filter("nameLower >=", normalized)
@@ -41,7 +54,11 @@ public class Admin extends Controller {
                     .limit(SEARCH_MAX_FETCH_SIZE)
                     .fetch().iterator();
                 while (itr.hasNext()) {
-                    results.add(itr.next());
+                    User userByName = itr.next();
+                    // dedup
+                    if (userById == null || userById.id != userByName.id) {
+                        results.add(userByName);
+                    }
                 }
             }
         }
