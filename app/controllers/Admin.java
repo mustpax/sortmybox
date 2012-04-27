@@ -7,11 +7,12 @@ import models.User;
 
 import org.mortbay.log.Log;
 
+import play.Logger;
 import play.modules.objectify.Datastore;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 @With(Login.class)
@@ -20,8 +21,6 @@ public class Admin extends Controller {
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
     
     public static void userSearch(String query) {
-        checkAccess();
-
         User user = Login.getLoggedInUser();
 
         boolean ranSearch = false;
@@ -49,9 +48,13 @@ public class Admin extends Controller {
         render(user, query, ranSearch, results);
     }
 
-    private static void checkAccess() {
+    @Before
+    static void checkAccess() {
         User user = Login.getLoggedInUser();
-        Preconditions.checkState(user.isAdmin(), "Logged in user is not an admin!");
+        if (user == null || ! user.isAdmin()) {
+            Logger.warn("Non-admin user attempted to access admin page: %s", user);
+            forbidden("Must be admin.");
+        }
     }
 
 }
