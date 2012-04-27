@@ -19,10 +19,6 @@ public class Footer extends Controller {
         renderInner();
     }
     
-    public static void contact() {
-        renderInner();
-    }
-    
     public static void faq() {
         renderInner();
     }
