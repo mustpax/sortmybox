@@ -106,7 +106,7 @@ public class Admin extends Controller {
         blacklistedUsers();
     }
 
-    public static void removeUserFromBlacklist(String userIdString) {
+    public static void removeFromBlacklist(String userIdString) {
         Preconditions.checkArgument(User.isValidId(userIdString),
                 "Invalid user id: " + userIdString);
         
