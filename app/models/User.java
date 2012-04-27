@@ -20,6 +20,7 @@ import play.modules.objectify.ObjectifyModel;
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
+import common.cache.CacheKey;
 
 import dropbox.gson.DbxAccount;
 
@@ -32,10 +33,6 @@ public class User extends ObjectifyModel implements Serializable {
                         Cache.forcedCacheImpl.getClass());
            Cache.cacheImpl = Cache.forcedCacheImpl;
         }
-    }
-
-    private static String getCacheKey(Long id) {
-        return String.format("user:%d", id);
     }
 
     @Id public Long id;
@@ -113,13 +110,29 @@ public class User extends ObjectifyModel implements Serializable {
         return true;
     }
 
+    public static boolean isValidId(String userId) {
+        // check input is not null and not empty
+        if (userId == null || userId.isEmpty()) {
+            return false;
+        }
+
+        // check input is a valid user id
+        try {
+            Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        
+        return true;
+    }
+    
     /**
      * @param id the user id
-     * @return fully loaded user for the given id, null if nout found.
+     * @return fully loaded user for the given id, null if not found.
      */
     public static User findById(long id) {
         Preconditions.checkNotNull(id, "id cannot be null");
-        String cacheKey = getCacheKey(id);
+        String cacheKey = CacheKey.create(User.class, id);
         User user = (User) Cache.get(cacheKey);
         if (user == null) {
             user = Datastore.find(User.class, id, false);
@@ -241,6 +254,6 @@ public class User extends ObjectifyModel implements Serializable {
      * Invalidate the cached version of this object.
      */
     public void invalidate() {
-        Cache.safeDelete(getCacheKey(this.id));
+        Cache.safeDelete(CacheKey.create(User.class, id));
     }
 }

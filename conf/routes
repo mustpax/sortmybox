@@ -22,6 +22,9 @@ GET     /faq                                	Footer.faq
 
 # Admin
 GET    /admin/searchUser                        Admin.searchUser
+GET    /admin/blacklistedUsers                  Admin.blacklistedUsers
+POST   /admin/addToBlacklist                    Admin.addToBlacklist
+POST   /admin/removeFromBlacklist               Admin.removeFromBlacklist
 GET    /admin/deleteUser                        Admin.deleteUser
 POST   /admin/deleteUserPost                    Admin.deleteUserPost
 

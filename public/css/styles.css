@@ -117,6 +117,17 @@ select[size] {
     display: inline;
 }
 
+.blacklist th,
+.blacklist td {
+	text-align: center;
+    padding: 4px;
+}
+
+.blacklist form {
+	 margin-top: 0px;
+     margin-bottom: 0px;     
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project

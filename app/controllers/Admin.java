@@ -3,6 +3,7 @@ package controllers;
 import java.util.Iterator;
 import java.util.List;
 
+import models.Blacklist;
 import models.CascadingDelete;
 import models.User;
 
@@ -14,12 +15,14 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 @With(Login.class)
 public class Admin extends Controller {
 
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
+    private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
 
     public static void searchUser(String query) {
         User user = Login.getLoggedInUser();
@@ -37,7 +40,7 @@ public class Admin extends Controller {
                 // 1. look up by user id
                 User userById = null;
                 try {
-                    Long userId = Long.parseLong(query);
+                    Long userId = Long.parseLong(normalized);
                     userById = User.findById(userId);
                     if (userById != null) {
                         results.add(userById);
@@ -66,6 +69,57 @@ public class Admin extends Controller {
         render(user, query, ranSearch, results);
     }
 
+    public static void blacklistedUsers() {
+        User user = Login.getLoggedInUser();
+        
+        List<Blacklist> blacklist = Lists.newArrayList();
+        Iterator<Blacklist> itr = Datastore
+            .query(Blacklist.class)
+            .limit(BLACKLIST_MAX_FETCH_SIZE)
+            .fetch().iterator();
+        while (itr.hasNext()) {
+            blacklist.add(itr.next());
+        }
+
+        render(user, blacklist);
+    }
+
+    public static void addToBlacklist(String userIdString) {
+        User user = Login.getLoggedInUser();
+
+        if (!User.isValidId(userIdString)) {
+            flash.error("Invalid user id: " + userIdString);
+            blacklistedUsers();
+
+        } 
+        
+        long userId = Long.valueOf(userIdString);
+        if (userId == user.id) {
+            flash.error("Can't block self: " + userId);
+            blacklistedUsers();
+        }
+        
+        Blacklist blacklist = new Blacklist(userId);
+        blacklist.save();
+        
+        flash.success("Blocked user id: " + userIdString);
+        blacklistedUsers();
+    }
+
+    public static void removeUserFromBlacklist(String userIdString) {
+        Preconditions.checkArgument(User.isValidId(userIdString),
+                "Invalid user id: " + userIdString);
+        
+        long userId = Long.valueOf(userIdString);
+        Blacklist blacklist = Blacklist.findById(userId);
+        if (blacklist != null) {
+            blacklist.delete();
+        }
+ 
+        flash.success("Unblocked user id: " + userIdString);
+        blacklistedUsers();
+    }
+
     public static void deleteUser() {
         User user = Login.getLoggedInUser();
         render(user);
@@ -75,21 +129,13 @@ public class Admin extends Controller {
         checkAuthenticity();
         
         User user = Login.getLoggedInUser();
-                
-        // check input is not null and not empty
-        if (userIdString == null || userIdString.trim().isEmpty()) {
-            flash.error("Missing user id.");
+
+        if (!User.isValidId(userIdString)) {
+            flash.error("Invalid user id: " + userIdString);
             deleteUser();
         }
         
-        // check input is a valid user id
-        long userId = -1;
-        try {
-            userId = Long.parseLong(userIdString.trim());
-        } catch (NumberFormatException e) {
-            flash.error("Invalid user id: %s", userIdString);
-            deleteUser();
-        }
+        long userId = Long.valueOf(userIdString);
         
         // check the user is not currently logged in user
         if (user.id == userId) {

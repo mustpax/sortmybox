@@ -2,6 +2,7 @@ package controllers;
 
 import java.net.URLEncoder;
 
+import models.Blacklist;
 import models.User;
 import play.Logger;
 import play.libs.OAuth;
@@ -168,6 +169,12 @@ public class Login extends Controller {
     private static User upsertUser(String token, String secret) {
         DropboxClient client = DropboxClientFactory.create(token, secret);
         DbxAccount account = client.getAccount();
+        
+        if (Blacklist.findById(account.uid) != null) {
+            // the user is on blacklist
+            session.clear();
+            forbidden("The user is currently blocked. User id: " + account.uid);
+        }
         return User.getOrCreateUser(account, token, secret);
     }
     
