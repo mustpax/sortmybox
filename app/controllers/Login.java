@@ -9,6 +9,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
+import play.mvc.With;
 
 import com.google.appengine.api.NamespaceManager;
 import com.google.common.base.Joiner;
@@ -28,6 +29,7 @@ import dropbox.gson.DbxAccount;
  *
  * @author mustpax
  */
+@With(ErrorReporter.class)
 public class Login extends Controller {
     
     private static final String REDIRECT_URL = "url";

@@ -1,0 +1,18 @@
+
+User: ${username}
+Date: ${date}
+
+Errors:
+
+#{list errors, as:'error'}
+    Exception ${error_index}: ${error.t.getClass()}
+    Message: ${error.t.getMessage()}
+    Trace:
+    ${error.getStackTrace()}
+#{/list}
+
+HTTP Headers:
+#{list headers, as:'header'}
+    Header: ${header.name}
+    Value: ${header.value()}
+#{/list}

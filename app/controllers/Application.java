@@ -47,6 +47,10 @@ public class Application extends Controller {
         }
     }
     
+    public static void forceError() {
+        throw new IllegalArgumentException("Just pretending to fail.");
+    }
+    
     /**
      * @param user the logged in user
      * @return InitResult the result of initialization
