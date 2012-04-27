@@ -37,16 +37,24 @@
 	<p>We have 3 kinds of rules: </p>
 	<dl class="dl-horizontal">
 		<dt>Name Contains:</dt>
-		<dd> Move similarly named files to an appropriate folder.</dd> 
-		<dd>For example: Files containing <code>photo_2011</code> in their names will be moved to <code>/Photos 2011</code>.</dd>
+		<dd>Move similarly named files to an appropriate folder.</dd> 
+		<dd>A rule with the pattern <code>venice 2011</code> matches files named
+            <code>jen birthday venice 2011.jpg</code> or
+            <code>gondola venice 2011.jpg</code>.</dd>
 	
 		<dt>Extension equals:</dt> 
 		<dd>Files with a matching extension will be moved to an appropriate folder.</dd> 
-		<dd>For example: Files with extension <code>.doc</code> will be moved to <code>/Documents</code>.</dd>
+		<dd>A rule with the extension <code>doc</code> matches files named
+            <code>science report final.doc</code> or
+            <code>resume.doc</code>, <strong>but not</strong> 
+            <code>doc brown with marty.jpg</code>.</dd>
 	
 		<dt>Name Pattern:</dt> 
 		<dd>Use wildcards like <code>?</code> and <code>*</code> to move files to an appropriate folder. <code>?</code> matches a single letter/number/symbol/character whereas <code>*</code> can match any number of them.</dd> 
-		<dd>For example: Files matching <code>DSC*</code> will be moved to the <code>Photos</code> folder.</dd>
+		<dd>The pattern <code>Prince*.mp3</code> matches <code>Prince - Purple rain.mp3</code> or <code>Prince.mp3</code>,
+            <strong>but not</strong> <code>Prince.doc</code> or <code>Best of Prince.mp3</code>.</dd>
+		<dd>The pattern <code>error?.txt</code> matches <code>error.txt</code> or <code>errors.txt</code>,
+            <strong>but not</strong> <code>errorss.txt</code> or <code>new error.txt</code>.</dd>
 	</dl>
 	<h3>Is Sortbox free?</h3>
 	
