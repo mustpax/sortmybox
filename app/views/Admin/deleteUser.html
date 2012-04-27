@@ -1,0 +1,15 @@
+#{extends 'Admin/header.html' /}
+#{set title:'Delete user'/}
+#{set deleteUser:'active'/}
+
+
+<div class="row">
+  <div class="span12" >
+    <form class="well form-inline" action="@{deleteUserPost()}" method="POST">
+      #{authenticityToken/}
+      <input type="text" class="input-medium" name="userIdString"
+          #{if userIdString}value="${userIdString}"#{/if}#{else}placeholder="Enter user id"#{/else}>
+      <button type="submit" class="btn">Delete</button>
+    </form>
+  </div>
+</div>

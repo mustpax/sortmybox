@@ -3,6 +3,7 @@ package controllers;
 import java.util.Iterator;
 import java.util.List;
 
+import models.CascadingDelete;
 import models.User;
 
 import org.mortbay.log.Log;
@@ -19,8 +20,8 @@ import com.google.common.collect.Lists;
 public class Admin extends Controller {
 
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
-    
-    public static void userSearch(String query) {
+
+    public static void searchUser(String query) {
         User user = Login.getLoggedInUser();
 
         boolean ranSearch = false;
@@ -46,6 +47,51 @@ public class Admin extends Controller {
         }
 
         render(user, query, ranSearch, results);
+    }
+
+    public static void deleteUser() {
+        User user = Login.getLoggedInUser();
+        render(user);
+    }
+
+    public static void deleteUserPost(String userIdString) {
+        checkAuthenticity();
+        
+        User user = Login.getLoggedInUser();
+                
+        // check input is not null and not empty
+        if (userIdString == null || userIdString.trim().isEmpty()) {
+            flash.error("Missing user id.");
+            deleteUser();
+        }
+        
+        // check input is a valid user id
+        long userId = -1;
+        try {
+            userId = Long.parseLong(userIdString.trim());
+        } catch (NumberFormatException e) {
+            flash.error("Invalid user id: %s", userIdString);
+            deleteUser();
+        }
+        
+        // check the user is not currently logged in user
+        if (user.id == userId) {
+            flash.error("Can't delete self: %s", userIdString);
+            deleteUser();
+        }
+
+        // check the user exists
+        User userToDelete = User.findById(userId);
+        if (userToDelete == null) {
+            flash.error("Non-existant user: User id: %s", userIdString);
+            deleteUser();
+        }
+        
+        // delete the user
+        CascadingDelete.delete(userToDelete);
+
+        flash.success("Successfully deleted user: %s", userIdString);
+        deleteUser();
     }
 
     @Before

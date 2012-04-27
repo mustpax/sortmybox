@@ -21,7 +21,9 @@ GET     /contact                                Footer.contact
 GET     /faq                                	Footer.faq
 
 # Admin
-GET    /admin/userSearch                        Admin.userSearch
+GET    /admin/searchUser                        Admin.searchUser
+GET    /admin/deleteUser                        Admin.deleteUser
+POST   /admin/deleteUserPost                    Admin.deleteUserPost
 
 # Rules
 POST    /rules                                  Rules.update

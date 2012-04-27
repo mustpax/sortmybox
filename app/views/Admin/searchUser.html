@@ -1,21 +1,11 @@
-#{extends 'main.html' /} #{set title:'User Search'/}
-#{set admin:'active'/}
+#{extends 'Admin/header.html' /}
+#{set title:'Search user'/}
+#{set searchUser:'active'/}
 
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="@{userSearch()}">User search</a>
-  </li>
-  <li>
-    <a href="#">User blacklist</a>
-  </li>
-  <li>
-    <a href="#">Delete user</a>
-  </li>
-</ul>
 
 <div class="row">
   <div class="span12">
-    <form class="well form-search" action="@{userSearch}">
+    <form class="well form-search" action="@{searchUser}">
       <input type="text" class="input-medium search-query" name="query"
           #{if query}value="${query}"#{/if}#{else}placeholder="Enter user name"#{/else}>
         <button type="submit" class="btn">Search</button>
@@ -42,7 +32,7 @@
          <td>${result.id}</td>
          <td>${result.name}</td>
          <td>${result.periodicSort}</td>
-         <td>${result.lastSync.since()}</td>
+         <td>#{if result.lastSync}{result.lastSync.since()}#{/if}#{else}<em>None yet</em>#{/else}</td>
          <td>TODO</td>
          <td>${result.created}</td>
          <td>${result.modified}</td>
