@@ -10,11 +10,9 @@
       <dd>${user.name}</dd>
       <dt>Periodic sort</dt>
       <dd class="periodicSort">
-        <button class="btn disabled">
-        ${user.periodicSort ? "Enabled" : "Disabled"}
-        </button>
         #{if user.periodicSort}
         #{form @settings(), method:'POST' }
+            <button class="btn disabled">Enabled</button>        
             <input type="hidden" name="periodicSort" value="0">
             <button type="submit" class="btn btn-danger">Disable</button>
         #{/form}
@@ -23,6 +21,7 @@
         #{form @settings(), method:'POST' }
             <input type="hidden" name="periodicSort" value="1">
             <button type="submit" class="btn btn-primary">Enable</button>
+            <button class="btn disabled">Disabled</button>        
         #{/form}
         #{/else}
       </dd>
