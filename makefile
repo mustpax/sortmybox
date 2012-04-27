@@ -29,6 +29,9 @@ deploy: all
 	-play gae:deploy
 	git push origin prod
 
+dev: all
+	-play gae:deploy
+
 clean:
 	play clean
 	rm $(alljs)
