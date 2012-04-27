@@ -13,18 +13,16 @@ import com.googlecode.objectify.Objectify;
 
 @With(Login.class)
 public class Accounts extends Controller {
-
-	public static void info() {
-		User user = Login.getLoggedInUser();
-		render(user);
-	}
-
 	public static void settingsPost(boolean periodicSort) {
 	    checkAuthenticity();
 	    User user = Login.getLoggedInUser();
 	    user.periodicSort = periodicSort;
 	    user.save();
-	    flash.success("Settings saved successfully.");
+	    if (periodicSort) {
+		    flash.success("Periodic sort enabled.");
+	    } else {
+		    flash.success("Periodic sort disabled.");
+	    }
 	    Logger.info("Settings updated for user: %s", user);
 	    settings();
 	}

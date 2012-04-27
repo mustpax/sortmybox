@@ -1,17 +1,6 @@
-#{extends 'main.html' /}
+#{extends 'Accounts/header.html' /}
 #{set title:'Delete Account'/}
-
-<ul class="nav nav-tabs">
-  <li class="">
-    <a href="@{info()}">Account info</a>
-  </li>
-  <li>
-    <a href="@{settings()}">Account settings</a>
-  </li>
-  <li class="active">
-    <a href="@{delete()}">Delete account</a>
-  </li>
-</ul>
+#{set delete:'active'/}
 
 <div class="row">
     <div class="span8 offset2">
@@ -21,7 +10,7 @@
         <p>If you are having an issue and think if we might be able to help, please try <a href="/contact">contacting support</a> first.</p>
         <p>Are you sure you want to delete your Sortbox account? Your sort rules and activity history will be deleted permanently.</p></br>
         <button type="submit" class="btn btn-danger">Delete this account</button>
-        <a class="btn" href="@{info()}">Cancel</a>    
+        <a class="btn" href="@{settings()}">Cancel</a>    
       </form>
     </div>
 </div>

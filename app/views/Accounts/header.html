@@ -1,0 +1,23 @@
+#{extends 'main.html' /}
+
+#{if flash.success}
+<div class="row">
+  <div class="span12">
+    <div class="alert alert-info alert-created">
+      <a class="close" data-dismiss="alert">×</a>
+      <h4 class="alert-heading">${flash.success}</h4>
+    </div>
+  </div>
+</div>
+#{/if}
+
+<ul class="nav nav-tabs">
+  <li class="#{get 'settings'}#{/get}">
+    <a href="@{settings()}">Account</a>
+  </li>
+  <li class="#{get 'delete'}#{/get}">
+    <a href="@{delete()}">Delete account</a>
+  </li>
+</ul>
+
+#{doLayout /}

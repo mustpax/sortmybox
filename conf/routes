@@ -8,7 +8,6 @@ GET     /dirs                                   Application.dirs
 GET     /error                                  Application.forceError
 
 # Account
-GET     /account/info                           Accounts.info
 GET     /account/settings                       Accounts.settings
 POST    /account/settings                       Accounts.settingsPost
 GET     /account/delete                         Accounts.delete

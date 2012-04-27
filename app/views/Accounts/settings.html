@@ -1,48 +1,43 @@
-#{extends 'main.html' /}
+#{extends 'Accounts/header.html' /}
 #{set title:'Settings'/}
+#{set settings:'active'/}
 
-#{if flash.success}
+
 <div class="row">
-  <div class="span12">
-    <div class="alert alert-info alert-created">
-      <a class="close" data-dismiss="alert">×</a>
-      <h4 class="alert-heading">${flash.success}</h4>
-    </div>
+  <div class="span8 offset2">
+    <dl class="dl-horizontal account-info ">
+      <dt>User name</dt>
+      <dd>${user.name}</dd>
+      <dt>Periodic sort</dt>
+      <dd class="periodicSort">
+        <button class="btn disabled">
+        ${user.periodicSort ? "Enabled" : "Disabled"}
+        </button>
+        #{if user.periodicSort}
+        #{form @settings(), method:'POST' }
+            <input type="hidden" name="periodicSort" value="0">
+            <button type="submit" class="btn btn-danger">Disable</button>
+        #{/form}
+        #{/if}
+        #{else}
+        #{form @settings(), method:'POST' }
+            <input type="hidden" name="periodicSort" value="1">
+            <button type="submit" class="btn btn-primary">Enable</button>
+        #{/form}
+        #{/else}
+      </dd>
+      <dt>Last sync</dt>
+      #{if user.lastSync}
+      <dd>${user.lastSync}</dd>
+      #{/if}
+      #{else}
+      <dd><em>None yet</em></dd>
+      #{/else}
+      <dt>Created date</dt>
+      <dd>${user.created}</dd>
+      <dt>Last modified</dt>
+      <dd>${user.modified}</dd>
+    </dl>
   </div>
 </div>
-#{/if}
 
-<ul class="nav nav-tabs">
-  <li>
-    <a href="@{info()}">Account info</a>
-  </li>
-  <li class="active">
-    <a href="@{settings()}">Account settings</a>
-  </li>
-  <li>
-    <a href="@{delete()}">Delete account</a>
-  </li>
-</ul>
-
-<div class="row">
- <div class="span8 offset2">
-  <form class="form-horizontal" action="@{settings}" method="POST">
-   #{authenticityToken /}
-   <fieldset>
-    <div class="control-group">
-     <label class="control-label" for="periodicSort">Enable
-      periodic sort</label>
-     <div class="controls">
-       <label class="checkbox">
-         <input type="checkbox" id="periodicSort" name="periodicSort" value="true" ${user.periodicSort ? "checked" : ""}>
-         <input type="hidden" name="periodicSort" value="false"/>
-     </div>
-    </div>
-    <div class="form-actions">
-     <button type="submit" class="btn btn-primary">Save changes</button>
-     <a class="btn" href="@{info()}">Cancel</a>
-    </div>
-   </fieldset>
-  </form>
- </div>
-</div>
