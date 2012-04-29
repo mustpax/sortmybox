@@ -184,7 +184,7 @@ public class Login extends Controller {
     public static User getLoggedInUser() {
         String uid = session.get(SessionKeys.UID);
         if (uid == null) {
-            Logger.warn("Session uid not found.");
+            Logger.info("User not logged in: no uid in session.");
             return null;
         }
 
