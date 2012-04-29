@@ -12,6 +12,9 @@ js: $(alljs)
 $(alljs): $(jsfiles)
 	cat $(jsfiles) > $@
 
+sync-static:
+	build/sync-bucket.sh
+
 deps: .lastdepsrun
 
 .lastdepsrun: conf/dependencies.yml
