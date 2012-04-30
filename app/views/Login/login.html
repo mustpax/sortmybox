@@ -1,16 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Organize your Dropbox' /}
 
-#{if flash.success}
-<div class="row">
-  <div class="span12">
-    <div class="alert alert-info alert-created">
-      <a class="close" data-dismiss="alert">×</a>
-      <h4 class="alert-heading">${flash.success}</h4>
-    </div>
-  </div>
-</div>
-#{/if}
+#{flash /}
 
 <div class="row">
  <div class="span12">
