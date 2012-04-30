@@ -7,9 +7,10 @@
 }*
 %{
   namespace = java.lang.System.getenv("NAMESPACE");
+  cdn = play.configuration.getProperty("sortbox.cdn");
 }%
-#{if play.mode.isProd() && !namespace}
-${play.configuration.getProperty("sortbox.cdn")}${_arg}
+#{if play.mode.isProd() && !namespace && cdn}
+${cdn}${_arg}
 #{/if}
 #{else}
 ${_arg}
