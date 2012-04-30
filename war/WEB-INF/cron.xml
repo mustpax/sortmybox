@@ -11,4 +11,10 @@
         <schedule>every day 3:00</schedule>
         <timezone>America/Los_Angeles</timezone>
     </cron>
+    <cron>
+        <url>/cron/cron/UsageStatsGatherer</url>
+        <description>Runs UsageStatsGatherer</description>
+        <schedule>every day 1:00</schedule>
+        <timezone>America/Los_Angeles</timezone>
+    </cron>    
 </cronentries>
