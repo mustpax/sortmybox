@@ -72,7 +72,7 @@ public class User extends ObjectifyModel implements Serializable {
     }
     
     private static Set<Long> getAdmins() {
-        String ids= Play.configuration.getProperty("admin.ids", "").trim();
+        String ids= Play.configuration.getProperty("sortbox.admins", "").trim();
         ImmutableSet.Builder<Long> builder = ImmutableSet.builder();
         for (String id : ids.split(",")) {
             if (id.isEmpty()) continue;
