@@ -107,7 +107,7 @@ public class User extends ObjectifyModel implements Serializable {
 
     public boolean isAdmin() {
         // FIXME(syyang): derive from a static listing of admin users
-        return true;
+        return false;
     }
 
     public static boolean isValidId(String userId) {
