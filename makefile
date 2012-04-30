@@ -27,7 +27,7 @@ stage: all
 	-play gae:deploy
 	git push origin staging
 
-deploy: all
+deploy: all sync-static
 	build/checkbranch.sh prod
 	-play gae:deploy
 	git push origin prod
