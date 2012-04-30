@@ -12,6 +12,9 @@ js: $(alljs)
 $(alljs): $(jsfiles)
 	cat $(jsfiles) > $@
 
+sync-static:
+	build/sync-bucket.sh
+
 deps: .lastdepsrun
 
 .lastdepsrun: conf/dependencies.yml
@@ -24,7 +27,7 @@ stage: all
 	-play gae:deploy
 	git push origin staging
 
-deploy: all
+deploy: all sync-static
 	build/checkbranch.sh prod
 	-play gae:deploy
 	git push origin prod
@@ -41,3 +44,4 @@ superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
 	git clean -dxf
 
+.PHONY : all run js sync-static deps stage deploy dev clean superclean

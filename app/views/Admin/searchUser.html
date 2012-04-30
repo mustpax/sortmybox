@@ -23,7 +23,6 @@
           <th>Last sync</th>
           <th>Last login</th>
           <th>Created</th>
-          <th>Modified</th>
        </tr>
      </thead>
      <tbody>
@@ -32,10 +31,9 @@
          <td>${result.id}</td>
          <td>${result.name}</td>
          <td>${result.periodicSort}</td>
-         <td>#{if result.lastSync}{result.lastSync.since()}#{/if}#{else}<em>None yet</em>#{/else}</td>
-         <td>TODO</td>
+         <td>${result.lastSync}</td>
+         <td>${result.lastLogin}</td>
          <td>${result.created}</td>
-         <td>${result.modified}</td>
        </tr>
      #{/list}
      </tbody>

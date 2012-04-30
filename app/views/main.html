@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>#{get 'title'}Home#{/get} &mdash; Sortbox</title>
+    <title>Sortbox &mdash; #{get 'title'}Home#{/get}</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -11,10 +11,10 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <link href="@{'/public/css/bootstrap.min.css'}" rel="stylesheet">
-    <link href="@{'/public/css/styles.css'}" rel="stylesheet">
+    <link href="#{static-path '/public/css/bootstrap.min.css'/}" rel="stylesheet">
+    <link href="#{static-path '/public/css/styles.css'/}" rel="stylesheet">
     
-    <link rel="shortcut icon" href="@{'/public/img/favicon.png'}">
+    <link rel="shortcut icon" href="#{static-path '/public/img/favicon.png'/}">
   </head>
 
   <body>
@@ -60,13 +60,13 @@
       </div>
     </div>
     #{if play.mode.isDev() }
-	    <script src="@{'/public/js/json2.js'}"></script>
-	    <script src="@{'/public/js/underscore.js'}"></script>
-	    <script src="@{'/public/js/jquery-1.7.2.js'}"></script>
-	    <script src="@{'/public/js/bootstrap.min.js'}"></script>
+	    <script src="#{static-path '/public/js/json2.js'/}"></script>
+	    <script src="#{static-path '/public/js/underscore.js'/}"></script>
+	    <script src="#{static-path '/public/js/jquery-1.7.2.js'/}"></script>
+	    <script src="#{static-path '/public/js/bootstrap.min.js'/}"></script>
     #{/if}
     #{else}
-	    <script src="@{'/public/js/all.js'}"></script>
+	    <script src="#{static-path '/public/js/all.js'/}"></script>
     #{/else}
     
     <script>

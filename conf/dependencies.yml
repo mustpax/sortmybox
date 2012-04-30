@@ -2,7 +2,6 @@
 
 require:
     - play
-    - play -> secure
     - play -> gae 1.6.0
     - play -> mockito 0.1
     - play -> objectify 1.0

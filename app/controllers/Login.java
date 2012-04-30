@@ -73,16 +73,6 @@ public class Login extends Controller {
 
             login();
         }
-
-        // Checks
-        Check check = getActionAnnotation(Check.class);
-        if(check != null) {
-            check(check);
-        }
-        check = getControllerInheritedAnnotation(Check.class);
-        if(check != null) {
-            check(check);
-        }
     }
 
     @Before(priority=1)
@@ -97,27 +87,12 @@ public class Login extends Controller {
         }
     }
     
-    private static void check(Check check) {
-        for(String profile : check.value()) {
-            boolean hasProfile = hasProfile(profile);
-            if (!hasProfile) {
-                forbidden("Forbidden. User missing profile: " + profile);
-            }
-        }
-    }
-
-    private static boolean hasProfile(String profile) {
-        // TODO
-        return false;
-    }
-
     public static void login() {
         if (isLoggedIn()) {
             Logger.info("User visited login url, but already logged in.");
             redirectToOriginalURL();
         } else {
             flash.keep(REDIRECT_URL);
-            response.cacheFor("1h");
             render();
         }
     }
@@ -173,7 +148,8 @@ public class Login extends Controller {
         if (Blacklist.findById(account.uid) != null) {
             // the user is on blacklist
             session.clear();
-            forbidden("The user is currently blocked. User id: " + account.uid);
+            Logger.warn("The user is currently blocked. User id: " + account.uid);
+            forbidden("User blocked.");
         }
         return User.getOrCreateUser(account, token, secret);
     }
@@ -184,7 +160,7 @@ public class Login extends Controller {
     public static User getLoggedInUser() {
         String uid = session.get(SessionKeys.UID);
         if (uid == null) {
-            Logger.warn("Session uid not found.");
+            Logger.info("User not logged in: no uid in session.");
             return null;
         }
 

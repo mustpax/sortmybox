@@ -2,6 +2,7 @@ package models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
@@ -17,6 +18,7 @@ import play.libs.Crypto;
 import play.modules.objectify.Datastore;
 import play.modules.objectify.ObjectifyModel;
 
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
@@ -26,6 +28,8 @@ import dropbox.gson.DbxAccount;
 
 public class User extends ObjectifyModel implements Serializable {
 
+    private static final Set<Long> ADMINS;
+ 
     static {
         if ((Cache.cacheImpl != Cache.forcedCacheImpl) && (Cache.forcedCacheImpl != null)) {
             Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
@@ -33,6 +37,8 @@ public class User extends ObjectifyModel implements Serializable {
                         Cache.forcedCacheImpl.getClass());
            Cache.cacheImpl = Cache.forcedCacheImpl;
         }
+
+        ADMINS = getAdmins();
     }
 
     @Id public Long id;
@@ -40,16 +46,20 @@ public class User extends ObjectifyModel implements Serializable {
     public String nameLower;
     public String email;
     public Boolean periodicSort;
+    public Integer fileMoves;
+
     public Date created;
     public Date modified;
     public Date lastSync;
+    public Date lastLogin;
 
     private String token;
     private String secret;
     
     public User() {
-        this.created = new Date();
+        this.created = this.lastLogin = new Date();
         this.periodicSort = true;
+        this.fileMoves = 0;
     }
 
     public User(DbxAccount account, String token, String secret) {
@@ -59,6 +69,16 @@ public class User extends ObjectifyModel implements Serializable {
         this.nameLower = name.toLowerCase();
         setToken(token);
         setSecret(secret);
+    }
+    
+    private static Set<Long> getAdmins() {
+        String ids= Play.configuration.getProperty("admin.ids", "").trim();
+        ImmutableSet.Builder<Long> builder = ImmutableSet.builder();
+        for (String id : ids.split(",")) {
+            if (id.isEmpty()) continue;
+            builder.add(Long.valueOf(id));
+        }
+        return builder.build();
     }
     
     /**
@@ -106,8 +126,7 @@ public class User extends ObjectifyModel implements Serializable {
     }
 
     public boolean isAdmin() {
-        // FIXME(syyang): derive from a static listing of admin users
-        return false;
+        return ADMINS.contains(id);
     }
 
     public static boolean isValidId(String userId) {
@@ -154,24 +173,24 @@ public class User extends ObjectifyModel implements Serializable {
             Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
             user.save();
         } else {
-            boolean shouldSave = false;
-
             if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
                 // TODO: update other fields if stale
                 Logger.info("User has new Dropbox oauth credentials: %s", user);
                 user.setToken(token);
                 user.setSecret(secret);
-                shouldSave = true;
             }
 
             if (user.nameLower == null) {
                 user.nameLower = user.name.toLowerCase();
-                shouldSave = true;
             }
 
-            if (shouldSave) {
-                user.save();
+            if (user.fileMoves == null) {
+                user.fileMoves = 0;
             }
+            
+            user.lastLogin = new Date();
+
+            user.save();
         }
 
         return user;
@@ -181,13 +200,19 @@ public class User extends ObjectifyModel implements Serializable {
         lastSync = new Date();
         save();
     }
-    
+
+    public void incrementFileMoves(int count) {
+        fileMoves += count;
+        save();
+    }
+
     public Key<User> save() {
         invalidate();
         return Datastore.put(this);
     }
 
     public void delete() {
+        invalidate();
         Datastore.delete(this);
     }
 
@@ -210,6 +235,7 @@ public class User extends ObjectifyModel implements Serializable {
             .append(this.created)
             .append(this.modified)
             .append(this.lastSync)
+            .append(this.lastLogin)
             .hashCode();
     }
 
@@ -233,6 +259,7 @@ public class User extends ObjectifyModel implements Serializable {
             .append(this.created, other.created)
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
+            .append(this.lastLogin, other.lastLogin)
             .isEquals();
     }
     
@@ -247,6 +274,7 @@ public class User extends ObjectifyModel implements Serializable {
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)
+            .add("last_login", lastLogin)
             .toString();
     }
     
