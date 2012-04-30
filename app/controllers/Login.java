@@ -149,7 +149,8 @@ public class Login extends Controller {
         if (Blacklist.findById(account.uid) != null) {
             // the user is on blacklist
             session.clear();
-            forbidden("The user is currently blocked. User id: " + account.uid);
+            Logger.warn("The user is currently blocked. User id: " + account.uid);
+            forbidden("User blocked.");
         }
         return User.getOrCreateUser(account, token, secret);
     }
