@@ -49,12 +49,13 @@ public class User extends ObjectifyModel implements Serializable {
     public Date created;
     public Date modified;
     public Date lastSync;
+    public Date lastLogin;
 
     private String token;
     private String secret;
     
     public User() {
-        this.created = new Date();
+        this.created = this.lastLogin = new Date();
         this.periodicSort = true;
     }
 
@@ -169,24 +170,20 @@ public class User extends ObjectifyModel implements Serializable {
             Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
             user.save();
         } else {
-            boolean shouldSave = false;
-
             if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
                 // TODO: update other fields if stale
                 Logger.info("User has new Dropbox oauth credentials: %s", user);
                 user.setToken(token);
                 user.setSecret(secret);
-                shouldSave = true;
             }
 
             if (user.nameLower == null) {
                 user.nameLower = user.name.toLowerCase();
-                shouldSave = true;
             }
 
-            if (shouldSave) {
-                user.save();
-            }
+            user.lastLogin = new Date();
+
+            user.save();
         }
 
         return user;
@@ -203,6 +200,7 @@ public class User extends ObjectifyModel implements Serializable {
     }
 
     public void delete() {
+        invalidate();
         Datastore.delete(this);
     }
 
@@ -225,6 +223,7 @@ public class User extends ObjectifyModel implements Serializable {
             .append(this.created)
             .append(this.modified)
             .append(this.lastSync)
+            .append(this.lastLogin)
             .hashCode();
     }
 
@@ -248,6 +247,7 @@ public class User extends ObjectifyModel implements Serializable {
             .append(this.created, other.created)
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
+            .append(this.lastLogin, other.lastLogin)
             .isEquals();
     }
     
@@ -262,6 +262,7 @@ public class User extends ObjectifyModel implements Serializable {
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)
+            .add("last_login", lastLogin)
             .toString();
     }
     

@@ -6,13 +6,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
-import models.User;
 import play.Logger;
 import play.Play;
 import play.mvc.Http.Header;
 import play.mvc.Mailer;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Send emails.
@@ -22,16 +19,8 @@ import com.google.common.base.Preconditions;
  */
 public class Mails extends Mailer {
     public static final String ERROR_EMAIL = Play.configuration.getProperty("sortbox.error_email");
-    public static final String FROM_EMAIL = Play.configuration.getProperty("sortbox.email");
+    public static final String CONTACT_EMAIL = Play.configuration.getProperty("sortbox.email");
 
-    public static void notifyAccountDeletion(User user) {
-        Preconditions.checkNotNull(user);
-        setSubject("Sortbox account deactivated, " +  user.email);
-        addRecipient(user.email);
-        setFrom("Sortbox <" + FROM_EMAIL + ">");
-        send(user);
-    }
-    
     public static class EmailedException implements Iterable<EmailedException> {
         public final Throwable t;
         public EmailedException(Throwable t) {
@@ -89,7 +78,7 @@ public class Mails extends Mailer {
     public static void logError(Long id, Throwable e, Collection<Header> headers) {
         Logger.error(e, "Sending Gack to %s", ERROR_EMAIL);
         Date date = new Date();
-        setFrom(FROM_EMAIL);
+        setFrom(CONTACT_EMAIL);
         addRecipient(ERROR_EMAIL);
         setSubject(String.format("Error at %s logged: %s", date, e.getClass()));
         EmailedException errors = new EmailedException(e);

@@ -27,11 +27,13 @@
       </dd>
       <dt>Last sync</dt>
       #{if user.lastSync}
-      <dd>${user.lastSync}</dd>
+      <dd>#{if user.lastSync}${user.lastSync.since()}#{/if}#{else}<em>None yet</em>#{/else}</dd>
       #{/if}
       #{else}
       <dd><em>None yet</em></dd>
       #{/else}
+      <dt>Last login</dt>
+      <dd>${user.lastLogin.since()}</dd>      
       <dt>Created date</dt>
       <dd>${user.created}</dd>
       <dt>Last modified</dt>

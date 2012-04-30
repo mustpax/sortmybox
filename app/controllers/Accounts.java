@@ -2,6 +2,7 @@ package controllers;
 
 import models.CascadingDelete;
 import models.User;
+import notifiers.Mails;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -29,7 +30,8 @@ public class Accounts extends Controller {
 
 	public static void delete() {
 		User user = Login.getLoggedInUser();
-		render(user);
+		String contact = Mails.CONTACT_EMAIL;
+		render(user, contact);
 	}
 	
     public static void deletePost() {
