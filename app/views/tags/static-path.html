@@ -1,0 +1,13 @@
+*{
+ * Resolve static resource path in a CDN aware manner.
+ * A CDN path will be used on prod.
+}*
+%{
+  namespace = java.lang.System.getenv("NAMESPACE");
+}%
+#{if play.mode.isProd() && !namespace}
+${play.configuration.getProperty("sortbox.cdn")}${_arg}
+#{/if}
+#{else}
+/public${_arg}
+#{/else}
