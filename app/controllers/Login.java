@@ -73,16 +73,6 @@ public class Login extends Controller {
 
             login();
         }
-
-        // Checks
-        Check check = getActionAnnotation(Check.class);
-        if(check != null) {
-            check(check);
-        }
-        check = getControllerInheritedAnnotation(Check.class);
-        if(check != null) {
-            check(check);
-        }
     }
 
     @Before(priority=1)
@@ -97,20 +87,6 @@ public class Login extends Controller {
         }
     }
     
-    private static void check(Check check) {
-        for(String profile : check.value()) {
-            boolean hasProfile = hasProfile(profile);
-            if (!hasProfile) {
-                forbidden("Forbidden. User missing profile: " + profile);
-            }
-        }
-    }
-
-    private static boolean hasProfile(String profile) {
-        // TODO
-        return false;
-    }
-
     public static void login() {
         if (isLoggedIn()) {
             Logger.info("User visited login url, but already logged in.");
