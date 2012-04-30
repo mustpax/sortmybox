@@ -59,7 +59,7 @@ public class Application extends Controller {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
         DropboxClient client = DropboxClientFactory.create(user);
-        String sortboxPath = Dropbox.getRoot().getSortboxPath();
+        String sortboxPath = Dropbox.getSortboxPath();
         DbxMetadata file = client.getMetadata(sortboxPath);
         if (file == null) {
             // 1. create missing Sortbox folder

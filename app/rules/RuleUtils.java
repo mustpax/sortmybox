@@ -100,7 +100,7 @@ public class RuleUtils {
 
         List<FileMove> fileMoves = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.getRoot().getSortboxPath());
+        Set<String> files = client.listDir(Dropbox.getSortboxPath());
 
         if (files.isEmpty()) {
             Logger.info("Ran rules for %s, no files to process.", user);

@@ -9,34 +9,9 @@ public class Dropbox {
     
     public static final int API_VERSION = 1;
 
-    private static final Root ROOT = Root.valueOf(Play.configuration.getProperty("dropbox.sandboxed", Root.SANDBOX.name()));
-
-
-    public static enum Root {
-        APP("dropbox"),
-        SANDBOX("sandbox");
-
-        private final String path;
-
-        private Root(String path) {
-            this.path = path;
-        }
-        public String getPath() { return path; }
-        
-        public String getSortboxPath() {
-            switch(this) {
-            case APP:
-                return "/Sortbox";
-            case SANDBOX:
-                return "/";
-            }
-            throw new IllegalStateException("Unhandled Dropbox root type: " + this);
-        }
+    public static String getSortboxPath() {
+        return "/Sortbox";
     }
-
-    public static Root getRoot() {
-        return ROOT;
-    }
-
+    
     private Dropbox() {}
  } 

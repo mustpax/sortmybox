@@ -1,18 +1,14 @@
 package dropbox.client;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import oauth.signpost.OAuth;
-
 import play.Logger;
-import play.Play;
-import play.libs.WS;
 import play.libs.OAuth.ServiceInfo;
+import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
-import play.templates.JavaExtensions;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -20,12 +16,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
-import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.DropboxURLs;
-import dropbox.Dropbox.Root;
-import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxAccount;
+import dropbox.gson.DbxMetadata;
 
 /**
  * REST API Client for Dropbox
@@ -55,7 +49,7 @@ class DropboxClientImpl implements DropboxClient {
         path = path.startsWith("/") ? path : "/" + path;
 
         WSRequest ws = new WSRequestFactory(DropboxURLs.METADATA, token, secret)
-            .addPath(Dropbox.getRoot(), path)
+            .addPath(path)
             .addPair("include_deleted", "false")
             .create();
 
@@ -106,7 +100,7 @@ class DropboxClientImpl implements DropboxClient {
         Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
 
         WSRequest ws = new WSRequestFactory(DropboxURLs.CREATE_FOLDER, token, secret)
-            .addPair("root", Dropbox.getRoot().getPath())
+            .addPair("root", "dropbox")
             .addPair("path", path)
             .create();
 
@@ -127,7 +121,7 @@ class DropboxClientImpl implements DropboxClient {
                 "To and from paths should start with /");
         
         WSRequest ws = new WSRequestFactory(DropboxURLs.MOVE, token, secret)
-            .addPair("root", Dropbox.getRoot().getPath())
+            .addPair("root", "dropbox")
             .addPair("from_path", from)
             .addPair("to_path", to)
             .create();
@@ -163,7 +157,6 @@ class DropboxClientImpl implements DropboxClient {
         private final String token;
         private final String secret;
         private final Map<String, String> pairs;
-        private String root = null;
         private String path = null;
         
         public WSRequestFactory(DropboxURLs url, String token, String secret) {
@@ -173,8 +166,7 @@ class DropboxClientImpl implements DropboxClient {
             this.pairs = Maps.newLinkedHashMap();
         }
         
-        public WSRequestFactory addPath(Root root, String path) {
-            this.root = root.getPath();
+        public WSRequestFactory addPath(String path) {
             this.path = path;
             return this;
         }
@@ -187,7 +179,7 @@ class DropboxClientImpl implements DropboxClient {
         public WSRequest create() {
             StringBuilder fullUrl = new StringBuilder(url);
             if (path != null) {
-                fullUrl.append("/").append(encodeParam(root)).append(encodePath(path));
+                fullUrl.append("/").append(encodeParam("dropbox")).append(encodePath(path));
             }
             if (pairs.size() > 0) {
                 fullUrl.append("?");
