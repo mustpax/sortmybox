@@ -86,6 +86,10 @@ select[size] {
     text-align: center;
 }
 
+.share-links iframe {
+    margin-right: 10px;
+}
+
 .logo {
     position: relative;
 }
