@@ -46,6 +46,8 @@ public class User extends ObjectifyModel implements Serializable {
     public String nameLower;
     public String email;
     public Boolean periodicSort;
+    public Integer fileMoves;
+
     public Date created;
     public Date modified;
     public Date lastSync;
@@ -57,6 +59,7 @@ public class User extends ObjectifyModel implements Serializable {
     public User() {
         this.created = this.lastLogin = new Date();
         this.periodicSort = true;
+        this.fileMoves = 0;
     }
 
     public User(DbxAccount account, String token, String secret) {
@@ -181,6 +184,10 @@ public class User extends ObjectifyModel implements Serializable {
                 user.nameLower = user.name.toLowerCase();
             }
 
+            if (user.fileMoves == null) {
+                user.fileMoves = 0;
+            }
+            
             user.lastLogin = new Date();
 
             user.save();
@@ -193,7 +200,12 @@ public class User extends ObjectifyModel implements Serializable {
         lastSync = new Date();
         save();
     }
-    
+
+    public void incrementFileMoves(int count) {
+        fileMoves += count;
+        save();
+    }
+
     public Key<User> save() {
         invalidate();
         return Datastore.put(this);

@@ -132,6 +132,7 @@ public class RuleUtils {
         
         Logger.info("Done running rules for %s. %d moves performed", user, fileMoves.size());
         if (!fileMoves.isEmpty()) {
+            user.incrementFileMoves(fileMoves.size());
             FileMove.save(fileMoves);
         }
 
