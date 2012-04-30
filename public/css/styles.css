@@ -119,13 +119,17 @@ select[size] {
 
 .blacklist th,
 .blacklist td {
-	text-align: center;
+    text-align: center;
     padding: 4px;
 }
 
 .blacklist form {
-	 margin-top: 0px;
-     margin-bottom: 0px;     
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.login {
+    margin-right: 30px;
 }
 
 /*
