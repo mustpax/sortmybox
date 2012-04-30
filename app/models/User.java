@@ -2,6 +2,7 @@ package models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
@@ -17,6 +18,7 @@ import play.libs.Crypto;
 import play.modules.objectify.Datastore;
 import play.modules.objectify.ObjectifyModel;
 
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
@@ -26,6 +28,8 @@ import dropbox.gson.DbxAccount;
 
 public class User extends ObjectifyModel implements Serializable {
 
+    private static final Set<Long> ADMINS;
+ 
     static {
         if ((Cache.cacheImpl != Cache.forcedCacheImpl) && (Cache.forcedCacheImpl != null)) {
             Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
@@ -33,6 +37,8 @@ public class User extends ObjectifyModel implements Serializable {
                         Cache.forcedCacheImpl.getClass());
            Cache.cacheImpl = Cache.forcedCacheImpl;
         }
+
+        ADMINS = getAdmins();
     }
 
     @Id public Long id;
@@ -59,6 +65,16 @@ public class User extends ObjectifyModel implements Serializable {
         this.nameLower = name.toLowerCase();
         setToken(token);
         setSecret(secret);
+    }
+    
+    private static Set<Long> getAdmins() {
+        String ids= Play.configuration.getProperty("admin.ids", "").trim();
+        ImmutableSet.Builder<Long> builder = ImmutableSet.builder();
+        for (String id : ids.split(",")) {
+            if (id.isEmpty()) continue;
+            builder.add(Long.valueOf(id));
+        }
+        return builder.build();
     }
     
     /**
@@ -106,8 +122,7 @@ public class User extends ObjectifyModel implements Serializable {
     }
 
     public boolean isAdmin() {
-        // FIXME(syyang): derive from a static listing of admin users
-        return false;
+        return ADMINS.contains(id);
     }
 
     public static boolean isValidId(String userId) {
