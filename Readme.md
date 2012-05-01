@@ -37,7 +37,10 @@ Special thanks to:
 - [Play Framework][play]: taking back Java web development from the architecture astronauts.
 - Hosting by [Google App Engine][appengine]
 - [GitHub][] for hosting the source code.
+- Background pattern by [Dan Krause][dan] via [Subtle Patterns][sp]
 
+[sp]: http://subtlepatterns.com/?p=1121
+[dan]: http://dankruse.com/
 [jQuery]: http://jquery.com/
 [Bootstrap]: http://documentcloud.github.com/underscore/
 [play]: http://www.playframework.org
