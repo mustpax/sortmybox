@@ -20,6 +20,7 @@ import play.mvc.Mailer;
 public class Mails extends Mailer {
     public static final String ERROR_EMAIL = Play.configuration.getProperty("sortbox.error_email");
     public static final String CONTACT_EMAIL = Play.configuration.getProperty("sortbox.email");
+    public static final String FROM_EMAIL = Play.configuration.getProperty("sortbox.from_email");
 
     public static class EmailedException implements Iterable<EmailedException> {
         public final Throwable t;
@@ -78,7 +79,7 @@ public class Mails extends Mailer {
     public static void logError(Long id, Throwable e, Collection<Header> headers) {
         Logger.error(e, "Sending Gack to %s", ERROR_EMAIL);
         Date date = new Date();
-        setFrom(CONTACT_EMAIL);
+        setFrom(FROM_EMAIL);
         addRecipient(ERROR_EMAIL);
         setSubject(String.format("Error at %s logged: %s", date, e.getClass()));
         EmailedException errors = new EmailedException(e);
