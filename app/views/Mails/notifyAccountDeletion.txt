@@ -1,7 +1,0 @@
-Hello ${user.email},
-
-Your account has been deleted. You don't need need to take any further actions.
-
-If you have any questions, please email us at sortboxteam@gmail.com or follow us on twitter @sortboxteam.
-
-- Sortbox Team
