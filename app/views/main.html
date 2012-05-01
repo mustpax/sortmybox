@@ -28,7 +28,9 @@
 	      </ul>
 	      <ul class="nav pull-right">
 	        #{if user}
-	            <li class="#{get 'admin'}#{/get}"><a href="@{Admin.searchUser()}">Admin</a></li>
+                #{if user.isAdmin() }
+                    <li class="#{get 'admin'}#{/get}"><a href="@{Admin.searchUser()}">Admin</a></li>
+                #{/if}
 	            <li class="dropdown">
 	              <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
 	              <ul class="dropdown-menu">
