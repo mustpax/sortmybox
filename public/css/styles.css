@@ -87,7 +87,8 @@ select[size] {
 }
 
 .share-links iframe {
-    margin-right: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .logo {
