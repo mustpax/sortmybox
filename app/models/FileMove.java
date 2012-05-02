@@ -16,8 +16,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
+@Cached
 public class FileMove extends ObjectifyModel implements Serializable {
 
     public static final int RETENTION_DAYS = 7;

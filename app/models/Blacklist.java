@@ -16,8 +16,11 @@ import play.modules.objectify.ObjectifyModel;
 
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
+import com.googlecode.objectify.annotation.Cached;
+
 import common.cache.CacheKey;
 
+@Cached
 public class Blacklist extends ObjectifyModel implements Serializable {
 
     // TODO: refactor this static block

@@ -12,7 +12,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
 import play.modules.objectify.Datastore;
@@ -22,24 +21,16 @@ import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
+
 import common.cache.CacheKey;
 
 import dropbox.gson.DbxAccount;
 
+@Cached
 public class User extends ObjectifyModel implements Serializable {
 
-    private static final Set<Long> ADMINS;
- 
-    static {
-        if ((Cache.cacheImpl != Cache.forcedCacheImpl) && (Cache.forcedCacheImpl != null)) {
-            Logger.warn("Wrong cache impl, fixing. Cache manager: %s Forced manager: %s",
-                        Cache.cacheImpl.getClass(),
-                        Cache.forcedCacheImpl.getClass());
-           Cache.cacheImpl = Cache.forcedCacheImpl;
-        }
-
-        ADMINS = getAdmins();
-    }
+    private static final Set<Long> ADMINS = getAdmins();
 
     @Id public Long id;
     public String name;
@@ -207,18 +198,15 @@ public class User extends ObjectifyModel implements Serializable {
     }
 
     public Key<User> save() {
-        invalidate();
         return Datastore.put(this);
     }
 
     public void delete() {
-        invalidate();
         Datastore.delete(this);
     }
 
     @PrePersist
     public void prePersist() {
-        invalidate();
         modified = new Date();
     }
 
@@ -277,11 +265,5 @@ public class User extends ObjectifyModel implements Serializable {
             .add("last_login", lastLogin)
             .toString();
     }
-    
-    /**
-     * Invalidate the cached version of this object.
-     */
-    public void invalidate() {
-        Cache.safeDelete(CacheKey.create(User.class, id));
-    }
+
 }

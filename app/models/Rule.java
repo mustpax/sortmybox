@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 /**
@@ -33,6 +34,7 @@ import com.googlecode.objectify.annotation.Parent;
  * @author mustpax
  * @author syyang
  */
+@Cached
 public class Rule extends ObjectifyModel implements Serializable {
 
     private static final int MAX_RULES_TO_FETCH = 10;
