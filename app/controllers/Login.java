@@ -32,9 +32,7 @@ import dropbox.gson.DbxAccount;
  */
 @With(ErrorReporter.class)
 public class Login extends Controller {
-    
     private static final String REDIRECT_URL = "url";
-    private static final String SESSION_USER = "userid";
 
     private static class SessionKeys {
         static final String TOKEN = "token";
@@ -56,11 +54,11 @@ public class Login extends Controller {
 
     @Before
     static void log() {
-        Joiner joiner = Joiner.on(":").skipNulls();
+        Joiner joiner = Joiner.on(":").useForNull("");
         Logger.info(joiner.join(request.remoteAddress,
                                 request.method,
                                 request.secure ? "ssl" : "http",
-                                session.get(SESSION_USER),
+                                session.get(SessionKeys.UID),
                                 request.url));
     }
 
