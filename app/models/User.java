@@ -142,15 +142,7 @@ public class User extends ObjectifyModel implements Serializable {
      */
     public static User findById(long id) {
         Preconditions.checkNotNull(id, "id cannot be null");
-        String cacheKey = CacheKey.create(User.class, id);
-        User user = (User) Cache.get(cacheKey);
-        if (user == null) {
-            user = Datastore.find(User.class, id, false);
-            if (user != null) {
-              Cache.set(cacheKey, user, "1h");
-            }
-        }
-        return user;
+        return Datastore.find(User.class, id, false);
     }
 
     public static User getOrCreateUser(DbxAccount account, String token, String secret) {
