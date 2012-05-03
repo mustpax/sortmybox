@@ -10,6 +10,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
+import play.mvc.Router;
 import play.mvc.With;
 
 import com.google.appengine.api.NamespaceManager;
@@ -62,7 +63,7 @@ public class Login extends Controller {
                                 request.url));
     }
 
-    @Before(unless={"login", "auth", "logout", "offline"}, priority=1000)
+    @Before(unless={"login", "auth", "logout", "offline", "authCallback"}, priority=1000)
     static void checkAccess() throws Throwable {
         if (!isLoggedIn()) {
             if ("GET".equals(request.method)) {
@@ -99,39 +100,39 @@ public class Login extends Controller {
         return getLoggedInUser() != null;
     }
 
+    public static void authCallback() throws Exception {
+        String token = session.get(SessionKeys.TOKEN);
+        String secret = session.get(SessionKeys.SECRET);
+        ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
+        OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
+        if (oauthResponse.error == null) {
+            Logger.info("Succesfully authenticated with Dropbox.");
+            User u = upsertUser(oauthResponse.token, oauthResponse.secret);
+            session.put(SessionKeys.UID, u.id);
+            session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
+            redirectToOriginalURL();
+        } else {
+            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
+            session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
+            forbidden("Could not authenticate with Dropbox.");
+        }
+    }
+
     public static void auth() throws Exception {
         flash.keep(REDIRECT_URL);
-        if (flash.contains("verifier")) {
-            String token = session.get(SessionKeys.TOKEN);
-            String secret = session.get(SessionKeys.SECRET);
-            ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
-            OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
-            if (oauthResponse.error == null) {
-                Logger.info("Succesfully authenticated with Dropbox.");
-                User u = upsertUser(oauthResponse.token, oauthResponse.secret);
-                session.put(SessionKeys.UID, u.id);
-                session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
-                redirectToOriginalURL();
-            } else {
-                Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
-                session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
-                forbidden("Could not authenticate with Dropbox.");
-            }
+        ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
+        OAuth oauth = OAuth.service(serviceInfo);
+        OAuth.Response oauthResponse = oauth.retrieveRequestToken();
+        if (oauthResponse.error == null) {
+            Logger.info("Redirecting to Dropbox for auth.");
+            session.put(SessionKeys.TOKEN, oauthResponse.token);
+            session.put(SessionKeys.SECRET, oauthResponse.secret);
+            redirect(oauth.redirectUrl(oauthResponse.token) +
+                    "&oauth_callback=" +
+                    URLEncoder.encode(request.getBase() + "/auth-cb", "UTF-8"));
         } else {
-            ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
-            OAuth oauth = OAuth.service(serviceInfo);
-            OAuth.Response oauthResponse = oauth.retrieveRequestToken();
-            if (oauthResponse.error == null) {
-                session.put(SessionKeys.TOKEN, oauthResponse.token);
-                session.put(SessionKeys.SECRET, oauthResponse.secret);
-                flash.put("verifier", "true");
-                redirect(oauth.redirectUrl(oauthResponse.token) +
-                         "&oauth_callback=" +
-                        URLEncoder.encode(request.getBase()+"/auth", "UTF-8"));
-            } else {
-                Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
-                error("Error connecting to Dropbox.");
-            }
+            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
+            error("Error connecting to Dropbox.");
         }
     }
     

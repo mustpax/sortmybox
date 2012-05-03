@@ -40,6 +40,7 @@ GET     /cron/{<.*>jobPath}                     CronManager.process
 
 # Authorization
 GET     /auth                                   Login.auth
+GET     /auth-cb                                Login.authCallback
 GET     /                                       Login.login
 GET     /logout                                 Login.logout
 GET     /offline                                Login.offline
