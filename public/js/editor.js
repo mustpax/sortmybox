@@ -151,16 +151,17 @@
         }
     };
     
-    var dirUpdater = _.debounce(function () {
+    function dirUpdater() {
         var cell = $(this).parents('td').first();
         var path = $(this).val() || '/';
         displayDirs(path, null, cell, true);
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
-    }, 1500);
+    };
     
-    $('.rule .dest').live('keyup focus change', dirUpdater);
+    $('.rule .dest').live('focus change', dirUpdater);
+    $('.rule .dest').live('keyup', _.debounce(dirUpdater, 1500));
 
     $('.rule .dest').live('focus', function() {
         var cell = $(this).parents('td').first();
