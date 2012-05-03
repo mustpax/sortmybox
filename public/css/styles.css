@@ -141,6 +141,20 @@ select[size] {
     margin-right: 40px;
 }
 
+.relative {
+    position: relative;
+}
+
+.status {
+    position: absolute;
+    right: -4px;
+    top: 6px;
+}
+
+.rule .msg {
+    display: block;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
