@@ -99,10 +99,10 @@ def usage():
 def submit_cb(bytes_so_far, total_bytes):
     print '%d bytes transferred / %d bytes total' % (bytes_so_far, total_bytes)
 
-def get_key_name(fullpath, prefix):
+def get_key_name(fullpath, prefix, prepend):
     key_name = fullpath[len(prefix):]
     l = key_name.split(os.sep)
-    return '/'.join(l)
+    return prepend + '/'.join(l)
 
 def main():
     try:
@@ -125,6 +125,7 @@ def main():
     quiet = False
     no_op = False
     prefix = '/'
+    prepend = ''
     grant = None
     no_overwrite = False
     reduced = False
@@ -178,7 +179,7 @@ def main():
                 if not quiet:
                     print 'Getting list of existing keys to check against'
                 keys = []
-                for key in b.list(get_key_name(path, prefix)):
+                for key in b.list(get_key_name(path, prefix, prepend)):
                     keys.append(key.name)
             for root, dirs, files in os.walk(path):
                 for ignore in ignore_dirs:
@@ -186,7 +187,7 @@ def main():
                         dirs.remove(ignore)
                 for file in files:
                     fullpath = os.path.join(root, file)
-                    key_name = get_key_name(fullpath, prefix)
+                    key_name = get_key_name(fullpath, prefix, prepend)
                     copy_file = True
                     if no_overwrite:
                         if key_name in keys:
