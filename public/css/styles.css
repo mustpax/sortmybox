@@ -41,7 +41,6 @@ select[size] {
     position: relative;
 }
 
-
 .exp-status {
     position: absolute;
     display: block;
@@ -153,6 +152,12 @@ select[size] {
 
 .rule .msg {
     display: block;
+}
+
+.rule input,
+.rule select {
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 /*
