@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Modified by Mustafa Paksoy 2012
+
 # Copyright (c) 2006,2007,2008 Mitch Garnaat http://garnaat.org/
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -74,6 +76,16 @@ SYNOPSIS
                        sync, even if the file has been updated locally if 
                        the key exists on s3 the file on s3 will not be 
                        updated.
+        prepend - Partial path to prepend to keys being uploaded to S3.
+                  The prefix stripping is applied before the append.
+                  For example, if the full path of a file is:
+                      /home/foo/bar/fie.baz
+                  and the prefix is specified as "-p /home/foo/" and
+                  the the prepend is specified as "-e /v1/"
+                  resulting key name in S3 will be:
+                     /v1/bar/fie.baz
+                 The prepend path must end in a trailing separator and if
+                 it does not then one will be added.
         reduced - Use Reduced Redundancy storage
 
 
@@ -98,7 +110,7 @@ def main():
                 sys.argv[1:], 'a:b:c::d:g:hi:np:qs:vwr',
                 ['access_key=', 'bucket=', 'callback=', 'debug=', 'help',
                  'grant=', 'ignore=', 'no_op', 'prefix=', 'quiet',
-                 'secret_key=', 'no_overwrite', 'reduced']
+                 'secret_key=', 'no_overwrite', 'reduced', 'prepend']
                 )
     except:
         usage()
@@ -143,6 +155,10 @@ def main():
             prefix = a
             if prefix[-1] != os.sep:
                 prefix = prefix + os.sep
+        if o in ('-e', '--prepend'):
+            prepend = a
+            if prepend[-1] != os.sep:
+                prepend = prepend + os.sep
         if o in ('-q', '--quiet'):
             quiet = True
         if o in ('-s', '--secret_key'):
