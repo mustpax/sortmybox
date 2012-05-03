@@ -104,24 +104,24 @@ public class Rule extends ObjectifyModel implements Serializable {
         }
 
         if (owner == null) {
-            ret.add(new RuleError("owner", "Missing rule owner."));
+            ret.add(new RuleError("owner", "Missing owner."));
         }
         
         if (StringUtils.isBlank(pattern)) {
-            ret.add(new RuleError("pattern", "Pattern cannot be empty."));
+            ret.add(new RuleError("pattern", "Can't be empty."));
         } else if (pattern.contains("/")) {
-            ret.add(new RuleError("pattern", "Pattern cannot contain slashes (/)."));
+            ret.add(new RuleError("pattern", "Can't contain slashes (/)."));
         }
         // Extensions may not include periods
         else if ((type == RuleType.EXT_EQ) &&
 	              pattern.contains(".")) {
-            ret.add(new RuleError("pattern", "Extensions cannot contain periods."));
+            ret.add(new RuleError("pattern", "Can't contain periods."));
         }
 
         if (StringUtils.isBlank(dest)) {
-            ret.add(new RuleError("dest", "Destination directory cannot be empty."));
+            ret.add(new RuleError("dest", "Can't be empty."));
         } else if (! dest.startsWith("/")) {
-            ret.add(new RuleError("dest", "Destination directory must start with a slash (/)."));
+            ret.add(new RuleError("dest", "Must start with a slash (/)."));
         }
         
         // TODO check dest is not a file
