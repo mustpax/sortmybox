@@ -268,14 +268,20 @@
 	                'authenticityToken' : window.csrfToken
                 },
                 success: function(data) {
+                             var hasErrors = false,
+                                 msg       = null;
                              doneLoading();
                              console.log('save success');
                              $.each(data, function(i, v) {
                                  addErrors(i, v);
+                                 hasErros = hasErrors || !! v.length;
                              });
-                             var msg = $('.save').popover({ title: "Success!", 
-                             						        content:"Your rules will run every 15 minutes.",
-                             						        trigger:"manual"}).popover('show');
+                             if (! hasErrors) {
+	                             msg = $('.save').popover({ title:   "Success!", 
+                             						        content: "Your rules will run every 15 minutes.",
+                             						        trigger: "manual"})
+                             				     .popover('show');
+                             }
                              setTimeout(function(){
                                 msg.popover("hide");
                              }, 2000);						      
