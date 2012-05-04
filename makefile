@@ -22,7 +22,7 @@ deps: .lastdepsrun
 	play ec
 	date > .lastdepsrun
 
-stage: all
+stage: all static
 	build/checkbranch.sh staging
 	-play gae:deploy
 	git push origin staging
@@ -32,7 +32,7 @@ deploy: all static
 	-play gae:deploy
 	git push origin prod
 
-dev: all
+dev: all static
 	-play gae:deploy
 
 clean:
