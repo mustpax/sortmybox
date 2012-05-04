@@ -32,7 +32,8 @@ SYNOPSIS
           -b/--bucket <bucket_name> [-c/--callback <num_cb>]
           [-d/--debug <debug_level>] [-i/--ignore <ignore_dirs>]
           [-n/--no_op] [-p/--prefix <prefix>] [-q/--quiet]
-          [-g/--grant grant] [-w/--no_overwrite] [-r/--reduced] path
+          [-g/--grant grant] [-w/--no_overwrite] [-r/--reduced]
+          [-e/--prepend <path>] path
 
     Where
         access_key - Your AWS Access Key ID.  If not supplied, boto will
@@ -107,7 +108,7 @@ def get_key_name(fullpath, prefix, prepend):
 def main():
     try:
         opts, args = getopt.getopt(
-                sys.argv[1:], 'a:b:c::d:g:hi:np:qs:vwr',
+                sys.argv[1:], 'a:b:c::d:g:hi:np:qs:vwre:',
                 ['access_key=', 'bucket=', 'callback=', 'debug=', 'help',
                  'grant=', 'ignore=', 'no_op', 'prefix=', 'quiet',
                  'secret_key=', 'no_overwrite', 'reduced', 'prepend']
