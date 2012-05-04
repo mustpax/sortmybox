@@ -9,4 +9,4 @@
   cdn = play.configuration.getProperty("sortbox.cdn");
   ver = com.google.appengine.api.utils.SystemProperty.applicationVersion.get();
 }%
-#{if play.mode.isProd() && cdn}${cdn}${ver}/${_arg}#{/if}#{else}${_arg}#{/else}
+#{if play.mode.isProd() && cdn}${cdn}/${ver}${_arg}#{/if}#{else}${_arg}#{/else}
