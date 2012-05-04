@@ -6,12 +6,14 @@
 #{set 'head'}
 <link rel="canonical" href="@@{Login.login()}">
  
-#{if alt}
-    #{abtest.alt /}
+#{if play.mode.isProd() }
+	#{if alt}
+	    #{abtest.alt /}
+	#{/if}
+	#{else}
+	    #{abtest.original /}
+	#{/else}
 #{/if}
-#{else}
-    #{abtest.original /}
-#{/else}
 #{/set}
 
 #{set nav:''/}
