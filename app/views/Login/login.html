@@ -3,6 +3,17 @@
 
 #{flash /}
 
+#{set 'head'}
+<link rel="canonical" href="@@{Login.login()}">
+ 
+#{if alt}
+    #{abtest.alt /}
+#{/if}
+#{else}
+    #{abtest.original /}
+#{/else}
+#{/set}
+
 #{set nav:''/}
 <style>
     body {

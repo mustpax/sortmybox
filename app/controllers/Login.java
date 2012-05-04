@@ -66,7 +66,7 @@ public class Login extends Controller {
                                 request.url));
     }
 
-    @Before(unless={"login", "auth", "logout", "offline", "authCallback"}, priority=1000)
+    @Before(unless={"login", "auth", "logout", "offline", "authCallback", "alt"}, priority=1000)
     static void checkAccess() throws Throwable {
         if (!isLoggedIn()) {
             if ("GET".equals(request.method)) {
@@ -87,6 +87,12 @@ public class Login extends Controller {
                 NamespaceManager.set(namespace);
             }
         }
+    }
+    
+    public static void alt() {
+        boolean alt = true;
+        flash.keep(REDIRECT_URL);
+        render("Login/login.html", alt);
     }
     
     public static void login() {
