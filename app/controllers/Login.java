@@ -14,6 +14,7 @@ import play.mvc.Router;
 import play.mvc.With;
 
 import com.google.appengine.api.NamespaceManager;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
 import common.request.Headers;
 
@@ -59,6 +60,8 @@ public class Login extends Controller {
         Logger.info(joiner.join(request.remoteAddress,
                                 request.method,
                                 request.secure ? "ssl" : "http",
+                                SystemProperty.applicationVersion.get(),
+                                SystemProperty.environment.get(),
                                 session.get(SessionKeys.UID),
                                 request.url));
     }
