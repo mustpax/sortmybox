@@ -41,6 +41,12 @@
     <a class="btn btn-large btn-primary login" href="@{auth()}">Login with Dropbox</a>
     <a class="btn btn-large learn" href="@{Footer.faq()}">Learn more</a>
    </p>
+   #{if alt}
+   <small>
+       <i class="icon-lock"></i>
+       Your credentials are encrypted. We will never store your files.
+   </small>
+   #{/if}
   </div>
  </div>
 </div>
