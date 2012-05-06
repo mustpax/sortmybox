@@ -160,6 +160,11 @@ select[size] {
     margin-bottom: 2px;
 }
 
+.carousel-caption {
+    top: 0;
+    bottom: auto;       
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
