@@ -54,3 +54,4 @@ test-result/
 
 conf/secret.conf
 public/js/all.js
+logs/
