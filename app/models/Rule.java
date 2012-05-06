@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.modules.objectify.Datastore;
 import play.modules.objectify.ObjectifyModel;
@@ -24,6 +25,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
@@ -171,6 +173,49 @@ public class Rule extends ObjectifyModel implements Serializable {
             .add("rank", rank)
             .add("owner", owner)
             .toString();
+    }
+
+    public static boolean insertAll(User user,
+                                    List<Rule> ruleList,
+                                    List<List<RuleError>> allErrors) {
+        List<Rule> toSave = Lists.newArrayList();
+        boolean hasErrors = false;
+    
+        Objectify ofy = Datastore.beginTxn();
+        try {
+            Iterable<Key<Rule>> ruleKeys = getByOwner(user).fetchKeys();
+            
+            // delete existing rules
+            Datastore.delete(ruleKeys);
+    
+            if (ruleList.isEmpty()) {
+                // in effect we are clearing all rules
+                Datastore.commit();
+            } else {
+                int rank = 0;
+                for (Rule rule : ruleList) {
+                    rule.owner = user.getKey();
+                    List<RuleError> errors = rule.validate();
+                    if (errors.isEmpty()) {
+                        rule.rank = rank++;
+                        toSave.add(rule);
+                    } else {
+                        hasErrors = true;
+                    }
+                    allErrors.add(errors);
+                }
+                if (!toSave.isEmpty()) {
+                    Logger.info("Inserting new rules for user");
+                    Datastore.put(toSave);
+                    Datastore.commit();
+                }
+            }
+            return hasErrors && !toSave.isEmpty();
+        } finally {
+            if (ofy.getTxn().isActive()) {
+                ofy.getTxn().rollback();
+            }
+        }
     }
 
     public static Query<Rule> getByOwner(User user) {
