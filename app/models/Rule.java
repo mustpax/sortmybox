@@ -186,11 +186,11 @@ public class Rule extends ObjectifyModel implements Serializable {
             Iterable<Key<Rule>> ruleKeys = getByOwner(user).fetchKeys();
             
             // delete existing rules
-            Datastore.delete(ruleKeys);
+            ofy.delete(ruleKeys);
     
             if (ruleList.isEmpty()) {
                 // in effect we are clearing all rules
-                Datastore.commit();
+                ofy.getTxn().commit();
             } else {
                 int rank = 0;
                 for (Rule rule : ruleList) {
@@ -206,8 +206,8 @@ public class Rule extends ObjectifyModel implements Serializable {
                 }
                 if (!toSave.isEmpty()) {
                     Logger.info("Inserting new rules for user");
-                    Datastore.put(toSave);
-                    Datastore.commit();
+                    ofy.put(toSave);
+                    ofy.getTxn().commit();
                 }
             }
             return hasErrors && !toSave.isEmpty();
