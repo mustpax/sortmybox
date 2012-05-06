@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.persistence.Id;
 
@@ -25,7 +26,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
@@ -175,22 +175,33 @@ public class Rule extends ObjectifyModel implements Serializable {
             .toString();
     }
 
+    /**
+     * Replace all rules for given user with a new list of rules.
+     * 
+     * @param allErrors if not null, validation errors are saved here
+     * @return true if there were no errors and new rules were inserted
+     *              inserted
+     */
     public static boolean insertAll(User user,
                                     List<Rule> ruleList,
-                                    List<List<RuleError>> allErrors) {
+                                    @CheckForNull List<List<RuleError>> allErrors) {
         List<Rule> toSave = Lists.newArrayList();
         boolean hasErrors = false;
     
-        Objectify ofy = Datastore.beginTxn();
+        Datastore.beginTxn();
+        boolean committed = false;
         try {
-            Iterable<Key<Rule>> ruleKeys = getByOwner(user).fetchKeys();
+            List<Key<Rule>> ruleKeys = Lists.newLinkedList(getByOwner(user).fetchKeys());
             
+            Logger.info("Deleting %d rules.", ruleKeys.size());
             // delete existing rules
-            ofy.delete(ruleKeys);
+            Datastore.delete(ruleKeys);
     
             if (ruleList.isEmpty()) {
-                // in effect we are clearing all rules
-                ofy.getTxn().commit();
+                Logger.info("Deleting all rules since there are no new rules to insert.");
+                Datastore.commit();
+                committed = true;
+                return false;
             } else {
                 int rank = 0;
                 for (Rule rule : ruleList) {
@@ -202,18 +213,22 @@ public class Rule extends ObjectifyModel implements Serializable {
                     } else {
                         hasErrors = true;
                     }
-                    allErrors.add(errors);
+                    if (allErrors != null) {
+	                    allErrors.add(errors);
+                    }
                 }
                 if (!toSave.isEmpty()) {
-                    Logger.info("Inserting new rules for user");
-                    ofy.put(toSave);
-                    ofy.getTxn().commit();
+                    Logger.info("Inserting %d new rules for user.", toSave.size());
+                    Datastore.put(toSave);
+                    Datastore.commit();
+                    committed = true;
                 }
             }
-            return hasErrors && !toSave.isEmpty();
+            return ! hasErrors;
         } finally {
-            if (ofy.getTxn().isActive()) {
-                ofy.getTxn().rollback();
+            if (! committed) {
+                Logger.error("Did not commit last transaction, rolling back.");
+                Datastore.rollback();
             }
         }
     }
