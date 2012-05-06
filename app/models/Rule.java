@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
@@ -170,6 +171,11 @@ public class Rule extends ObjectifyModel implements Serializable {
             .add("rank", rank)
             .add("owner", owner)
             .toString();
+    }
+
+    public static Query<Rule> getByOwner(User user) {
+        return Datastore.query(Rule.class)
+    		            .ancestor(Datastore.key(User.class, user.id));
     }
 
     public static class RuleError {

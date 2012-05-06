@@ -6,6 +6,7 @@ import java.util.List;
 import models.Rule;
 import models.Rule.RuleError;
 import models.User;
+import play.Logger;
 import play.modules.objectify.Datastore;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -32,6 +33,7 @@ public class Rules extends Controller {
             //  1. preemptively check the count on the client side
             //  2. we should display an appropriate error message
             //     rather than issuing 400 error
+            Logger.warn("User missing rule list or too many rules.");
             badRequest();
         }
 
@@ -39,13 +41,11 @@ public class Rules extends Controller {
         List<List<RuleError>> allErrors = Lists.newArrayList();
         boolean hasErrors = false;
 
-        final User user = Login.getLoggedInUser();
+        User user = Login.getLoggedInUser();
 
         Objectify ofy = Datastore.beginTxn();
         try {
-            Iterable<Key<Rule>> ruleKeys = Datastore
-                .query(Rule.class)
-                .ancestor(Datastore.key(User.class, user.id))
+            Iterable<Key<Rule>> ruleKeys = Rule.getByOwner(user)
                 .fetchKeys();
             
             // delete existing rules
