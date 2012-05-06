@@ -37,16 +37,26 @@ public class Rules extends Controller {
             badRequest();
         }
 
-        List<Rule> toSave = Lists.newArrayList();
-        List<List<RuleError>> allErrors = Lists.newArrayList();
-        boolean hasErrors = false;
-
         User user = Login.getLoggedInUser();
+        List<List<RuleError>> allErrors = Lists.newArrayList();
+
+        if (insertAll(user, ruleList, allErrors)) {
+            RuleUtils.runRules(user);
+        }
+
+        renderJSON(allErrors);
+    }
+
+    public static boolean insertAll(User user,
+                                    List<Rule> ruleList,
+                                    List<List<RuleError>> allErrors) {
+        List<Rule> toSave = Lists.newArrayList();
+        boolean hasErrors = false;
 
         Objectify ofy = Datastore.beginTxn();
         try {
             Iterable<Key<Rule>> ruleKeys = Rule.getByOwner(user)
-                .fetchKeys();
+								               .fetchKeys();
             
             // delete existing rules
             Datastore.delete(ruleKeys);
@@ -72,16 +82,11 @@ public class Rules extends Controller {
                     Datastore.commit();
                 }
             }
+            return hasErrors && !toSave.isEmpty();
         } finally {
             if (ofy.getTxn().isActive()) {
                 ofy.getTxn().rollback();
             }
         }
-
-        if (!hasErrors && !toSave.isEmpty()) {
-            RuleUtils.runRules(user);
-        }
-
-        renderJSON(allErrors);
     }
 }
