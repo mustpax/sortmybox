@@ -165,6 +165,12 @@ select[size] {
     bottom: auto;       
 }
 
+.faq {
+	background-color: whiteSmoke;
+	padding-top: 20px;
+	padding-bottom: 10px;
+}
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
