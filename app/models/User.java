@@ -20,7 +20,6 @@ import play.modules.objectify.ObjectifyModel;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
-import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 
@@ -140,14 +139,13 @@ public class User extends ObjectifyModel implements Serializable {
      * @return fully loaded user for the given id, null if not found.
      */
     public static User findById(long id) {
-        Preconditions.checkNotNull(id, "id cannot be null");
         try {
             Key<User> key = Datastore.key(User.class, id);
             return Datastore.get(key);
         } catch (EntityNotFoundException e) {
             return null;
         } catch (IllegalArgumentException e) {
-            Logger.warn("Failed to get user: %s", id);
+            Logger.warn("Failed to get user: %d", id);
             throw e;
         }
     }
