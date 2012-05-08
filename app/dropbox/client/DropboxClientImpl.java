@@ -62,7 +62,7 @@ class DropboxClientImpl implements DropboxClient {
             return ret;
         }
 
-        Logger.error("Failed getting metadata for '%s'. Message: %s", path, getError(resp));
+        Logger.warn("Failed getting metadata for '%s'. Message: %s", path, getError(resp));
         return null;
     }
 
