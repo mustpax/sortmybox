@@ -20,28 +20,18 @@ public class CascadingDelete {
     public static void delete(User user) {
         Preconditions.checkNotNull(user);
         
-        Objectify ofy = Datastore.beginTxn();
-        try {
-            // 1. delete rules
-            Iterable<Key<Rule>> ruleKeys = Datastore.query(Rule.class)
-                .ancestor(Datastore.key(User.class, user.id))
-                .fetchKeys();
-            Datastore.delete(ruleKeys);
-            Logger.info("Deleted rules for user: %s", user);
+        // 1. delete rules
+        Iterable<Key<Rule>> ruleKeys = Datastore.query(Rule.class)
+            .ancestor(Datastore.key(User.class, user.id))
+            .fetchKeys();
+        Datastore.delete(ruleKeys);
+        Logger.info("Deleted rules for user: %s", user);
 
-            // 2. delete user
-            user.delete();
-            Logger.info("Deleted user: %s", user);
+        // 2. delete user
+        user.delete();
+        Logger.info("Deleted user: %s", user);
 
-            // 3. enqueue a delete task to delete file moves
-            FileMoveDeleter.submit(user);
-
-            // 4. commit the txn.
-            Datastore.commit();
-        } finally {
-            if (ofy.getTxn().isActive()) {
-                ofy.getTxn().rollback();
-            }
-        }
+        // 3. enqueue a delete task to delete file moves
+        FileMoveDeleter.submit(user);
     }
 }
