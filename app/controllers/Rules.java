@@ -38,6 +38,7 @@ public class Rules extends Controller {
         List<List<RuleError>> allErrors = Lists.newArrayList();
 
         if (Rule.insertAll(user, ruleList, allErrors)) {
+            Logger.info("New rules inserted with no errors so running rules.");
             RuleUtils.runRules(user);
         }
 

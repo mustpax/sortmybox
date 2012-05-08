@@ -186,51 +186,42 @@ public class Rule extends ObjectifyModel implements Serializable {
                                     List<Rule> ruleList,
                                     @CheckForNull List<List<RuleError>> allErrors) {
         List<Rule> toSave = Lists.newArrayList();
-        boolean hasErrors = false;
+        boolean needToRun = true;
     
-        Datastore.beginTxn();
-        boolean committed = false;
-        try {
-            List<Key<Rule>> ruleKeys = Lists.newLinkedList(getByOwner(user).fetchKeys());
+        List<Key<Rule>> ruleKeys = Lists.newLinkedList(getByOwner(user).fetchKeys());
             
-            Logger.info("Deleting %d rules.", ruleKeys.size());
-            // delete existing rules
-            Datastore.delete(ruleKeys);
-    
-            if (ruleList.isEmpty()) {
-                Logger.info("Deleting all rules since there are no new rules to insert.");
-                Datastore.commit();
-                committed = true;
-                return false;
-            } else {
-                int rank = 0;
-                for (Rule rule : ruleList) {
-                    rule.owner = user.getKey();
-                    List<RuleError> errors = rule.validate();
-                    if (errors.isEmpty()) {
-                        rule.rank = rank++;
-                        toSave.add(rule);
-                    } else {
-                        hasErrors = true;
-                    }
-                    if (allErrors != null) {
-	                    allErrors.add(errors);
-                    }
+        if (ruleList.isEmpty()) {
+            Logger.info("Deleting all rules since there are no new rules to insert.");
+            // No rules inserted no need to run
+            needToRun = false;
+        } else {
+            int rank = 0;
+            for (Rule rule : ruleList) {
+                rule.owner = user.getKey();
+                List<RuleError> errors = rule.validate();
+                if (errors.isEmpty()) {
+                    rule.rank = rank++;
+                    toSave.add(rule);
+                } else {
+                    needToRun = false;
                 }
-                if (!toSave.isEmpty()) {
-                    Logger.info("Inserting %d new rules for user.", toSave.size());
-                    Datastore.put(toSave);
-                    Datastore.commit();
-                    committed = true;
+
+                if (allErrors != null) {
+                    allErrors.add(errors);
                 }
             }
-            return ! hasErrors;
-        } finally {
-            if (! committed) {
-                Logger.error("Did not commit last transaction, rolling back.");
-                Datastore.rollback();
+
+            if (!toSave.isEmpty()) {
+                Logger.info("Inserting %d new rules for user.", toSave.size());
+                Datastore.put(toSave);
             }
         }
+        
+        Logger.info("Deleting %d old rules.", ruleKeys.size());
+        // delete existing rules
+        Datastore.delete(ruleKeys);
+    
+        return needToRun;
     }
 
     public static Query<Rule> getByOwner(User user) {
