@@ -152,13 +152,6 @@ public class Login extends Controller {
     private static User upsertUser(String token, String secret) {
         DropboxClient client = DropboxClientFactory.create(token, secret);
         DbxAccount account = client.getAccount();
-        
-        if (Blacklist.findById(account.uid) != null) {
-            // the user is on blacklist
-            session.clear();
-            Logger.warn("The user is currently blocked. User id: " + account.uid);
-            forbidden("User blocked.");
-        }
         return User.getOrCreateUser(account, token, secret);
     }
     
