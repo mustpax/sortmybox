@@ -80,24 +80,16 @@ public class Application extends Controller {
      * @return true if canned rules are created
      */
     private static boolean createCannedRules(final User user) {
-        boolean createdCannedRules = false;
-        Objectify ofy = Datastore.beginTxn();
-        try {
-            if (!Rule.ruleExists(user.id)) {
-                List<Rule> rules = Lists.newArrayListWithCapacity(3);
-                rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
-                rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
-                rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
-                Datastore.put(rules);
-                Datastore.commit();
-                createdCannedRules = true;
-            }
-        } finally {
-            if (ofy.getTxn().isActive()) {
-                ofy.getTxn().rollback();
-            }
+        if (!Rule.ruleExists(user.id)) {
+            List<Rule> rules = Lists.newArrayListWithCapacity(3);
+            rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
+            rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
+            rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
+            Datastore.put(rules);
+            return true;
         }
-        return createdCannedRules;
+
+        return false;
     }
     
     public static class InitResult implements Serializable {
