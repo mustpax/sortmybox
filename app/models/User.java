@@ -17,13 +17,12 @@ import play.libs.Crypto;
 import play.modules.objectify.Datastore;
 import play.modules.objectify.ObjectifyModel;
 
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 import com.google.gdata.util.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
-
-import common.cache.CacheKey;
 
 import dropbox.gson.DbxAccount;
 
@@ -142,7 +141,15 @@ public class User extends ObjectifyModel implements Serializable {
      */
     public static User findById(long id) {
         Preconditions.checkNotNull(id, "id cannot be null");
-        return Datastore.find(User.class, id, false);
+        try {
+            Key<User> key = Datastore.key(User.class, id);
+            return Datastore.get(key);
+        } catch (EntityNotFoundException e) {
+            return null;
+        } catch (IllegalArgumentException e) {
+            Logger.warn("Failed to get user: %s", id);
+            throw e;
+        }
     }
 
     public static User getOrCreateUser(DbxAccount account, String token, String secret) {
