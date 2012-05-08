@@ -68,32 +68,16 @@ public class FileMove extends ObjectifyModel implements Serializable {
     }
 
     public static void save(List<FileMove> fileMoves) {
-        Objectify ofy = Datastore.beginTxn();
-        try {
-            Datastore.put(fileMoves);
-            Datastore.commit();
-        } finally {
-            if (ofy.getTxn().isActive()) {
-                ofy.getTxn().rollback();
-            }
-        }
+        Datastore.put(fileMoves);
     }
 
     public static void truncateFileMoves(Long userId) {
         Date oldestPermitted = DateTime.now().minusDays(RETENTION_DAYS).toDate();
-        Objectify ofy = Datastore.beginTxn();
-        try {
-            Iterable<Key<FileMove>> fileMoveKeys = Datastore.query(FileMove.class)
-                .ancestor(Datastore.key(User.class, userId))
-                .filter("when <", oldestPermitted)
-                .fetchKeys();
+        Iterable<Key<FileMove>> fileMoveKeys = Datastore.query(FileMove.class)
+            .ancestor(Datastore.key(User.class, userId))
+            .filter("when <", oldestPermitted)
+            .fetchKeys();
             
-            Datastore.delete(fileMoveKeys);
-            Datastore.commit();
-        } finally {
-            if (ofy.getTxn().isActive()) {
-                ofy.getTxn().rollback();
-            }
-        }
+        Datastore.delete(fileMoveKeys);
     }
 }
