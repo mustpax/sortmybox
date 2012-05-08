@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 
-#{if createdSortbox}
+#{if initResult.createdSortboxDir }
 <div class="row">
 	<div class="span12">
 		<div class="alert alert-info alert-created hide">
@@ -8,7 +8,9 @@
 		    <h4 class="alert-heading">Sortbox created!</h4>
 			We created a folder called <strong>Sortbox</strong> for you in your Dropbox.
             Save files here to get them sorted based on your rules.<br>
-            We also created some rules for you to get you started.
+            #{if initResult.createdCannedRules}
+	            We also created some rules for you to get you started.
+            #{/if}
 		</div>
 	</div>
 </div>

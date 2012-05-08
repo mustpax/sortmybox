@@ -94,10 +94,10 @@ public class Application extends Controller {
     
     public static class InitResult implements Serializable {
         /** whether the app newly created the Sortbox directory */
-        final boolean createdSortboxDir;
+        final public boolean createdSortboxDir;
 
         /** whether the app populated canned rules */
-        final boolean createdCannedRules;
+        final public boolean createdCannedRules;
         
         InitResult(boolean createdSortboxDir, boolean createdCannedRules) {
             this.createdSortboxDir = createdSortboxDir;
