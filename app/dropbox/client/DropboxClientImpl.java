@@ -62,8 +62,12 @@ class DropboxClientImpl implements DropboxClient {
             return ret;
         }
 
-        Logger.warn("Failed getting metadata for '%s'. Message: %s", path, getError(resp));
+        Logger.warn("Failed getting metadata for '%s'. %s", path, getError(resp));
         return null;
+    }
+
+    private static String sanitizeStatus(Integer status) {
+        return status == null ? "null" : status.toString();
     }
 
     @Override
@@ -109,7 +113,7 @@ class DropboxClientImpl implements DropboxClient {
             return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
         }
 
-        Logger.error("Failed creating folder at '%s'. Message: %s", path, getError(resp));
+        Logger.error("Failed creating folder at '%s'. %s", path, getError(resp));
         return null;
     }
     
@@ -133,7 +137,7 @@ class DropboxClientImpl implements DropboxClient {
         }
 
         String err = getError(resp);
-        Logger.warn("Failed to move files. Error: %s", err);
+        Logger.warn("Failed to move files. " + err);
         if (Integer.valueOf(403).equals(resp.getStatus())) {
             throw new FileMoveCollisionException(err);
         }
@@ -142,11 +146,14 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     private static String getError(HttpResponse resp) {
+        String error;
         try {
-	        return resp.getJson().getAsJsonObject().get("error").getAsString();
+	        error = resp.getJson().getAsJsonObject().get("error").getAsString();
         } catch (UnsupportedOperationException e) {
-            return "Status: " + resp.getStatus() + resp.getString();
+            Logger.error(e, "Cannot parse error response from Dropbox. Resp: %s", resp.getStatus());
+            error = "[cannot read error message]";
         }
+        return String.format("Status: %s Message: %s", sanitizeStatus(resp.getStatus()), error);
     }
     
     /**
