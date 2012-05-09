@@ -7,8 +7,18 @@
       <form class="well" action="@{delete()}" method="POST">
         #{authenticityToken/}
         <h3>Are you sure you want to delete your Sortbox account?</h3></br>
-        <p>If you are having an issue and think if we might be able to help, please try <a href="mailto: ${contact}">contacting support</a> first.</p>
-        <p>Are you sure you want to delete your Sortbox account? Your sort rules and activity history will be deleted permanently.</p></br>
+        <p>
+            If you think we might be able to help
+            <a href="mailto: ${contact}">please contact us</a>.
+            We love getting feedback and your help would let us make Sortbox
+            better.
+        </p>
+        <p>
+            Are you sure you want to delete your Sortbox account?
+            Your sorting rules and activity history will be deleted permanently.
+            This action cannot be undone.
+        </p>
+        </br>
         <button type="submit" class="btn btn-danger">Delete this account</button>
         <a class="btn" href="@{settings()}">Cancel</a>    
       </form>
