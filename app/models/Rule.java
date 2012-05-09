@@ -3,32 +3,31 @@ package models;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.persistence.Id;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import play.Logger;
-import play.data.validation.Required;
-import play.modules.objectify.Datastore;
-import play.modules.objectify.ObjectifyModel;
 import rules.RuleType;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Query;
-import com.googlecode.objectify.annotation.Cached;
-import com.googlecode.objectify.annotation.Parent;
 
 /**
  * A sorting rule that allows files to be moved to a specified
@@ -37,11 +36,31 @@ import com.googlecode.objectify.annotation.Parent;
  * @author mustpax
  * @author syyang
  */
-@Cached
-public class Rule extends ObjectifyModel implements Serializable {
+public class Rule implements Serializable {
+    public static final String KIND = "Rule";
 
     public static final int MAX_RULES = 200;
     
+    public static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {
+        @Override
+        public Key apply(Entity entity) {
+            return entity.getKey();
+        }
+    };
+
+    public static final Function<Rule, Entity> TO_ENTITY = new Function<Rule, Entity>() {
+        @Override
+        public Entity apply(Rule rule) {
+            return rule.toEntity();
+        }
+    };
+
+    private static final Function<Entity, Rule> TO_RULE = new Function<Entity, Rule>() {
+        @Override
+        public Rule apply(Entity entity) {
+            return new Rule(entity);
+        }
+    };
 
     private static final Comparator<Rule> RANK_COMPARATOR = new Comparator<Rule>() {
         @Override public int compare(Rule rule1, Rule rule2) {
@@ -50,8 +69,8 @@ public class Rule extends ObjectifyModel implements Serializable {
         }
     };
 
-    @Id public Long id;
-    @Required @Parent public Key<User> owner;
+    public long id;
+    public Long owner;
     public RuleType type;
     public String pattern;
     public String dest;
@@ -64,12 +83,27 @@ public class Rule extends ObjectifyModel implements Serializable {
         this.pattern = pattern;
         this.dest = dest;
         this.rank = rank;
-        this.owner = Datastore.key(User.class, owner);
+        this.owner = owner;
+    }
+    
+    public Entity toEntity() {
+        Key parentKey = User.key(owner);
+        Entity entity = new Entity(KIND, parentKey);
+        entity.setProperty("type", type.name());
+        entity.setProperty("pattern", pattern);
+        entity.setProperty("dest", dest);
+        entity.setProperty("rank", rank);
+        entity.setProperty("owner", owner);
+        return entity;
     }
 
-    public static Rule findById(Long userId, Long ruleId) {
-        Key<Rule> ruleKey = Datastore.key(User.class, userId, Rule.class, ruleId);
-        return Datastore.find(ruleKey, false);
+    private Rule(Entity entity) {
+        this.id = entity.getKey().getId();
+        this.type = RuleType.fromDbValue((String) entity.getProperty("type"));
+        this.pattern = (String) entity.getProperty("pattern");
+        this.dest = (String) entity.getProperty("dest");
+        this.rank = ((Long) entity.getProperty("rank")).intValue();
+        this.owner = (Long) entity.getProperty("owner");
     }
 
     /** 
@@ -80,21 +114,57 @@ public class Rule extends ObjectifyModel implements Serializable {
      */
     public static List<Rule> findByUserId(Long userId) {
         Preconditions.checkNotNull(userId, "User id can't be null");
-        Iterator<Rule> itr = Datastore.query(Rule.class)
-                .ancestor(Datastore.key(User.class, userId))
-                .limit(MAX_RULES).iterator();
-        List<Rule> rules = Lists.newArrayList(itr);
+        Query q = byOwner(userId);
+
+        List<Rule> rules = Lists.newArrayList(fetch(q));
         Collections.sort(rules, RANK_COMPARATOR);
         return rules;
     }
+    
+    public static Iterable<Rule> fetch(Query q) {
+        return fetch(q, -1);
+    }
+
+    public static Iterable<Rule> fetch(Query q, int limit) {
+        if (limit < 0) {
+            limit = MAX_RULES;
+        }
+
+        FetchOptions fo = FetchOptions.Builder.withLimit(limit);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        return Iterables.transform(ds.prepare(q)
+                                     .asIterable(fo),
+                                   TO_RULE);
+    }
+    
+    public static Iterable<Key> fetchKeys(Query q) {
+        return fetchKeys(q, -1);
+    }
+    
+    public static Iterable<Key> fetchKeys(Query q, int limit) {
+        if (limit < 0) {
+            limit = MAX_RULES;
+        }
+
+        FetchOptions fo = FetchOptions.Builder.withLimit(limit);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        return Iterables.transform(ds.prepare(q.setKeysOnly())
+                                     .asIterable(fo),
+                                   TO_KEY);
+    }
+            
+
+    public static Query all() {
+        return new Query(KIND);
+    }
+    
+    public static Query byOwner(long userId) {
+	    return all().setAncestor(User.key(userId));
+    }
+
 
     public static boolean ruleExists(Long userId) {
-        QueryResultIterable<Key<Rule>> ruleKeys = Datastore
-            .query(Rule.class)
-            .ancestor(Datastore.key(User.class, userId))
-            .limit(1)
-            .fetchKeys();
-        return ruleKeys.iterator().hasNext();
+        return fetch(byOwner(userId).setKeysOnly()).iterator().hasNext();
     }
     
     public boolean matches(String fileName) {
@@ -193,8 +263,8 @@ public class Rule extends ObjectifyModel implements Serializable {
         List<Rule> toSave = Lists.newArrayList();
         boolean needToRun = true;
     
-        List<Key<Rule>> ruleKeys = Lists.newLinkedList(getByOwner(user).fetchKeys());
-            
+        List<Key> oldKeys = Lists.newArrayList(fetchKeys(byOwner(user.id)));
+
         if (ruleList.isEmpty()) {
             Logger.info("Deleting all rules since there are no new rules to insert.");
             // No rules inserted no need to run
@@ -202,7 +272,7 @@ public class Rule extends ObjectifyModel implements Serializable {
         } else {
             int rank = 0;
             for (Rule rule : ruleList) {
-                rule.owner = user.getKey();
+                rule.owner = user.id;
                 List<RuleError> errors = rule.validate();
                 if (errors.isEmpty()) {
                     rule.rank = rank++;
@@ -218,20 +288,21 @@ public class Rule extends ObjectifyModel implements Serializable {
 
             if (!toSave.isEmpty()) {
                 Logger.info("Inserting %d new rules for user.", toSave.size());
-                Datastore.put(toSave);
+                saveAll(toSave);
             }
         }
         
-        Logger.info("Deleting %d old rules.", ruleKeys.size());
+        Logger.info("Deleting %d old rules.", oldKeys.size());
         // delete existing rules
-        Datastore.delete(ruleKeys);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        ds.delete(oldKeys);
     
         return needToRun;
     }
-
-    public static Query<Rule> getByOwner(User user) {
-        return Datastore.query(Rule.class)
-    		            .ancestor(Datastore.key(User.class, user.id));
+    
+    public static void saveAll(Iterable<Rule> rules) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
+        ds.put(Iterables.transform(rules, TO_ENTITY));
     }
 
     public static class RuleError {

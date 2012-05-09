@@ -18,6 +18,7 @@ import play.modules.objectify.Datastore;
 import play.modules.objectify.ObjectifyModel;
 
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
@@ -29,6 +30,8 @@ import dropbox.gson.DbxAccount;
 public class User extends ObjectifyModel implements Serializable {
 
     private static final Set<Long> ADMINS = getAdmins();
+
+    public static final String KIND = "User";
 
     @Id public Long id;
     public String name;
@@ -200,6 +203,10 @@ public class User extends ObjectifyModel implements Serializable {
 
     public void delete() {
         Datastore.delete(this);
+    }
+    
+    public static com.google.appengine.api.datastore.Key key(long id) {
+        return KeyFactory.createKey(KIND, id);
     }
 
     @PrePersist

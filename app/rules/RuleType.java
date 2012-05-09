@@ -44,4 +44,10 @@ public enum RuleType {
      */
     public abstract boolean matches(String pattern, String fileName);
 
+    public static RuleType fromDbValue(String dbValue) {
+        for (RuleType type : RuleType.values()) {
+            if (type.name().equals(dbValue)) return type;
+        }
+        return null;
+    }
 }
