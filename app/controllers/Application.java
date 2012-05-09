@@ -13,7 +13,6 @@ import play.mvc.With;
 import rules.RuleType;
 
 import com.google.common.collect.Lists;
-import com.googlecode.objectify.Objectify;
 
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
@@ -33,7 +32,7 @@ public class Application extends Controller {
         User user = Login.getLoggedInUser();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
-        List<FileMove> moves = Lists.newArrayList(FileMove.findByUser(user).limit(MAX_FILE_MOVES));
+        List<FileMove> moves = FileMove.findByOwner(user.id, MAX_FILE_MOVES);
         render(user, rules, moves, initResult);
     }
     

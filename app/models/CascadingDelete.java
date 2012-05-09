@@ -6,7 +6,6 @@ import tasks.FileMoveDeleter;
 
 import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
 
 public class CascadingDelete {
 
@@ -24,7 +23,7 @@ public class CascadingDelete {
         Iterable<Key<Rule>> ruleKeys = Datastore.query(Rule.class)
             .ancestor(Datastore.key(User.class, user.id))
             .fetchKeys();
-        Datastore.delete(ruleKeys);
+        //FIXME: Datastore.delete(ruleKeys);
         Logger.info("Deleted rules for user: %s", user);
 
         // 2. delete user

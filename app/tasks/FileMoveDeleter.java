@@ -1,17 +1,24 @@
 package tasks;
 
 import java.util.Date;
+import java.util.List;
 
+import models.DatastoreUtil;
 import models.FileMove;
 import models.User;
 import play.Logger;
-import play.modules.objectify.Datastore;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
-import com.googlecode.objectify.Key;
 
 public class FileMoveDeleter implements Task {
 
@@ -42,17 +49,19 @@ public class FileMoveDeleter implements Task {
 
         int numChunks = 0;
         while (true) {
-            Iterable<Key<FileMove>> fileMoveKeys = Datastore
-                .query(FileMove.class)
-                .ancestor(Datastore.key(User.class, userId))
-                .limit(CHUNK_SIZE)
-                .fetchKeys();
+            Query query = new Query(FileMove.class.getSimpleName())
+                .addFilter("owner", FilterOperator.EQUAL, userId)
+                .setKeysOnly();
 
-            if (!fileMoveKeys.iterator().hasNext()) {
+            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+            PreparedQuery pq = ds.prepare(query);
+
+            List<Entity> entities = pq.asList(FetchOptions.Builder.withLimit(CHUNK_SIZE));
+            if (entities == null || entities.isEmpty()) {
                 break;
             }
 
-            Datastore.delete(fileMoveKeys);
+            ds.delete(DatastoreUtil.extractKeys(entities));
             numChunks++;
         }
         

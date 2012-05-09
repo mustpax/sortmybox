@@ -124,7 +124,7 @@ public class RuleUtils {
                     } catch (FileMoveCollisionException e) {
                         success = false;
                     }
-                    fileMoves.add(new FileMove(user.id, r, base, success));
+                    fileMoves.add(new FileMove(user.id, base, r.dest, success));
                     break;
                 }
             }

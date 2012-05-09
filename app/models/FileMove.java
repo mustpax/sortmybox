@@ -4,39 +4,36 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Id;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import org.joda.time.DateTime;
+/**
+ * POJO for file moves.
+ */
+public class FileMove implements Serializable {
 
-import play.data.validation.Required;
-import play.modules.objectify.Datastore;
-import play.modules.objectify.ObjectifyModel;
-
-import com.google.gdata.util.common.base.Preconditions;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.Query;
-import com.googlecode.objectify.annotation.Cached;
-import com.googlecode.objectify.annotation.Parent;
-
-@Cached
-public class FileMove extends ObjectifyModel implements Serializable {
+    private static final long serialVersionUID = 45L;
 
     public static final int RETENTION_DAYS = 7;
     
-    @Id public Long id;
-    @Required @Parent public Key<User> owner;
+    public Long id;
     public String fromFile;
     public String toDir;
     public Date when;
+    public Long owner;
     public Boolean successful;
     
-    public FileMove(Long owner, Rule rule, String from, boolean success) {
-        this.owner = Datastore.key(User.class, owner);
-        this.toDir = rule.dest;
+    public FileMove() {}
+
+    public FileMove(Long owner, String from, String dest, boolean success) {
+        this.toDir = dest;
         this.fromFile = from;
         this.when = new Date();
         this.successful = success;
+        this.owner = owner;
     }
     
     public boolean isSuccessful() {
@@ -54,30 +51,51 @@ public class FileMove extends ObjectifyModel implements Serializable {
 			                 this.fromFile, this.toDir, this.when);
     }
 
-    public static FileMove findById(Long userId, Long fileMoveId) {
-        Key<FileMove> fileMoveKey = Datastore.key(User.class, userId, FileMove.class, fileMoveId);
-        return Datastore.find(fileMoveKey, false);
+    public static FileMove findById(Long id) {
+        Key key = DatastoreUtil.newKey(FileMove.class, id);
+        return DatastoreUtil.get(key, FileMoveMapper.INSTANCE);
     }
 
-    public static Query<FileMove> findByUser(User user) {
-        Preconditions.checkNotNull(user, "User can't be null");
-        return Datastore.query(FileMove.class)
-                .ancestor(Datastore.key(User.class, user.id))
-                .filter("when >", user.created)
-                .order("-when");
+    public static List<FileMove> findByOwner(Long owner, int maxRows) {
+        Query query = new Query(FileMove.class.getSimpleName());
+        query.addFilter("owner", FilterOperator.EQUAL, owner);
+        return DatastoreUtil.asList(query,
+                       FetchOptions.Builder.withLimit(maxRows),
+                       FileMoveMapper.INSTANCE);
     }
 
     public static void save(List<FileMove> fileMoves) {
-        Datastore.put(fileMoves);
+        DatastoreUtil.put(fileMoves, FileMoveMapper.INSTANCE);
     }
 
-    public static void truncateFileMoves(Long userId) {
-        Date oldestPermitted = DateTime.now().minusDays(RETENTION_DAYS).toDate();
-        Iterable<Key<FileMove>> fileMoveKeys = Datastore.query(FileMove.class)
-            .ancestor(Datastore.key(User.class, userId))
-            .filter("when <", oldestPermitted)
-            .fetchKeys();
-            
-        Datastore.delete(fileMoveKeys);
+
+    private static class FileMoveMapper implements Mapper<FileMove> {
+
+        static final FileMoveMapper INSTANCE = new FileMoveMapper();
+
+        private FileMoveMapper() {}
+
+        @Override
+        public Entity toEntity(FileMove mv) {
+            Entity entity = DatastoreUtil.newEntity(FileMove.class, mv.id);
+            entity.setProperty("fromFile", mv.fromFile);
+            entity.setProperty("toDir", mv.toDir);
+            entity.setProperty("when", mv.when);
+            entity.setProperty("owner", mv.owner);
+            entity.setProperty("successful", mv.successful);
+            return entity;
+        }
+
+        @Override
+        public FileMove toModel(Entity entity) {
+            FileMove mv = new FileMove();
+            mv.id = entity.getKey().getId();
+            mv.fromFile = (String) entity.getProperty("fromFile");
+            mv.toDir = (String) entity.getProperty("toDir");
+            mv.when = (Date) entity.getProperty("when");
+            mv.owner = (Long) entity.getProperty("owner");
+            mv.successful = (Boolean) entity.getProperty("successful");
+            return mv;
+        }
     }
 }
