@@ -65,10 +65,7 @@ public class UsageStatsGatherer implements Job {
             }
             
             count += results.size();
-            cursor = results.getCursor();
-            
-            System.out.println(count);
-            
+            cursor = results.getCursor();            
         }
         return count;
     }
