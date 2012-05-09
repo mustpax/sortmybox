@@ -42,7 +42,7 @@ Special thanks to:
 [sp]: http://subtlepatterns.com/?p=1121
 [dan]: http://dankruse.com/
 [jQuery]: http://jquery.com/
-[Bootstrap]: http://documentcloud.github.com/underscore/
+[Bootstrap]: https://github.com/twitter/bootstrap
 [play]: http://www.playframework.org
 [GitHub]: https://github.com/mustpax/sortbox
 [appengine]: http://appengine.google.com
