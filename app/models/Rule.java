@@ -40,7 +40,8 @@ import com.googlecode.objectify.annotation.Parent;
 @Cached
 public class Rule extends ObjectifyModel implements Serializable {
 
-    private static final int MAX_RULES_TO_FETCH = 10;
+    public static final int MAX_RULES = 200;
+    
 
     private static final Comparator<Rule> RANK_COMPARATOR = new Comparator<Rule>() {
         @Override public int compare(Rule rule1, Rule rule2) {
@@ -81,7 +82,7 @@ public class Rule extends ObjectifyModel implements Serializable {
         Preconditions.checkNotNull(userId, "User id can't be null");
         Iterator<Rule> itr = Datastore.query(Rule.class)
                 .ancestor(Datastore.key(User.class, userId))
-                .limit(MAX_RULES_TO_FETCH).iterator();
+                .limit(MAX_RULES).iterator();
         List<Rule> rules = Lists.newArrayList(itr);
         Collections.sort(rules, RANK_COMPARATOR);
         return rules;
@@ -185,6 +186,10 @@ public class Rule extends ObjectifyModel implements Serializable {
     public static boolean insertAll(User user,
                                     List<Rule> ruleList,
                                     @CheckForNull List<List<RuleError>> allErrors) {
+        if ((ruleList == null) || (ruleList.size() > MAX_RULES)) {
+            throw new IllegalArgumentException("Rules missing or too many rules.");
+        }
+
         List<Rule> toSave = Lists.newArrayList();
         boolean needToRun = true;
     

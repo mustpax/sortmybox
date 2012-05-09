@@ -18,14 +18,22 @@ import com.google.gson.reflect.TypeToken;
 @With(Login.class)
 public class Rules extends Controller {
     
-    private static final int MAX_NUM_RULES = 200;
-    
     public static void update(String rules) {
         checkAuthenticity();
-        Type t = new TypeToken<List<Rule>>(){}.getType();
-        List<Rule> ruleList = new Gson().fromJson(rules, t);
-        
-        if (ruleList != null && ruleList.size() > MAX_NUM_RULES) {
+
+        try {
+            Type t = new TypeToken<List<Rule>>(){}.getType();
+            List<Rule> ruleList = new Gson().fromJson(rules, t);
+
+            User user = Login.getLoggedInUser();
+            List<List<RuleError>> allErrors = Lists.newArrayList();
+            if (Rule.insertAll(user, ruleList, allErrors)) {
+                Logger.info("New rules inserted with no errors so running rules.");
+                RuleUtils.runRules(user);
+            }
+
+            renderJSON(allErrors);
+        } catch (IllegalArgumentException e) {
             //TODO:
             //  1. preemptively check the count on the client side
             //  2. we should display an appropriate error message
@@ -33,15 +41,5 @@ public class Rules extends Controller {
             Logger.warn("User missing rule list or too many rules.");
             badRequest();
         }
-
-        User user = Login.getLoggedInUser();
-        List<List<RuleError>> allErrors = Lists.newArrayList();
-
-        if (Rule.insertAll(user, ruleList, allErrors)) {
-            Logger.info("New rules inserted with no errors so running rules.");
-            RuleUtils.runRules(user);
-        }
-
-        renderJSON(allErrors);
     }
 }
