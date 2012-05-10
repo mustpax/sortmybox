@@ -12,6 +12,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -29,8 +30,8 @@ public class DatastoreUtil {
     
     private DatastoreUtil() {}
     
-    public static List<Key> extractKeys(List<Entity> entities) {
-        return Lists.transform(entities, TO_KEY);
+    public static Iterable<Key> extractKeys(Iterable<Entity> entities) {
+        return Iterables.transform(entities, TO_KEY);
     }
   
     public static Key newKey(Class<?> clazz, long id) {
