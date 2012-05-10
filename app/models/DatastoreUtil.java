@@ -81,10 +81,10 @@ public class DatastoreUtil {
         }
     }
 
-    public static <T> void put(Iterable<T> models, Mapper<T> mapper) {
+    public static <T> List<Key> put(Iterable<T> models, Mapper<T> mapper) {
         ToEntityFunction<T> func = new ToEntityFunction<T>(mapper);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        ds.put(Iterables.transform(models, func));
+        return ds.put(Iterables.transform(models, func));
     }
     
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
