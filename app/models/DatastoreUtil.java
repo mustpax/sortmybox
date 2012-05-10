@@ -42,7 +42,7 @@ public class DatastoreUtil {
         if (id == null) {
             return new Entity(clazz.getSimpleName());
         } else {
-            return new Entity(newKey(FileMove.class, id));
+            return new Entity(newKey(clazz, id));
         }
     }
     
