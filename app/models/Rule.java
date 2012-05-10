@@ -112,10 +112,7 @@ public class Rule implements Serializable {
         }
 
         FetchOptions fo = FetchOptions.Builder.withLimit(limit);
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        return Iterables.transform(ds.prepare(q.setKeysOnly())
-                                     .asIterable(fo),
-                                   DatastoreUtil.TO_KEY);
+        return DatastoreUtil.queryKeys(q, fo, MAPPER);
     }
             
 
