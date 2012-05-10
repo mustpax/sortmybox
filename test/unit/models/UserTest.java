@@ -1,5 +1,7 @@
 package unit.models;
 
+import java.util.Date;
+
 import models.User;
 
 import org.junit.After;
@@ -58,7 +60,16 @@ public class UserTest extends BaseModelTest {
         user.setSecretRaw(SECRET);
         assertEquals(SECRET, user.getSecret());
     }
-    
+
+    @Test
+    public void testSave() {
+        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        user.save();
+        User user2 = User.findById(ID);
+        assertNotSame(user2, user);
+        assertEquals(user2, user);
+    }
+
     @Test
     public void testModstamp() {
         DbxAccount account = new DbxAccount();
@@ -68,13 +79,15 @@ public class UserTest extends BaseModelTest {
         User u = User.getOrCreateUser(account, TOKEN, SECRET);
         assertNotNull(u.modified);
         assertNotNull(u.created);
-        assertFalse(u.modified.before(u.created));
+        assertTrue(u.modified.equals(u.created) || u.modified.after(u.created));
+        Date mod1 = u.modified;
         
         // Updating token and secret should update modification date but not creation date
         u = User.getOrCreateUser(account, TOKEN + "x", SECRET + "x");
         assertNotNull(u.modified);
         assertNotNull(u.created);
         assertTrue(u.modified.after(u.created));
+        assertTrue(u.modified.after(mod1));
     }
 
     private static User newUser(Long id, String token, String email, String secret, String name) {
@@ -83,7 +96,7 @@ public class UserTest extends BaseModelTest {
         user.setToken(token);
         user.email = email;
         user.setSecret(secret);
-        user.name = name;
+        user.setName(name);
         return user;
     }
 }

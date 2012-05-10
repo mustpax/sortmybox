@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
@@ -14,28 +15,29 @@ import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
-import play.modules.objectify.Datastore;
-import play.modules.objectify.ObjectifyModel;
 
-import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceConfig;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Cached;
 
 import dropbox.gson.DbxAccount;
 
-@Cached
-public class User extends ObjectifyModel implements Serializable {
+public class User implements Serializable {
+    public static final Mapper<User> MAPPER = new UserMapper();
 
     private static final Set<Long> ADMINS = getAdmins();
 
     public static final String KIND = "User";
 
     @Id public Long id;
-    public String name;
-    public String nameLower;
+    private String name;
+    private String nameLower;
     public String email;
     public Boolean periodicSort;
     public Integer fileMoves;
@@ -49,7 +51,7 @@ public class User extends ObjectifyModel implements Serializable {
     private String secret;
     
     public User() {
-        this.created = this.lastLogin = new Date();
+        this.modified = this.created = this.lastLogin = new Date();
         this.periodicSort = true;
         this.fileMoves = 0;
     }
@@ -57,12 +59,26 @@ public class User extends ObjectifyModel implements Serializable {
     public User(DbxAccount account, String token, String secret) {
         this();
         this.id = account.uid;
-        this.name = account.name;
-        this.nameLower = name.toLowerCase();
+        setName(account.name);
         setToken(token);
         setSecret(secret);
     }
     
+    public User(Entity entity) {
+        this.id = entity.getKey().getId();
+        this.name = (String) entity.getProperty("name");
+        this.nameLower = (String) entity.getProperty("nameLower");
+        this.email = (String) entity.getProperty("email");
+        this.periodicSort = (Boolean) entity.getProperty("periodicSort");
+        this.created = (Date) entity.getProperty("created");
+        this.modified = (Date) entity.getProperty("modified");
+        this.lastSync = (Date) entity.getProperty("lastSync");
+        this.lastLogin = (Date) entity.getProperty("lastLogin");
+        this.token = (String) entity.getProperty("token");
+        this.secret = (String) entity.getProperty("secret");
+        this.fileMoves = ((Long) entity.getProperty("fileMoves")).intValue();
+    }
+
     private static Set<Long> getAdmins() {
         String ids= Play.configuration.getProperty("sortbox.admins", "").trim();
         ImmutableSet.Builder<Long> builder = ImmutableSet.builder();
@@ -72,7 +88,16 @@ public class User extends ObjectifyModel implements Serializable {
         }
         return builder.build();
     }
+
+    public String getName() {
+        return this.name;
+    }
     
+    public void setName(String name) {
+        this.name = name;
+        this.nameLower = name.toLowerCase();
+    }
+
     /**
      * Only for testing.
      */
@@ -142,15 +167,7 @@ public class User extends ObjectifyModel implements Serializable {
      * @return fully loaded user for the given id, null if not found.
      */
     public static User findById(long id) {
-        try {
-            Key<User> key = Datastore.key(User.class, id);
-            return Datastore.get(key);
-        } catch (EntityNotFoundException e) {
-            return null;
-        } catch (IllegalArgumentException e) {
-            Logger.warn("Failed to get user: %d", id);
-            throw e;
-        }
+        return DatastoreUtil.get(key(id), MAPPER);
     }
 
     public static User getOrCreateUser(DbxAccount account, String token, String secret) {
@@ -197,15 +214,16 @@ public class User extends ObjectifyModel implements Serializable {
         save();
     }
 
-    public Key<User> save() {
-        return Datastore.put(this);
+    public Key save() {
+        this.modified = new Date();
+        return DatastoreUtil.put(Collections.singleton(this), MAPPER).get(0);
     }
 
     public void delete() {
-        Datastore.delete(this);
+        DatastoreServiceFactory.getDatastoreService().delete(key(this.id));
     }
     
-    public static com.google.appengine.api.datastore.Key key(long id) {
+    public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
     }
 
@@ -235,8 +253,6 @@ public class User extends ObjectifyModel implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!super.equals(obj))
-            return false;
         if (getClass() != obj.getClass())
             return false;
         User other = (User) obj;
@@ -270,4 +286,27 @@ public class User extends ObjectifyModel implements Serializable {
             .toString();
     }
 
+    private static class UserMapper implements Mapper<User> {
+        @Override
+        public Entity toEntity(User model) {
+            Entity entity = new Entity(key(model.id));
+            entity.setProperty("name", model.name);
+            entity.setProperty("nameLower", model.nameLower);
+            entity.setProperty("email", model.email);
+            entity.setProperty("periodicSort", model.periodicSort);
+            entity.setProperty("created", model.created);
+            entity.setProperty("modified", model.modified);
+            entity.setProperty("lastSync", model.lastSync);
+            entity.setProperty("token", model.token);
+            entity.setProperty("secret", model.secret);
+            entity.setProperty("fileMoves", model.fileMoves);
+            entity.setProperty("lastLogin", model.lastLogin);
+            return entity;
+        }
+
+        @Override
+        public User toModel(Entity entity) {
+            return new User(entity);
+        }
+    }
 }
