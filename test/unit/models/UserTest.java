@@ -71,6 +71,15 @@ public class UserTest extends BaseModelTest {
     }
 
     @Test
+    public void testDelete() {
+        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        user.save();
+        assertNotNull(User.findById(ID));
+        user.delete();
+        assertNull(User.findById(ID));
+    }
+
+    @Test
     public void testModstamp() {
         DbxAccount account = new DbxAccount();
         account.uid = ID;
