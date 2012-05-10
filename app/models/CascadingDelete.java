@@ -1,11 +1,12 @@
 package models;
 
 import play.Logger;
-import play.modules.objectify.Datastore;
 import tasks.FileMoveDeleter;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.common.base.Preconditions;
-import com.googlecode.objectify.Key;
 
 public class CascadingDelete {
 
@@ -19,11 +20,10 @@ public class CascadingDelete {
     public static void delete(User user) {
         Preconditions.checkNotNull(user);
         
-        // 1. delete rules
-        Iterable<Key<Rule>> ruleKeys = Datastore.query(Rule.class)
-            .ancestor(Datastore.key(User.class, user.id))
-            .fetchKeys();
-        //FIXME: Datastore.delete(ruleKeys);
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        // Double limit to ensure we get every single rule
+        FetchOptions fo = FetchOptions.Builder.withLimit(Rule.MAX_RULES * 2);
+        ds.delete(DatastoreUtil.queryKeys(Rule.byOwner(user.id), fo, Rule.MAPPER));
         Logger.info("Deleted rules for user: %s", user);
 
         // 2. delete user

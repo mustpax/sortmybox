@@ -21,7 +21,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
@@ -38,29 +37,9 @@ import com.google.common.collect.Lists;
  */
 public class Rule implements Serializable {
     public static final String KIND = "Rule";
+    public static final RuleMapper MAPPER = new RuleMapper();
 
     public static final int MAX_RULES = 200;
-    
-    public static final Function<Entity, Key> TO_KEY = new Function<Entity, Key>() {
-        @Override
-        public Key apply(Entity entity) {
-            return entity.getKey();
-        }
-    };
-
-    public static final Function<Rule, Entity> TO_ENTITY = new Function<Rule, Entity>() {
-        @Override
-        public Entity apply(Rule rule) {
-            return rule.toEntity();
-        }
-    };
-
-    private static final Function<Entity, Rule> TO_RULE = new Function<Entity, Rule>() {
-        @Override
-        public Rule apply(Entity entity) {
-            return new Rule(entity);
-        }
-    };
 
     private static final Comparator<Rule> RANK_COMPARATOR = new Comparator<Rule>() {
         @Override public int compare(Rule rule1, Rule rule2) {
@@ -86,17 +65,6 @@ public class Rule implements Serializable {
         this.owner = owner;
     }
     
-    public Entity toEntity() {
-        Key parentKey = User.key(owner);
-        Entity entity = new Entity(KIND, parentKey);
-        entity.setProperty("type", type.name());
-        entity.setProperty("pattern", pattern);
-        entity.setProperty("dest", dest);
-        entity.setProperty("rank", rank);
-        entity.setProperty("owner", owner);
-        return entity;
-    }
-
     private Rule(Entity entity) {
         this.id = entity.getKey().getId();
         this.type = RuleType.fromDbValue((String) entity.getProperty("type"));
@@ -131,10 +99,7 @@ public class Rule implements Serializable {
         }
 
         FetchOptions fo = FetchOptions.Builder.withLimit(limit);
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        return Iterables.transform(ds.prepare(q)
-                                     .asIterable(fo),
-                                   TO_RULE);
+        return DatastoreUtil.query(q, fo, MAPPER);
     }
     
     public static Iterable<Key> fetchKeys(Query q) {
@@ -150,7 +115,7 @@ public class Rule implements Serializable {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
         return Iterables.transform(ds.prepare(q.setKeysOnly())
                                      .asIterable(fo),
-                                   TO_KEY);
+                                   DatastoreUtil.TO_KEY);
     }
             
 
@@ -300,9 +265,8 @@ public class Rule implements Serializable {
         return needToRun;
     }
     
-    public static void saveAll(Iterable<Rule> rules) {
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();        
-        ds.put(Iterables.transform(rules, TO_ENTITY));
+    private static void saveAll(Iterable<Rule> rules) {
+        DatastoreUtil.put(rules, MAPPER);
     }
 
     public static class RuleError {
@@ -312,6 +276,28 @@ public class Rule implements Serializable {
         public RuleError(String field, String msg) {
             this.field = field;
             this.msg = msg;
+        }
+    }
+
+    private static class RuleMapper implements Mapper<Rule> {
+
+        private RuleMapper() {}
+
+        @Override
+        public Entity toEntity(Rule r) {
+            Key parentKey = User.key(r.owner);
+            Entity entity = new Entity(KIND, parentKey);
+            entity.setProperty("type", r.type.name());
+            entity.setProperty("pattern", r.pattern);
+            entity.setProperty("dest", r.dest);
+            entity.setProperty("rank", r.rank);
+            entity.setProperty("owner", r.owner);
+            return entity;
+        }
+
+        @Override
+        public Rule toModel(Entity entity) {
+            return new Rule(entity);
         }
     }
 }

@@ -28,6 +28,31 @@ public class DatastoreUtil {
         }
     };
     
+    public static class ToEntityFunction<T> implements Function<T, Entity> {
+        private final Mapper<T> m;
+        public ToEntityFunction(Mapper<T> m) {
+            this.m = m;
+        }
+
+        @Override
+        public Entity apply(T t) {
+            return m.toEntity(t);
+        }
+    }
+    
+    public static class FromEntityFunction<T> implements Function<Entity, T> {
+        private final Mapper<T> m;
+
+        public FromEntityFunction(Mapper<T> m) {
+            this.m = m;
+        }
+
+        @Override
+        public T apply(Entity e) {
+            return m.toModel(e);
+        }
+    }
+    
     private DatastoreUtil() {}
     
     public static Iterable<Key> extractKeys(Iterable<Entity> entities) {
@@ -56,23 +81,25 @@ public class DatastoreUtil {
         }
     }
 
-    public static <T> void put(List<T> models, Mapper<T> mapper) {
-        List<Entity> entities = Lists.newArrayListWithCapacity(models.size());
-        for (T model : models) {
-            entities.add(mapper.toEntity(model));
-        }
+    public static <T> void put(Iterable<T> models, Mapper<T> mapper) {
+        ToEntityFunction<T> func = new ToEntityFunction<T>(mapper);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        ds.put(entities);
+        ds.put(Iterables.transform(models, func));
     }
     
-    public static <T> List<T> asList(Query q, FetchOptions options, Mapper<T> mapper) {
+    public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q);
-        List<Entity> entities = pq.asList(options);
-        List<T> models = Lists.newArrayListWithCapacity(entities.size());
-        for (Entity entity : entities) {
-            models.add(mapper.toModel(entity));
-        }
-        return models;
+        return Iterables.transform(pq.asIterable(), new FromEntityFunction<T>(mapper));
+    }
+
+    public static <T> Iterable<Key> queryKeys(Query q, FetchOptions options, Mapper<T> mapper) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = ds.prepare(q.setKeysOnly());
+        return Iterables.transform(pq.asIterable(), TO_KEY);
+    }
+
+    public static <T> List<T> asList(Query q, FetchOptions options, Mapper<T> mapper) {
+        return Lists.newArrayList(query(q, options, mapper));
     }
 }
