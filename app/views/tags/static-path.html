@@ -8,8 +8,10 @@
 %{
   cdn = play.configuration.getProperty("sortbox.cdn");
   ver = com.google.appengine.api.utils.SystemProperty.applicationVersion.get();
+  cacheBreak = null;
   if (ver) {
 	  ver = ver.split("\\.")[0];
+	  cacheBreak = ver.split("\\.")[1];
   }
 }%
-#{if play.mode.isProd() && cdn}${cdn}/${ver}${_arg}#{/if}#{else}${_arg}#{/else}
+#{if play.mode.isProd() && cdn}${cdn}/${ver}${_arg}?${cacheBreak}#{/if}#{else}${_arg}#{/else}
