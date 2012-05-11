@@ -76,5 +76,10 @@ public class UsageStats {
         public Class<UsageStats> getType() {
             return UsageStats.class;
         }
+
+        @Override
+        public Key toKey(UsageStats model) {
+            return key(model.id);
+        }
     }
 }

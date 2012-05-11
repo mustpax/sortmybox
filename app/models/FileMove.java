@@ -54,10 +54,6 @@ public class FileMove implements Serializable {
 			                 this.fromFile, this.toDir, this.when);
     }
 
-    public static Query all() {
-        return new Query(KIND);
-    }
-    
     public static FileMove findById(Long id) {
         Key key = KeyFactory.createKey(KIND, id);
         return DatastoreUtil.get(key, FileMoveMapper.INSTANCE);
@@ -75,6 +71,13 @@ public class FileMove implements Serializable {
         DatastoreUtil.put(fileMoves, FileMoveMapper.INSTANCE);
     }
 
+    public static Query all() {
+        return new Query(KIND);
+    }
+    
+    public static Key key(long id) {
+        return KeyFactory.createKey(KIND, id);
+    }
     private static class FileMoveMapper implements Mapper<FileMove> {
 
         static final FileMoveMapper INSTANCE = new FileMoveMapper();
@@ -112,6 +115,11 @@ public class FileMove implements Serializable {
         @Override
         public Class<FileMove> getType() {
             return FileMove.class;
+        }
+
+        @Override
+        public Key toKey(FileMove model) {
+            return key(model.id);
         }
     }
 

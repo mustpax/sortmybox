@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Collections;
 import java.util.Map;
 
 import javax.persistence.Cacheable;
@@ -22,18 +23,21 @@ class Cache {
         return (T) ms.get(k);
     }
 
-    public static <T> void put(T val, Mapper<T> m) {
-        MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
-        Key k = m.toEntity(val).getKey();
-        ms.put(k, val, DEFAULT_EXPIRATION);
+    public static <T> void put(T model, Mapper<T> mapper) {
+        putAll(Collections.singleton(model), mapper);
     }
     
     public static <T> void putAll(Iterable<T> models, Mapper<T> mapper) {
         Map<Key, T> map = Maps.newHashMap();
         for (T model: models) {
-            map.put(mapper.toEntity(model).getKey(), model);
+            map.put(mapper.toKey(model), model);
         }
         MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
         ms.putAll(map, DEFAULT_EXPIRATION);
+    }
+    
+    public static <T> void delete(T model, Mapper<T> mapper) {
+        MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
+        ms.delete(mapper.toKey(model));
     }
 }

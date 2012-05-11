@@ -174,7 +174,7 @@ public class User implements Serializable {
     }
 
     public void delete() {
-    	DatastoreUtil.delete(this, MAPPER);
+        DatastoreUtil.delete(this, MAPPER);
     }
     
     /**
@@ -356,6 +356,11 @@ public class User implements Serializable {
         @Override
         public Class<User> getType() {
             return User.class;
+        }
+
+        @Override
+        public Key toKey(User model) {
+            return key(model.id);
         }
     }
 }

@@ -264,6 +264,10 @@ public class Rule implements Serializable {
         return needToRun;
     }
     
+    public static Key key(long id) {
+        return KeyFactory.createKey(KIND, id);
+    }
+
     private static void saveAll(Iterable<Rule> rules) {
         DatastoreUtil.put(rules, MAPPER);
     }
@@ -307,6 +311,11 @@ public class Rule implements Serializable {
         @Override
         public Class<Rule> getType() {
             return Rule.class;
+        }
+
+        @Override
+        public Key toKey(Rule model) {
+            return key(model.id);
         }
     }
 }

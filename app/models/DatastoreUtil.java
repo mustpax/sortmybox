@@ -97,10 +97,6 @@ public class DatastoreUtil {
         return ds.put(Iterables.transform(models, func));
     }
     
-    public static <T> void delete(T model, Mapper<T> mapper) {
-        delete(Collections.singletonList(model), mapper);
-    }
-
     public static <T> void delete(List<T> models, final Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         ds.delete(Lists.transform(models, new Function<T, Key>() {
@@ -130,5 +126,13 @@ public class DatastoreUtil {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q.setKeysOnly());
         return pq.countEntities(FetchOptions.Builder.withDefaults());
+    }
+
+    public static <T> void delete(T model, Mapper<T> mapper) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        if (Cache.isCachable(mapper)) {
+            Cache.delete(model, mapper);
+        }
+        ds.delete(mapper.toKey(model));
     }
 }

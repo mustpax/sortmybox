@@ -124,5 +124,10 @@ public class Blacklist implements Serializable {
         public Class<Blacklist> getType() {
             return Blacklist.class;
         }
+
+        @Override
+        public Key toKey(Blacklist model) {
+            return key(model.id);
+        }
     }
 }

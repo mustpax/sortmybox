@@ -15,6 +15,8 @@ public interface Mapper<T> {
     Entity toEntity(T model);
     
     T toModel(Entity entity);
+    
+    Key toKey(T model);
 
     Class<T> getType();
 }
