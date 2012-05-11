@@ -81,10 +81,10 @@ public class FileMove implements Serializable {
 
         private FileMoveMapper() {}
 
-    	@Override
-		public Key getKey(FileMove mv) {
-			return KeyFactory.createKey(KIND, mv.id);
-		}
+        @Override
+        public Key getKey(FileMove mv) {
+        	return KeyFactory.createKey(KIND, mv.id);
+        }
     	
         @Override
         public Entity toEntity(FileMove mv) {

@@ -310,10 +310,10 @@ public class User implements Serializable {
 
     private static class UserMapper implements Mapper<User> {
 
-    	@Override
-		public Key getKey(User user) {
-			return KeyFactory.createKey(KIND, user.id);
-		}
+        @Override
+        public Key getKey(User user) {
+            return KeyFactory.createKey(KIND, user.id);
+        }
 
         @Override
         public Entity toEntity(User model) {

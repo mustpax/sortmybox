@@ -48,7 +48,7 @@ public class UsageStatsGatherer implements Job {
         Cursor cursor = null;
         while (true) {
             Query query = FileMove
-            	.all()
+                .all()
                 .addFilter("when", FilterOperator.GREATER_THAN_OR_EQUAL, from)
                 .addFilter("when", FilterOperator.LESS_THAN_OR_EQUAL, to)
                 .setKeysOnly();

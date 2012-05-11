@@ -282,10 +282,10 @@ public class Rule implements Serializable {
 
         private RuleMapper() {}
 
-    	@Override
-		public Key getKey(Rule rule) {
-			return User.key(rule.id);
-		}
+        @Override
+        public Key getKey(Rule rule) {
+        	return User.key(rule.id);
+        }
 
         @Override
         public Entity toEntity(Rule r) {
