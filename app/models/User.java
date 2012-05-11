@@ -5,9 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -35,7 +32,7 @@ public class User implements Serializable {
 
     public static final String KIND = "User";
 
-    @Id public Long id;
+    public Long id;
     private String name;
     private String nameLower;
     public String email;
@@ -216,7 +213,7 @@ public class User implements Serializable {
 
     public Key save() {
         this.modified = new Date();
-        return DatastoreUtil.put(Collections.singleton(this), MAPPER).get(0);
+        return DatastoreUtil.put(this, MAPPER);
     }
 
     public void delete() {
@@ -225,11 +222,6 @@ public class User implements Serializable {
     
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
-    }
-
-    @PrePersist
-    public void prePersist() {
-        modified = new Date();
     }
 
     @Override
