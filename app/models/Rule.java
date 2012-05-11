@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
 import com.google.common.base.Function;
@@ -36,6 +37,9 @@ import com.google.common.collect.Lists;
  * @author syyang
  */
 public class Rule implements Serializable {
+	
+    private static final long serialVersionUID = 45L;
+
     public static final String KIND = "Rule";
     public static final RuleMapper MAPPER = new RuleMapper();
 
@@ -277,6 +281,11 @@ public class Rule implements Serializable {
     private static class RuleMapper implements Mapper<Rule> {
 
         private RuleMapper() {}
+
+    	@Override
+		public Key getKey(Rule rule) {
+			return User.key(rule.id);
+		}
 
         @Override
         public Entity toEntity(Rule r) {

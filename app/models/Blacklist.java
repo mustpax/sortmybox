@@ -15,6 +15,9 @@ import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Objects;
 
 public class Blacklist implements Serializable {
+	
+    private static final long serialVersionUID = 45L;
+
     private static final Mapper<Blacklist> MAPPER = new BlacklistMapper();
 
     private static final String KIND = "Blacklist";
@@ -41,7 +44,7 @@ public class Blacklist implements Serializable {
     }
 
     public void delete() {
-        DatastoreServiceFactory.getDatastoreService().delete(key(this.id));
+        DatastoreUtil.delete(this, MAPPER);
     }
 
     public static Blacklist findById(long id) {
@@ -99,6 +102,12 @@ public class Blacklist implements Serializable {
     }
 
     private static class BlacklistMapper implements Mapper<Blacklist> {
+		
+    	@Override
+		public Key getKey(Blacklist blacklist) {
+			return KeyFactory.createKey(KIND, blacklist.id);
+		}
+
         @Override
         public Entity toEntity(Blacklist model) {
             Entity ret = new Entity(key(model.id));

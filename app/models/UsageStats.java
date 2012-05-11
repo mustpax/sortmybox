@@ -51,6 +51,12 @@ public class UsageStats {
     }
 
     private static class UsageStatsMapper implements Mapper<UsageStats> {
+
+    	@Override
+		public Key getKey(UsageStats stats) {
+			return KeyFactory.createKey(KIND, stats.id);
+		}
+    	
         @Override
         public Entity toEntity(UsageStats model) {
             Entity ret = new Entity(key(model.id));

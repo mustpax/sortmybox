@@ -59,16 +59,12 @@ public class DatastoreUtil {
     public static Iterable<Key> extractKeys(Iterable<Entity> entities) {
         return Iterables.transform(entities, TO_KEY);
     }
-  
-    public static Key newKey(Class<?> clazz, long id) {
-        return KeyFactory.createKey(clazz.getSimpleName(), id);
-    }
     
-    public static Entity newEntity(Class<?> clazz, Long id) {
+    public static Entity newEntity(String kind, Long id) {
         if (id == null) {
-            return new Entity(clazz.getSimpleName());
+            return new Entity(kind);
         } else {
-            return new Entity(newKey(clazz, id));
+            return new Entity(KeyFactory.createKey(kind, id));
         }
     }
     
@@ -92,6 +88,19 @@ public class DatastoreUtil {
         return ds.put(Iterables.transform(models, func));
     }
     
+    public static <T> void delete(T model, Mapper<T> mapper) {
+        delete(Collections.singletonList(model), mapper);
+    }
+
+    public static <T> void delete(List<T> models, final Mapper<T> mapper) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        ds.delete(Lists.transform(models, new Function<T, Key>() {
+            @Override public Key apply(T model) {
+                return mapper.getKey(model);
+            }
+        }));
+    }
+
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q);

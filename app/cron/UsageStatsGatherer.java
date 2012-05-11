@@ -40,14 +40,15 @@ public class UsageStatsGatherer implements Job {
         UsageStats stats = new UsageStats(numUsers, numRules, numFileMoves);
         stats.save();
         
-        Logger.info("Finished collecting user stats: " + stats);
+        Logger.info("Finished collecting usage stats: " + stats);
     }
     
     private static int countFileMoves(Date from, Date to) {
         int count = 0;
         Cursor cursor = null;
         while (true) {
-            Query query = new Query(FileMove.class.getSimpleName())
+            Query query = FileMove
+            	.all()
                 .addFilter("when", FilterOperator.GREATER_THAN_OR_EQUAL, from)
                 .addFilter("when", FilterOperator.LESS_THAN_OR_EQUAL, to)
                 .setKeysOnly();

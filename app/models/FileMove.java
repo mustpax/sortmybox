@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
@@ -17,6 +18,7 @@ public class FileMove implements Serializable {
 
     private static final long serialVersionUID = 45L;
 
+    public static final String KIND = FileMove.class.getSimpleName();
     public static final int RETENTION_DAYS = 7;
     
     public Long id;
@@ -51,8 +53,12 @@ public class FileMove implements Serializable {
 			                 this.fromFile, this.toDir, this.when);
     }
 
+    public static Query all() {
+        return new Query(KIND);
+    }
+    
     public static FileMove findById(Long id) {
-        Key key = DatastoreUtil.newKey(FileMove.class, id);
+        Key key = KeyFactory.createKey(KIND, id);
         return DatastoreUtil.get(key, FileMoveMapper.INSTANCE);
     }
 
@@ -75,9 +81,14 @@ public class FileMove implements Serializable {
 
         private FileMoveMapper() {}
 
+    	@Override
+		public Key getKey(FileMove mv) {
+			return KeyFactory.createKey(KIND, mv.id);
+		}
+    	
         @Override
         public Entity toEntity(FileMove mv) {
-            Entity entity = DatastoreUtil.newEntity(FileMove.class, mv.id);
+            Entity entity = DatastoreUtil.newEntity(KIND, mv.id);
             entity.setProperty("fromFile", mv.fromFile);
             entity.setProperty("toDir", mv.toDir);
             entity.setProperty("when", mv.when);

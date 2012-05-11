@@ -28,6 +28,9 @@ import com.google.common.base.Objects;
 import dropbox.gson.DbxAccount;
 
 public class User implements Serializable {
+	
+    private static final long serialVersionUID = 45L;
+    
     public static final Mapper<User> MAPPER = new UserMapper();
 
     private static final Set<Long> ADMINS = getAdmins();
@@ -219,7 +222,7 @@ public class User implements Serializable {
     }
 
     public void delete() {
-        DatastoreServiceFactory.getDatastoreService().delete(key(this.id));
+    	DatastoreUtil.delete(this, MAPPER);
     }
     
     public static Key key(long id) {
@@ -306,6 +309,12 @@ public class User implements Serializable {
     }
 
     private static class UserMapper implements Mapper<User> {
+
+    	@Override
+		public Key getKey(User user) {
+			return KeyFactory.createKey(KIND, user.id);
+		}
+
         @Override
         public Entity toEntity(User model) {
             Entity entity = new Entity(key(model.id));
