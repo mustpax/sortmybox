@@ -5,10 +5,11 @@ import java.util.Map;
 
 import models.User;
 import play.Logger;
-import play.modules.objectify.Datastore;
 
 import com.google.appengine.api.datastore.Entity;
-import com.googlecode.objectify.Key;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import cron.Job;
 
@@ -27,16 +28,14 @@ public class RuleProcessor implements Job {
         int chunkSize = jobData.containsKey(CHUNK_SIZE) ?
                 Integer.parseInt(jobData.get(CHUNK_SIZE)) : DEFAULT_CHUNK_SIZE;
 
-        Iterator<Key<User>> userKeys = getAllUserKeys().iterator();
+        Iterable<Key> userKeys = getAllUserKeys();
         
         int numMessages = 0;
         int count = 1;
         Long startId = null;
         Long lastId = null;
 
-        Key<User> userKey;
-        while (userKeys.hasNext()) {
-            userKey = userKeys.next();
+        for (Key userKey: userKeys) {
             if (startId == null) {
                 startId = lastId = userKey.getId();
             }
@@ -52,14 +51,14 @@ public class RuleProcessor implements Job {
         }
 
         Logger.info("Enqueued chunkRuleProcessor messages. Chunk size: %d Num messages: %d",
-                chunkSize, numMessages);
+	                chunkSize, numMessages);
     }
 
-    private static Iterable<Key<User>> getAllUserKeys() {
-        return Datastore.query(User.class)
-            .filter("periodicSort =", true)
-            .order(Entity.KEY_RESERVED_PROPERTY)
-            .fetchKeys();
+    private static Iterable<Key> getAllUserKeys() {
+        Query q = User.all()
+                      .addFilter("periodicSort", FilterOperator.EQUAL, true)
+                      .addSort(Entity.KEY_RESERVED_PROPERTY);
+        return User.queryKeys(q);
     }
     
 }
