@@ -37,15 +37,17 @@ public class RuleProcessor implements Job {
 
         for (Key userKey: userKeys) {
             if (startId == null) {
-                startId = lastId = userKey.getId();
+                startId = userKey.getId();
             }
+
+            lastId = userKey.getId();
             if (count % chunkSize == 0) {
-                lastId = userKey.getId();
                 ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
-                startId = lastId = null;
+                startId = null;
             }
             count++;
         }
+
         if (startId != null) {
             ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
         }

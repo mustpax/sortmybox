@@ -4,6 +4,5 @@ require:
     - play
     - play -> gae 1.6.0
     - play -> mockito 0.1
-    - play -> objectify 1.0
     - com.google.guava -> guava r09
     - commons-lang 2.5

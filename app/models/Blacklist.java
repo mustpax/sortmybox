@@ -3,25 +3,23 @@ package models;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import play.cache.Cache;
-import play.modules.objectify.Datastore;
-import play.modules.objectify.ObjectifyModel;
-
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Objects;
-import com.google.gdata.util.common.base.Preconditions;
-import com.googlecode.objectify.annotation.Cached;
-import common.cache.CacheKey;
 
-@Cached
-public class Blacklist extends ObjectifyModel implements Serializable {
+public class Blacklist implements Serializable {
+    private static final Mapper<Blacklist> MAPPER = new BlacklistMapper();
+
+    private static final String KIND = "Blacklist";
     
-    @Id public Long id;
+    public Long id;
     public Date created;
     
     public Blacklist() {
@@ -33,26 +31,21 @@ public class Blacklist extends ObjectifyModel implements Serializable {
         this.id = id;
     }
 
+    public Blacklist(Entity e) {
+        this.id = e.getKey().getId();
+        this.created = (Date) e.getProperty("created");
+    }
+
     public void save() {
-        Datastore.put(this);
+        DatastoreUtil.put(this, MAPPER);
     }
 
     public void delete() {
-        Datastore.delete(this);
-    }
-
-    public void invalidate() {
-        Cache.safeDelete(CacheKey.create(Blacklist.class, id));
-    }
-
-    @PrePersist
-    public void prePersist() {
-        invalidate();
+        DatastoreServiceFactory.getDatastoreService().delete(key(this.id));
     }
 
     public static Blacklist findById(long id) {
-        Preconditions.checkNotNull(id, "id cannot be null");
-        return Datastore.find(Blacklist.class, id, false);
+        return DatastoreUtil.get(key(id), MAPPER);
     }
 
     @Override
@@ -67,8 +60,6 @@ public class Blacklist extends ObjectifyModel implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!super.equals(obj))
-            return false;
         if (getClass() != obj.getClass())
             return false;
         Blacklist other = (Blacklist) obj;
@@ -84,5 +75,40 @@ public class Blacklist extends ObjectifyModel implements Serializable {
             .add("id", id)
             .add("created", created)
             .toString();
+    }
+    
+    
+    public static Key key(long id) {
+        return KeyFactory.createKey(KIND, id);
+    }
+    
+    public static Iterable<Blacklist> query(Query q, int limit) {
+        FetchOptions fo;
+        
+        if (limit < 0) {
+            fo = FetchOptions.Builder.withDefaults();
+        } else {
+            fo = FetchOptions.Builder.withLimit(limit);
+        }
+        
+        return DatastoreUtil.query(q, fo, MAPPER);
+    }
+
+    public static Query all() {
+        return new Query(KIND);
+    }
+
+    private static class BlacklistMapper implements Mapper<Blacklist> {
+        @Override
+        public Entity toEntity(Blacklist model) {
+            Entity ret = new Entity(key(model.id));
+            ret.setProperty("created", model.created);
+            return ret;
+        }
+
+        @Override
+        public Blacklist toModel(Entity entity) {
+            return new Blacklist(entity);
+        }
     }
 }

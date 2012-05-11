@@ -1,6 +1,5 @@
 package controllers;
 
-import java.util.Iterator;
 import java.util.List;
 
 import models.Blacklist;
@@ -10,7 +9,6 @@ import models.User;
 import org.mortbay.log.Log;
 
 import play.Logger;
-import play.modules.objectify.Datastore;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -73,15 +71,7 @@ public class Admin extends Controller {
     public static void blacklistedUsers() {
         User user = Login.getLoggedInUser();
         
-        List<Blacklist> blacklist = Lists.newArrayList();
-        Iterator<Blacklist> itr = Datastore
-            .query(Blacklist.class)
-            .limit(BLACKLIST_MAX_FETCH_SIZE)
-            .fetch().iterator();
-        while (itr.hasNext()) {
-            blacklist.add(itr.next());
-        }
-
+        List<Blacklist> blacklist = Lists.newArrayList(Blacklist.query(Blacklist.all(), BLACKLIST_MAX_FETCH_SIZE));
         render(user, blacklist);
     }
 

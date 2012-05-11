@@ -3,13 +3,15 @@ package cron;
 import java.util.Date;
 import java.util.Map;
 
+import models.DatastoreUtil;
 import models.FileMove;
+import models.Rule;
 import models.UsageStats;
+import models.User;
 
 import org.joda.time.DateTime;
 
 import play.Logger;
-import play.modules.objectify.Datastore;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -20,8 +22,6 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.QueryResultList;
-import com.google.appengine.api.users.User;
-import com.google.appengine.repackaged.org.apache.commons.digester.Rule;
 
 public class UsageStatsGatherer implements Job {
 
@@ -29,8 +29,8 @@ public class UsageStatsGatherer implements Job {
 
     @Override
     public void execute(Map<String, String> jobData) {
-        int numUsers = Datastore.query(User.class).countAll();
-        int numRules = Datastore.query(Rule.class).countAll();
+        int numUsers = DatastoreUtil.count(User.all());
+        int numRules = DatastoreUtil.count(Rule.all());
         
         Date to = DateTime.now().toDateMidnight().toDate();
         Date from = DateTime.now().minusDays(1).toDateMidnight().toDate();

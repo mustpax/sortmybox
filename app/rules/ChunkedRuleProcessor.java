@@ -2,15 +2,17 @@ package rules;
 
 import java.util.Iterator;
 
+import models.DatastoreUtil;
 import models.User;
 import play.Logger;
-import play.modules.objectify.Datastore;
 import tasks.Task;
 import tasks.TaskContext;
 import tasks.TaskUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
@@ -47,27 +49,27 @@ public class ChunkedRuleProcessor implements Task {
         long lastId = Long.valueOf(context.getParam(pLAST_ID));
         int chunkSize = Integer.valueOf(context.getParam(pCHUNK_SIZE));
 
-        Iterable<User> users = getUsersForKeyRange(startId, lastId, chunkSize);
-        Iterator<User> itr = users.iterator();
+        Iterable<User> users = getUsersForKeyRange(startId, lastId);
         int moves = 0;
         int numUsers = 0;
-        while (itr.hasNext()) {
-            User user = itr.next();
+        for (User user: users) {
             moves += RuleUtils.runRules(user).size();
             numUsers++;
+            if (numUsers > chunkSize) {
+                Logger.warn("Chunk contains more ids than expected. Task id: %s", context.getTaskId());
+                break;
+            }
         }
 
         Logger.info("Processed chunk. Task id: %s Chunk: %d Chunk size: %d Start id: %d Last id: %d Processed users: %d Files moved: %d",
                     context.getTaskId(), chunkId, chunkSize, startId, lastId, numUsers, moves);
     }
 
-    private static Iterable<User> getUsersForKeyRange(long startId, long lastId, int maxNum) {
-        final String KIND = User.class.getSimpleName();
-        return Datastore.query(User.class)
-            .filter(Entity.KEY_RESERVED_PROPERTY + " >=", KeyFactory.createKey(KIND, startId))
-            .filter(Entity.KEY_RESERVED_PROPERTY + " <=", KeyFactory.createKey(KIND, lastId))
-            .filter("periodicSort =", true)
-            .limit(maxNum)
-            .fetch();
+    private static Iterable<User> getUsersForKeyRange(long startId, long lastId) {
+        Query q = User.all()
+			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(startId))
+			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, User.key(lastId))
+			          .addFilter("periodicSort", FilterOperator.EQUAL, true);
+        return User.query(q);
     }
 }
