@@ -148,64 +148,6 @@ public class User implements Serializable {
         return ADMINS.contains(id);
     }
 
-    public static boolean isValidId(String userId) {
-        // check input is not null and not empty
-        if (userId == null || userId.isEmpty()) {
-            return false;
-        }
-
-        // check input is a valid user id
-        try {
-            Long.parseLong(userId);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * @param id the user id
-     * @return fully loaded user for the given id, null if not found.
-     */
-    public static User findById(long id) {
-        return DatastoreUtil.get(key(id), MAPPER);
-    }
-
-    public static User getOrCreateUser(DbxAccount account, String token, String secret) {
-        if (account == null || !account.notNull()) {
-            return null;
-        }
-
-        User user = findById(account.uid);
-        if (user == null) {
-            user = new User(account, token, secret);
-            Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
-            user.save();
-        } else {
-            if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
-                // TODO: update other fields if stale
-                Logger.info("User has new Dropbox oauth credentials: %s", user);
-                user.setToken(token);
-                user.setSecret(secret);
-            }
-
-            if (user.nameLower == null) {
-                user.nameLower = user.name.toLowerCase();
-            }
-
-            if (user.fileMoves == null) {
-                user.fileMoves = 0;
-            }
-            
-            user.lastLogin = new Date();
-
-            user.save();
-        }
-
-        return user;
-    }
-
     public void updateLastSyncDate() {
         lastSync = new Date();
         save();
@@ -225,6 +167,30 @@ public class User implements Serializable {
     	DatastoreUtil.delete(this, MAPPER);
     }
     
+    /**
+     * @param id the user id
+     * @return fully loaded user for the given id, null if not found.
+     */
+    public static User findById(long id) {
+        return DatastoreUtil.get(key(id), MAPPER);
+    }
+
+    public static boolean isValidId(String userId) {
+        // check input is not null and not empty
+        if (userId == null || userId.isEmpty()) {
+            return false;
+        }
+    
+        // check input is a valid user id
+        try {
+            Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        
+        return true;
+    }
+
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
     }
@@ -252,6 +218,40 @@ public class User implements Serializable {
     public static Iterable<Key> queryKeys(Query q) {
         assert q.getKind().equals(KIND) : "Query kind must be User";
         return DatastoreUtil.queryKeys(q, FetchOptions.Builder.withDefaults(), MAPPER);
+    }
+
+    public static User upsert(DbxAccount account, String token, String secret) {
+        if (account == null || !account.notNull()) {
+            return null;
+        }
+    
+        User user = findById(account.uid);
+        if (user == null) {
+            user = new User(account, token, secret);
+            Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
+            user.save();
+        } else {
+            if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
+                // TODO: update other fields if stale
+                Logger.info("User has new Dropbox oauth credentials: %s", user);
+                user.setToken(token);
+                user.setSecret(secret);
+            }
+    
+            if (user.nameLower == null) {
+                user.nameLower = user.name.toLowerCase();
+            }
+    
+            if (user.fileMoves == null) {
+                user.fileMoves = 0;
+            }
+            
+            user.lastLogin = new Date();
+    
+            user.save();
+        }
+    
+        return user;
     }
 
     @Override
