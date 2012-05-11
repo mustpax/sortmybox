@@ -4,6 +4,9 @@ jsfiles = public/js/json2.js public/js/jquery-1.7.2.min.js public/js/bootstrap.m
 all: deps js
 	build/prep-webxml.py
 
+test: all
+	play test
+
 run: all
 	play run
 
