@@ -107,4 +107,10 @@ public class DatastoreUtil {
     public static <T> List<T> asList(Query q, FetchOptions options, Mapper<T> mapper) {
         return Lists.newArrayList(query(q, options, mapper));
     }
+
+    public static int count(Query q) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = ds.prepare(q.setKeysOnly());
+        return pq.countEntities(FetchOptions.Builder.withDefaults());
+    }
 }
