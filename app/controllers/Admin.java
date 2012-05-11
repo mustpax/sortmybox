@@ -15,6 +15,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -25,8 +26,6 @@ public class Admin extends Controller {
     private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
 
     public static void searchUser(String query) {
-        User user = Login.getLoggedInUser();
-
         boolean ranSearch = false;
         List<User> results = Lists.newArrayList();
 
@@ -48,24 +47,26 @@ public class Admin extends Controller {
                 } catch (NumberFormatException e) {
                     // ignore. the query term is not a user id.
                 }
-                
+
                 // 2. look up by user name
-                Iterator<User> itr = Datastore
-                    .query(User.class)
-                    .filter("nameLower >=", normalized)
-                    .filter("nameLower <=", normalized +"\ufffd")
-                    .limit(SEARCH_MAX_FETCH_SIZE)
-                    .fetch().iterator();
-                while (itr.hasNext()) {
-                    User userByName = itr.next();
+                Iterable<User> users =
+                    User.query(
+                        User.all()
+	                        .addFilter("nameLower", FilterOperator.GREATER_THAN_OR_EQUAL, normalized)
+	                        .addFilter("nameLower", FilterOperator.LESS_THAN_OR_EQUAL, normalized + "\ufffd"),
+	                    SEARCH_MAX_FETCH_SIZE
+	                );
+
+                for (User u: users) {
                     // dedup
-                    if (userById == null || userById.id != userByName.id) {
-                        results.add(userByName);
+                    if (userById == null || userById.id != u.id) {
+                        results.add(u);
                     }
                 }
             }
         }
 
+        User user = Login.getLoggedInUser();
         render(user, query, ranSearch, results);
     }
 
