@@ -61,9 +61,7 @@ public class User implements Serializable {
     public User(DbxAccount account, String token, String secret) {
         this();
         this.id = account.uid;
-        setName(account.name);
-        setToken(token);
-        setSecret(secret);
+        sync(account, token, secret);
     }
     
     public User(Entity entity) {
@@ -157,6 +155,15 @@ public class User implements Serializable {
         fileMoves += count;
         save();
     }
+    
+    /**
+     * Update this user with Dropbox credentials
+     */
+    public void sync(DbxAccount account, String secret, String token) {
+        setName(account.name);
+        setSecret(secret);
+        setToken(token);
+    }
 
     public Key save() {
         this.modified = new Date();
@@ -231,11 +238,9 @@ public class User implements Serializable {
             Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
             user.save();
         } else {
-            if (!user.getToken().equals(token) || !user.getSecret().equals(secret)){
-                // TODO: update other fields if stale
+            if (! user.equals(account, token, secret)) {
                 Logger.info("User has new Dropbox oauth credentials: %s", user);
-                user.setToken(token);
-                user.setSecret(secret);
+                user.sync(account, token, secret);
             }
     
             if (user.nameLower == null) {
@@ -290,6 +295,14 @@ public class User implements Serializable {
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
             .append(this.lastLogin, other.lastLogin)
+            .isEquals();
+    }
+    
+    public boolean equals(DbxAccount account, String secret, String token) {
+        return new EqualsBuilder()
+            .append(this.name, account.name)
+            .append(this.getSecret(), secret)
+            .append(this.getToken(), token)
             .isEquals();
     }
     
