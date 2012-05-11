@@ -303,5 +303,10 @@ public class Rule implements Serializable {
         public Rule toModel(Entity entity) {
             return new Rule(entity);
         }
+
+        @Override
+        public Class<Rule> getType() {
+            return Rule.class;
+        }
     }
 }

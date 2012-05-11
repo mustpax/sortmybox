@@ -70,6 +70,12 @@ public class DatastoreUtil {
     
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {
+            if (Cache.isCachable(mapper)) {
+                T ret = Cache.get(key);
+                if (ret != null) {
+                    return ret;
+                }
+            }
             DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
             Entity entity = ds.get(key);
             return mapper.toModel(entity);
@@ -85,6 +91,9 @@ public class DatastoreUtil {
     public static <T> List<Key> put(Iterable<T> models, Mapper<T> mapper) {
         ToEntityFunction<T> func = new ToEntityFunction<T>(mapper);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        if (Cache.isCachable(mapper)) {
+            Cache.putAll(models, mapper);
+        }
         return ds.put(Iterables.transform(models, func));
     }
     

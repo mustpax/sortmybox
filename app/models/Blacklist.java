@@ -119,5 +119,10 @@ public class Blacklist implements Serializable {
         public Blacklist toModel(Entity entity) {
             return new Blacklist(entity);
         }
+
+        @Override
+        public Class<Blacklist> getType() {
+            return Blacklist.class;
+        }
     }
 }

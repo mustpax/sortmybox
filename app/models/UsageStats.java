@@ -71,5 +71,10 @@ public class UsageStats {
         public UsageStats toModel(Entity entity) {
             return new UsageStats(entity);
         }
+
+        @Override
+        public Class<UsageStats> getType() {
+            return UsageStats.class;
+        }
     }
 }

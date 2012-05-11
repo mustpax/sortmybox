@@ -49,7 +49,7 @@ public class FileMoveDeleter implements Task {
 
         int numChunks = 0;
         while (true) {
-            Query query = new Query(FileMove.class.getSimpleName())
+            Query query = FileMove.all()
                 .addFilter("owner", FilterOperator.EQUAL, userId)
                 .setKeysOnly();
 

@@ -16,4 +16,5 @@ public interface Mapper<T> {
     
     T toModel(Entity entity);
 
+    Class<T> getType();
 }

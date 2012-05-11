@@ -1,8 +1,5 @@
 package rules;
 
-import java.util.Iterator;
-
-import models.DatastoreUtil;
 import models.User;
 import play.Logger;
 import tasks.Task;
@@ -10,7 +7,6 @@ import tasks.TaskContext;
 import tasks.TaskUtils;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;

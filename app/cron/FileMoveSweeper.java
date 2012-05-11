@@ -32,7 +32,7 @@ public class FileMoveSweeper implements Job {
         int numChunks = 1;
         while (true) {
             // TODO: check if query object can be reused
-            Query query = new Query(FileMove.class.getSimpleName())
+            Query query = FileMove.all()
                 .addFilter("when", FilterOperator.LESS_THAN, oldestPermitted)
                 .setKeysOnly();
 

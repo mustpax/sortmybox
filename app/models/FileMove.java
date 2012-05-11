@@ -18,8 +18,9 @@ public class FileMove implements Serializable {
 
     private static final long serialVersionUID = 45L;
 
-    public static final String KIND = FileMove.class.getSimpleName();
     public static final int RETENTION_DAYS = 7;
+
+    private static final String KIND = "FileMove";
     
     public Long id;
     public String fromFile;
@@ -74,7 +75,6 @@ public class FileMove implements Serializable {
         DatastoreUtil.put(fileMoves, FileMoveMapper.INSTANCE);
     }
 
-
     private static class FileMoveMapper implements Mapper<FileMove> {
 
         static final FileMoveMapper INSTANCE = new FileMoveMapper();
@@ -108,5 +108,11 @@ public class FileMove implements Serializable {
             mv.successful = (Boolean) entity.getProperty("successful");
             return mv;
         }
+
+        @Override
+        public Class<FileMove> getType() {
+            return FileMove.class;
+        }
     }
+
 }

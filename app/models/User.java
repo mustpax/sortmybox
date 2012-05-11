@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -27,6 +29,7 @@ import com.google.common.base.Objects;
 
 import dropbox.gson.DbxAccount;
 
+@Cacheable
 public class User implements Serializable {
 	
     private static final long serialVersionUID = 45L;
@@ -348,6 +351,11 @@ public class User implements Serializable {
         @Override
         public User toModel(Entity entity) {
             return new User(entity);
+        }
+
+        @Override
+        public Class<User> getType() {
+            return User.class;
         }
     }
 }
