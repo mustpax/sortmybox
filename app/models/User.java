@@ -17,8 +17,10 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
@@ -222,6 +224,31 @@ public class User implements Serializable {
     
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
+    }
+
+    public static Query all() {
+        return new Query(KIND);
+    }
+
+    public static Iterable<User> query(Query q) {
+        return query(q, -1);
+    }
+
+    public static Iterable<User> query(Query q, int limit) {
+        assert q.getKind().equals(KIND) : "Query kind must be User";
+        FetchOptions fo;
+        if (limit < 0) {
+            fo = FetchOptions.Builder.withDefaults();
+        } else {
+            fo = FetchOptions.Builder.withLimit(limit);
+        }
+
+        return DatastoreUtil.query(q, fo, MAPPER);
+    }
+
+    public static Iterable<Key> queryKeys(Query q) {
+        assert q.getKind().equals(KIND) : "Query kind must be User";
+        return DatastoreUtil.queryKeys(q, FetchOptions.Builder.withDefaults(), MAPPER);
     }
 
     @Override
