@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -79,6 +80,10 @@ public class DatastoreUtil {
         } catch (EntityNotFoundException e) {
             return null;
         }
+    }
+
+    public static <T> Key put(T model, Mapper<T> mapper) {
+        return put(Collections.singleton(model), mapper).get(0);
     }
 
     public static <T> List<Key> put(Iterable<T> models, Mapper<T> mapper) {
