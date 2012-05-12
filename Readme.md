@@ -19,7 +19,11 @@ their correct location based on sorting rules that *you* create.
 
 - Mustafa “Let’s do it in JavaScript” Paksoy
 - Sid “This codebase needs more FactoryImpl’s” Yang
-- Kanishka "That should be centered" Maheshwari
+- Kanishka “That should be centered” Maheshwari
+
+Early testing, design and usability feedback by:
+
+- Canmert ”Michael Jackson” Koral
 
 ### Feedback
 
@@ -37,8 +41,11 @@ Special thanks to:
 - [Play Framework][play]: taking back Java web development from the architecture astronauts.
 - Hosting by [Google App Engine][appengine]
 - [GitHub][] for hosting the source code.
+- Logo based on design by [Haziq Mir][hm] via [Creative Market][cm]
 - Background pattern by [Dan Krause][dan] via [Subtle Patterns][sp]
 
+[cm]: http://creativemarket.com/free-goods
+[hm]: https://twitter.com/haziqmir
 [sp]: http://subtlepatterns.com/?p=1121
 [dan]: http://dankruse.com/
 [jQuery]: http://jquery.com/
