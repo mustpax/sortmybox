@@ -184,6 +184,15 @@ code {
 	margin-bottom: 20px;
 }
 
+.move-fail code {
+    color: red;    
+}
+
+.move-fail {
+    background-color: #FAE5E3;    
+}
+
+
 /*
 * jQuery Mobile Framework
 * Copyright (c) jQuery Project
