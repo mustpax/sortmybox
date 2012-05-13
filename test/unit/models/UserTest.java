@@ -77,8 +77,17 @@ public class UserTest extends BaseModelTest {
     public void testSave() {
         User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
         user.save();
-        User user2 = User.findById(ID);
-        assertEquals(user2, user);
+        assertEquals(User.findById(ID), user);
+        
+        DbxAccount acc = new DbxAccount();
+        acc.name = NAME;
+        acc.uid = ID;
+        user.sync(acc, TOKEN, SECRET);
+        assertEquals(User.findById(ID), user);
+
+        user.setToken(TOKEN + "X");
+        user.save();
+        assertEquals(User.findById(ID), user);
     }
 
     @Test

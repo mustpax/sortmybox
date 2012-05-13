@@ -162,10 +162,10 @@ public class User implements Serializable {
     /**
      * Update this user with Dropbox credentials
      */
-    public void sync(DbxAccount account, String secret, String token) {
+    public void sync(DbxAccount account, String token, String secret) {
         setName(account.name);
-        setSecret(secret);
         setToken(token);
+        setSecret(secret);
     }
 
     public Key save() {
