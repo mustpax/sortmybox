@@ -1,13 +1,17 @@
 package unit.models;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import models.FileMove;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class FileMoveTest extends BaseModelTest {
 
@@ -28,5 +32,24 @@ public class FileMoveTest extends BaseModelTest {
         assertEquals("tom", mv.fromFile);
         assertEquals("jerry", mv.toDir);
         assertFalse(mv.successful);
+    }
+
+    @Test
+    public void testOrdering() {
+        List<FileMove> moves = Lists.newArrayList();
+        int count = 10;
+
+        // Create moves in increasing chronological order
+        for (int i = 0; i< count; i++) {
+            Date when = DateTime.now().plusDays(i).toDate();
+            FileMove m = new FileMove(1L, "from" + i, "/dest/to" + i, (i % 2) == 0);
+            m.when = when;
+            moves.add(m);
+        }
+        FileMove.save(moves);
+
+        // Datastore fetch should flip the ordering to reverse chrono order
+        Collections.reverse(moves);
+        assertEquals(moves, FileMove.findByOwner(1L, count));
     }
 }

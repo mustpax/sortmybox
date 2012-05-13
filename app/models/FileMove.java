@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
@@ -52,6 +54,22 @@ public class FileMove implements Serializable {
 			                 this.fromFile, this.toDir, this.when);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        FileMove other = (FileMove) obj;
+        EqualsBuilder eq = new EqualsBuilder()
+            .append(this.fromFile, other.fromFile)
+            .append(this.toDir, other.toDir)
+            .append(this.successful, other.successful)
+            .append(this.when, other.when)
+            .append(this.owner, other.owner);
+        return eq.isEquals();
+    }
+
     public static FileMove findById(Long id) {
         Key key = KeyFactory.createKey(KIND, id);
         return DatastoreUtil.get(key, FileMoveMapper.INSTANCE);
@@ -77,6 +95,7 @@ public class FileMove implements Serializable {
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
     }
+
     private static class FileMoveMapper implements Mapper<FileMove> {
 
         static final FileMoveMapper INSTANCE = new FileMoveMapper();
