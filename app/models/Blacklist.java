@@ -102,15 +102,9 @@ public class Blacklist implements Serializable {
     }
 
     private static class BlacklistMapper implements Mapper<Blacklist> {
-		
-        @Override
-        public Key getKey(Blacklist blacklist) {
-        	return KeyFactory.createKey(KIND, blacklist.id);
-        }
-
         @Override
         public Entity toEntity(Blacklist model) {
-            Entity ret = new Entity(key(model.id));
+            Entity ret = new Entity(toKey(model));
             ret.setProperty("created", model.created);
             return ret;
         }

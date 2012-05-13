@@ -71,11 +71,11 @@ public class Rule implements Serializable {
     
     private Rule(Entity entity) {
         this.id = entity.getKey().getId();
+        this.owner = entity.getKey().getParent().getId();
         this.type = RuleType.fromDbValue((String) entity.getProperty("type"));
         this.pattern = (String) entity.getProperty("pattern");
         this.dest = (String) entity.getProperty("dest");
         this.rank = ((Long) entity.getProperty("rank")).intValue();
-        this.owner = (Long) entity.getProperty("owner");
     }
 
     /** 
@@ -268,8 +268,8 @@ public class Rule implements Serializable {
         return needToRun;
     }
     
-    public static Key key(long id) {
-        return KeyFactory.createKey(KIND, id);
+    public static Key key(long parent, long id) {
+        return User.key(parent).getChild(KIND, id);
     }
     
     /**
@@ -295,23 +295,15 @@ public class Rule implements Serializable {
     }
 
     private static class RuleMapper implements Mapper<Rule> {
-
         private RuleMapper() {}
 
         @Override
-        public Key getKey(Rule rule) {
-        	return User.key(rule.id);
-        }
-
-        @Override
         public Entity toEntity(Rule r) {
-            Key parentKey = User.key(r.owner);
-            Entity entity = new Entity(KIND, parentKey);
+            Entity entity = new Entity(toKey(r));
             entity.setProperty("type", r.type.name());
             entity.setProperty("pattern", r.pattern);
             entity.setProperty("dest", r.dest);
             entity.setProperty("rank", r.rank);
-            entity.setProperty("owner", r.owner);
             return entity;
         }
 
@@ -321,13 +313,13 @@ public class Rule implements Serializable {
         }
 
         @Override
-        public Class<Rule> getType() {
-            return Rule.class;
+        public Key toKey(Rule r) {
+            return key(r.owner, r.id);
         }
 
         @Override
-        public Key toKey(Rule model) {
-            return key(model.id);
+        public Class<Rule> getType() {
+            return Rule.class;
         }
     }
 }

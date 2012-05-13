@@ -54,34 +54,39 @@ public class DatastoreUtil {
         }
     }
     
+    public static class ModelToKeyFunction<T> implements Function<T, Key> {
+        private final Mapper<T> m;
+
+        public ModelToKeyFunction(Mapper<T> m) {
+            this.m = m;
+        }
+
+        @Override
+        public Key apply(T t) {
+            return m.toKey(t);
+        }
+    }
+
     private DatastoreUtil() {}
     
     public static Iterable<Key> extractKeys(Iterable<Entity> entities) {
         return Iterables.transform(entities, TO_KEY);
     }
     
-    public static Entity newEntity(String kind, Long id) {
-        if (id == null) {
-            return new Entity(kind);
-        } else {
-            return new Entity(KeyFactory.createKey(kind, id));
-        }
-    }
-    
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {
-            T ret;
+            T ret = null;
             if (Cache.get().isCachable(mapper)) {
                 ret = Cache.get().get(key);
-                if (ret != null) {
-                    return ret;
-                }
             }
-            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-            Entity entity = ds.get(key);
-            ret = mapper.toModel(entity);
-            if (Cache.get().isCachable(mapper)) {
-                Cache.get().put(ret, mapper);
+            
+            if (ret == null) {
+                DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+                Entity entity = ds.get(key);
+                ret = mapper.toModel(entity);
+                if (Cache.get().isCachable(mapper)) {
+                    Cache.get().put(ret, mapper);
+                }
             }
             return ret;
         } catch (EntityNotFoundException e) {
@@ -105,11 +110,7 @@ public class DatastoreUtil {
     public static <T> void delete(List<T> models, final Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         Cache.get().deleteAll(models, mapper);
-        ds.delete(Lists.transform(models, new Function<T, Key>() {
-            @Override public Key apply(T model) {
-                return mapper.getKey(model);
-            }
-        }));
+        ds.delete(Lists.transform(models, new ModelToKeyFunction<T>(mapper)));
     }
 
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {

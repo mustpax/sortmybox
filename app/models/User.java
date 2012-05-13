@@ -325,15 +325,9 @@ public class User implements Serializable {
     }
 
     private static class UserMapper implements Mapper<User> {
-
-        @Override
-        public Key getKey(User user) {
-            return KeyFactory.createKey(KIND, user.id);
-        }
-
         @Override
         public Entity toEntity(User model) {
-            Entity entity = new Entity(key(model.id));
+            Entity entity = new Entity(toKey(model));
             entity.setProperty("name", model.name);
             entity.setProperty("nameLower", model.nameLower);
             entity.setProperty("email", model.email);

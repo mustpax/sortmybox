@@ -76,9 +76,9 @@ public class FileMove implements Serializable {
     }
 
     public static List<FileMove> findByOwner(Long owner, int maxRows) {
-        Query query = new Query(FileMove.class.getSimpleName());
-        query.addFilter("owner", FilterOperator.EQUAL, owner);
-        query.addSort("when", SortDirection.DESCENDING);
+        Query query = new Query(KIND)
+	                      .setAncestor(User.key(owner))
+	                      .addSort("when", SortDirection.DESCENDING);
         return DatastoreUtil.asList(query,
                        FetchOptions.Builder.withLimit(maxRows),
                        FileMoveMapper.INSTANCE);
@@ -92,8 +92,8 @@ public class FileMove implements Serializable {
         return new Query(KIND);
     }
     
-    public static Key key(long id) {
-        return KeyFactory.createKey(KIND, id);
+    public static Key key(long owner, long id) {
+        return User.key(owner).getChild(KIND, id);
     }
 
     private static class FileMoveMapper implements Mapper<FileMove> {
@@ -103,13 +103,8 @@ public class FileMove implements Serializable {
         private FileMoveMapper() {}
 
         @Override
-        public Key getKey(FileMove mv) {
-        	return KeyFactory.createKey(KIND, mv.id);
-        }
-    	
-        @Override
         public Entity toEntity(FileMove mv) {
-            Entity entity = DatastoreUtil.newEntity(KIND, mv.id);
+            Entity entity = new Entity(toKey(mv));
             entity.setProperty("fromFile", mv.fromFile);
             entity.setProperty("toDir", mv.toDir);
             entity.setProperty("when", mv.when);
@@ -122,10 +117,10 @@ public class FileMove implements Serializable {
         public FileMove toModel(Entity entity) {
             FileMove mv = new FileMove();
             mv.id = entity.getKey().getId();
+            mv.owner = entity.getKey().getParent().getId();
             mv.fromFile = (String) entity.getProperty("fromFile");
             mv.toDir = (String) entity.getProperty("toDir");
             mv.when = (Date) entity.getProperty("when");
-            mv.owner = (Long) entity.getProperty("owner");
             mv.successful = (Boolean) entity.getProperty("successful");
             return mv;
         }
@@ -137,7 +132,7 @@ public class FileMove implements Serializable {
 
         @Override
         public Key toKey(FileMove model) {
-            return key(model.id);
+            return key(model.owner, model.id);
         }
     }
 

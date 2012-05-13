@@ -9,9 +9,6 @@ import com.google.appengine.api.datastore.Key;
  * @author syyang
  */
 public interface Mapper<T> {
-
-    Key getKey(T model);
-
     Entity toEntity(T model);
     
     T toModel(Entity entity);
