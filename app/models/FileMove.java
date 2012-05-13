@@ -12,14 +12,11 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
-/**
- * POJO for file moves.
- */
 public class FileMove implements Serializable {
 
     private static final long serialVersionUID = 45L;
 
-    public static final int RETENTION_DAYS = 7;
+    public static final int RETENTION_DAYS = 90;
 
     private static final String KIND = "FileMove";
     
