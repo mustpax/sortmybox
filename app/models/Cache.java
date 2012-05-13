@@ -43,7 +43,7 @@ class Cache {
         return INSTANCE;
     }
 
-    public static boolean isCachable(Mapper mapper) {
+    public boolean isCachable(Mapper mapper) {
         return mapper.getType().isAnnotationPresent(Cacheable.class);
     }
     
@@ -55,9 +55,9 @@ class Cache {
         play.cache.Cache.set(mapper.toKey(model).toString(), model, "1h");
     }
     
-    public <T> void putAll(Iterable<T> models, Mapper<T> mapper) {
+    public <T> void deleteAll(Iterable<T> models, Mapper<T> mapper) {
         for (T model: models) {
-            put(model, mapper);
+            delete(model, mapper);
         }
     }
     

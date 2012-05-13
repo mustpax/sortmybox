@@ -70,15 +70,20 @@ public class DatastoreUtil {
     
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {
-            if (Cache.isCachable(mapper)) {
-                T ret = Cache.get().get(key);
+            T ret;
+            if (Cache.get().isCachable(mapper)) {
+                ret = Cache.get().get(key);
                 if (ret != null) {
                     return ret;
                 }
             }
             DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
             Entity entity = ds.get(key);
-            return mapper.toModel(entity);
+            ret = mapper.toModel(entity);
+            if (Cache.get().isCachable(mapper)) {
+                Cache.get().put(ret, mapper);
+            }
+            return ret;
         } catch (EntityNotFoundException e) {
             return null;
         }
@@ -91,14 +96,15 @@ public class DatastoreUtil {
     public static <T> List<Key> put(Iterable<T> models, Mapper<T> mapper) {
         ToEntityFunction<T> func = new ToEntityFunction<T>(mapper);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        if (Cache.isCachable(mapper)) {
-            Cache.get().putAll(models, mapper);
+        if (Cache.get().isCachable(mapper)) {
+            Cache.get().deleteAll(models, mapper);
         }
         return ds.put(Iterables.transform(models, func));
     }
     
     public static <T> void delete(List<T> models, final Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        Cache.get().deleteAll(models, mapper);
         ds.delete(Lists.transform(models, new Function<T, Key>() {
             @Override public Key apply(T model) {
                 return mapper.getKey(model);
@@ -130,7 +136,7 @@ public class DatastoreUtil {
 
     public static <T> void delete(T model, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        if (Cache.isCachable(mapper)) {
+        if (Cache.get().isCachable(mapper)) {
             Cache.get().delete(model, mapper);
         }
         ds.delete(mapper.toKey(model));
