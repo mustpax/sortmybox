@@ -17,19 +17,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
  
-public class RuleTest extends UnitTest {
-    private final LocalServiceTestHelper helper =
-        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-
-    @Before
-    public void setUp() {
-        helper.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        helper.tearDown();
-    }
+public class RuleTest extends BaseModelTest {
 
     @Test
     public void testNameContains() {
