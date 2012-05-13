@@ -70,11 +70,6 @@ public class FileMove implements Serializable {
         return eq.isEquals();
     }
 
-    public static FileMove findById(Long id) {
-        Key key = KeyFactory.createKey(KIND, id);
-        return DatastoreUtil.get(key, FileMoveMapper.INSTANCE);
-    }
-
     public static List<FileMove> findByOwner(Long owner, int maxRows) {
         Query query = new Query(KIND)
 	                      .setAncestor(User.key(owner))
