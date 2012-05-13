@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.cache.Cache;
 import play.test.UnitTest;
 import rules.RuleType;
 
@@ -128,6 +129,24 @@ public class RuleTest extends UnitTest {
         rules.remove(rules.size() - 1);
         rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.id));
         Rule.replace(u, rules, null);
+        actual = Rule.findByUserId(u.id);
+        assertEquals(actual, rules);
+    }
+    
+    @Test
+    public void testCache() {
+        User u = UserTest.newUser();
+        List<Rule> rules = Lists.newArrayList();
+        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.id));
+        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.id));
+        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.id));
+        Rule.replace(u, rules, null);
+        List<Rule> actual = Rule.findByUserId(u.id);
+        assertEquals(actual, rules);
+        
+        rules.remove(rules.size() - 1);
+        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.id));
+        Cache.set(Rule.cacheKey(u.id), rules);
         actual = Rule.findByUserId(u.id);
         assertEquals(actual, rules);
     }

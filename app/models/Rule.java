@@ -84,12 +84,16 @@ public class Rule implements Serializable {
      * <p>
      * NOTE: the max number of rules is bound by {@link #MAX_RULES_TO_FETCH}
      */
-    public static List<Rule> findByUserId(Long userId) {
-        Preconditions.checkNotNull(userId, "User id can't be null");
-        Query q = byOwner(userId);
+    public static List<Rule> findByUserId(long userId) {
+        List<Rule> rules = (List<Rule>) play.cache.Cache.get(cacheKey(userId));
 
-        List<Rule> rules = Lists.newArrayList(fetch(q));
-        Collections.sort(rules, RANK_COMPARATOR);
+        if (rules == null) {
+	        Query q = byOwner(userId);
+	        rules = Lists.newArrayList(fetch(q));
+	        Collections.sort(rules, RANK_COMPARATOR);
+	        play.cache.Cache.set(cacheKey(userId), rules);
+        }
+
         return rules;
     }
     
@@ -223,10 +227,12 @@ public class Rule implements Serializable {
             throw new IllegalArgumentException("Rules missing or too many rules.");
         }
 
+        play.cache.Cache.delete(cacheKey(user.id));
+
         List<Rule> toSave = Lists.newArrayList();
         boolean needToRun = true;
         List<Key> oldKeys = Lists.newArrayList(fetchKeys(byOwner(user.id)));
-    
+
         if (ruleList.isEmpty()) {
             Logger.info("Deleting all rules since there are no new rules to insert.");
             // No rules inserted no need to run
@@ -264,6 +270,14 @@ public class Rule implements Serializable {
     
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
+    }
+    
+    /**
+     * We cache all rules for a user together.
+     * So the cache key depends on the ownerId.
+     */
+    public static String cacheKey(long ownerId) {
+        return User.key(ownerId) + KIND;
     }
 
     private static void saveAll(Iterable<Rule> rules) {
