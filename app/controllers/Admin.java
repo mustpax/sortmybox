@@ -116,6 +116,10 @@ public class Admin extends Controller {
         render(user);
     }
 
+    public static void forceError() {
+        throw new IllegalArgumentException("Just pretending to fail.");
+    }
+
     public static void deleteUserPost(String userIdString) {
         checkAuthenticity();
         

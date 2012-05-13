@@ -5,7 +5,6 @@
 # Home page
 GET     /rules                                  Application.index
 GET     /dirs                                   Application.dirs
-GET     /error                                  Application.forceError
 
 # Account
 GET     /account/settings                       Accounts.settings
@@ -21,6 +20,7 @@ GET     /contact                                Footer.contact
 GET     /faq                                	Footer.faq
 
 # Admin
+GET    /admin/error                             Admin.forceError
 GET    /admin/searchUser                        Admin.searchUser
 GET    /admin/blacklistedUsers                  Admin.blacklistedUsers
 POST   /admin/addToBlacklist                    Admin.addToBlacklist
