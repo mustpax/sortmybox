@@ -71,9 +71,8 @@ public class FileMove implements Serializable {
     }
 
     public static List<FileMove> findByOwner(Long owner, int maxRows) {
-        Query query = new Query(KIND)
-	                      .setAncestor(User.key(owner))
-	                      .addSort("when", SortDirection.DESCENDING);
+        Query query = all().setAncestor(User.key(owner))
+	                       .addSort("when", SortDirection.DESCENDING);
         return DatastoreUtil.asList(query,
                        FetchOptions.Builder.withLimit(maxRows),
                        FileMoveMapper.INSTANCE);
@@ -103,7 +102,6 @@ public class FileMove implements Serializable {
             entity.setProperty("fromFile", mv.fromFile);
             entity.setProperty("toDir", mv.toDir);
             entity.setProperty("when", mv.when);
-            entity.setProperty("owner", mv.owner);
             entity.setProperty("successful", mv.successful);
             return entity;
         }
