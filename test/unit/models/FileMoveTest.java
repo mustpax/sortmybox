@@ -6,10 +6,14 @@ import java.util.Date;
 import java.util.List;
 
 import models.FileMove;
+import models.User;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -51,5 +55,18 @@ public class FileMoveTest extends BaseModelTest {
         // Datastore fetch should flip the ordering to reverse chrono order
         Collections.reverse(moves);
         assertEquals(moves, FileMove.findByOwner(1L, count));
+    }
+    
+    /**
+     * Verify that FileMoves are queriable via ancestor.
+     */
+    @Test
+    public void testGetByParent() {
+        FileMove mv1 = new FileMove(1L, "foo", "bar", true);
+        FileMove mv2 = new FileMove(1L, "tom", "jerry", false);
+        FileMove.save(Arrays.asList(mv1, mv2));
+        Query q = new Query(FileMove.KIND).setAncestor(User.key(1L));
+        List moves = Lists.newArrayList(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable());
+        assertEquals(2, moves.size());
     }
 }

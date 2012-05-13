@@ -52,7 +52,7 @@ public class Rule implements Serializable {
         }
     };
 
-    public long id;
+    public Long id;
     public Long owner;
     public RuleType type;
     public String pattern;
@@ -299,7 +299,7 @@ public class Rule implements Serializable {
 
         @Override
         public Entity toEntity(Rule r) {
-            Entity entity = new Entity(toKey(r));
+            Entity entity = DatastoreUtil.newEntity(User.key(r.owner), KIND, r.id);
             entity.setProperty("type", r.type.name());
             entity.setProperty("pattern", r.pattern);
             entity.setProperty("dest", r.dest);
@@ -314,6 +314,7 @@ public class Rule implements Serializable {
 
         @Override
         public Key toKey(Rule r) {
+            assert r.id != null : "Can't get key for FileMove that hasn't been persisted yet.";
             return key(r.owner, r.id);
         }
 

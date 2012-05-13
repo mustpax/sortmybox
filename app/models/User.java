@@ -327,7 +327,7 @@ public class User implements Serializable {
     private static class UserMapper implements Mapper<User> {
         @Override
         public Entity toEntity(User model) {
-            Entity entity = new Entity(toKey(model));
+            Entity entity = DatastoreUtil.newEntity(KIND, model.id);
             entity.setProperty("name", model.name);
             entity.setProperty("nameLower", model.nameLower);
             entity.setProperty("email", model.email);

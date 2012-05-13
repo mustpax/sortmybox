@@ -104,7 +104,7 @@ public class Blacklist implements Serializable {
     private static class BlacklistMapper implements Mapper<Blacklist> {
         @Override
         public Entity toEntity(Blacklist model) {
-            Entity ret = new Entity(toKey(model));
+            Entity ret = DatastoreUtil.newEntity(KIND, model.id);
             ret.setProperty("created", model.created);
             return ret;
         }

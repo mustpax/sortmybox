@@ -53,7 +53,7 @@ public class UsageStats {
     private static class UsageStatsMapper implements Mapper<UsageStats> {
         @Override
         public Entity toEntity(UsageStats model) {
-            Entity ret = new Entity(key(model.id));
+            Entity ret = DatastoreUtil.newEntity(KIND, model.id);
             ret.setProperty("users", model.users);
             ret.setProperty("rules", model.rules);
             ret.setProperty("fileMoves", model.fileMoves);

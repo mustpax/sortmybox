@@ -73,6 +73,22 @@ public class DatastoreUtil {
         return Iterables.transform(entities, TO_KEY);
     }
     
+    public static Entity newEntity(Key parent, String kind, Long id) {
+        if (id == null) {
+            return new Entity(kind, parent);
+        } else {
+            return new Entity(parent.getChild(kind, id));
+        }
+    }
+
+    public static Entity newEntity(String kind, Long id) {
+        if (id == null) {
+            return new Entity(kind);
+        } else {
+            return new Entity(KeyFactory.createKey(kind, id));
+        }
+    }
+    
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {
             T ret = null;

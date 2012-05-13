@@ -20,7 +20,7 @@ public class FileMove implements Serializable {
 
     public static final int RETENTION_DAYS = 90;
 
-    private static final String KIND = "FileMove";
+    public static final String KIND = "FileMove";
     
     public Long id;
     public String fromFile;
@@ -104,7 +104,7 @@ public class FileMove implements Serializable {
 
         @Override
         public Entity toEntity(FileMove mv) {
-            Entity entity = new Entity(toKey(mv));
+            Entity entity = DatastoreUtil.newEntity(User.key(mv.owner), KIND, mv.id);
             entity.setProperty("fromFile", mv.fromFile);
             entity.setProperty("toDir", mv.toDir);
             entity.setProperty("when", mv.when);
@@ -132,6 +132,7 @@ public class FileMove implements Serializable {
 
         @Override
         public Key toKey(FileMove model) {
+            assert model.id != null : "Can't get key for FileMove that hasn't been persisted yet.";
             return key(model.owner, model.id);
         }
     }
