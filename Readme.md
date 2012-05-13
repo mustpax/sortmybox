@@ -21,9 +21,9 @@ their correct location based on sorting rules that *you* create.
 - Sid “This codebase needs more FactoryImpl’s” Yang
 - Kanishka “That should be centered” Maheshwari
 
-Early testing, design and usability feedback by:
+Design and usability guidance by:
 
-- Canmert ”Michael Jackson” Koral
+- Canmert “Michael Jackson” Koral
 
 ### Feedback
 
