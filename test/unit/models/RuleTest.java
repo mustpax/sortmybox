@@ -1,13 +1,34 @@
 package unit.models;
 
-import play.test.*;
+import java.util.List;
+
+import models.Rule;
+import models.User;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import play.test.UnitTest;
 import rules.RuleType;
 
-import org.junit.*;
-import models.*;
-import models.Rule;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.common.collect.Lists;
  
 public class RuleTest extends UnitTest {
+    private final LocalServiceTestHelper helper =
+        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+    @Before
+    public void setUp() {
+        helper.setUp();
+    }
+
+    @After
+    public void tearDown() {
+        helper.tearDown();
+    }
 
     @Test
     public void testNameContains() {
@@ -91,5 +112,23 @@ public class RuleTest extends UnitTest {
 
         r.pattern = "p d f";
         assertTrue(r.matches("file.p d F"));
+    }
+
+    @Test
+    public void testReplace() {
+        User u = UserTest.newUser();
+        List<Rule> rules = Lists.newArrayList();
+        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.id));
+        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.id));
+        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.id));
+        Rule.replace(u, rules, null);
+        List<Rule> actual = Rule.findByUserId(u.id);
+        assertEquals(actual, rules);
+        
+        rules.remove(rules.size() - 1);
+        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.id));
+        Rule.replace(u, rules, null);
+        actual = Rule.findByUserId(u.id);
+        assertEquals(actual, rules);
     }
 }

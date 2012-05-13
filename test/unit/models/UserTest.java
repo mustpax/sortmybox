@@ -2,6 +2,8 @@ package unit.models;
 
 import java.util.Date;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
 import models.User;
 
 import org.junit.After;
@@ -124,7 +126,11 @@ public class UserTest extends BaseModelTest {
         assertEquals(User.findById(ID), user);
     }
 
-    private static User newUser(Long id, String token, String email, String secret, String name) {
+    public static User newUser() {
+        return newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+    }
+
+    public static User newUser(Long id, String token, String email, String secret, String name) {
         User user = new User();
         user.id = id;
         user.setToken(token);

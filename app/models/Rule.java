@@ -189,7 +189,6 @@ public class Rule implements Serializable {
             return false;
         Rule other = (Rule) obj;
         EqualsBuilder eq = new EqualsBuilder()
-            .append(this.id, other.id)
             .append(this.type, other.type)
             .append(this.pattern, other.pattern)
             .append(this.dest, other.dest)
@@ -217,18 +216,17 @@ public class Rule implements Serializable {
      * @return true if there were no errors and new rules were inserted
      *              inserted
      */
-    public static boolean insertAll(User user,
-                                    List<Rule> ruleList,
-                                    @CheckForNull List<List<RuleError>> allErrors) {
+    public static boolean replace(User user,
+                                  List<Rule> ruleList,
+                                  @CheckForNull List<List<RuleError>> allErrors) {
         if ((ruleList == null) || (ruleList.size() > MAX_RULES)) {
             throw new IllegalArgumentException("Rules missing or too many rules.");
         }
 
         List<Rule> toSave = Lists.newArrayList();
         boolean needToRun = true;
-    
         List<Key> oldKeys = Lists.newArrayList(fetchKeys(byOwner(user.id)));
-
+    
         if (ruleList.isEmpty()) {
             Logger.info("Deleting all rules since there are no new rules to insert.");
             // No rules inserted no need to run

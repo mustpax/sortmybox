@@ -27,7 +27,7 @@ public class Rules extends Controller {
 
             User user = Login.getLoggedInUser();
             List<List<RuleError>> allErrors = Lists.newArrayList();
-            if (Rule.insertAll(user, ruleList, allErrors)) {
+            if (Rule.replace(user, ruleList, allErrors)) {
                 Logger.info("New rules inserted with no errors so running rules.");
                 RuleUtils.runRules(user);
             }
