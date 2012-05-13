@@ -71,7 +71,7 @@ public class DatastoreUtil {
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {
             if (Cache.isCachable(mapper)) {
-                T ret = Cache.get(key);
+                T ret = Cache.get().get(key);
                 if (ret != null) {
                     return ret;
                 }
@@ -92,7 +92,7 @@ public class DatastoreUtil {
         ToEntityFunction<T> func = new ToEntityFunction<T>(mapper);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         if (Cache.isCachable(mapper)) {
-            Cache.putAll(models, mapper);
+            Cache.get().putAll(models, mapper);
         }
         return ds.put(Iterables.transform(models, func));
     }
@@ -131,7 +131,7 @@ public class DatastoreUtil {
     public static <T> void delete(T model, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         if (Cache.isCachable(mapper)) {
-            Cache.delete(model, mapper);
+            Cache.get().delete(model, mapper);
         }
         ds.delete(mapper.toKey(model));
     }

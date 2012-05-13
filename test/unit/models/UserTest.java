@@ -8,6 +8,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.cache.Cache;
+
+import com.google.appengine.api.memcache.ErrorHandler;
+import com.google.appengine.api.memcache.InvalidValueException;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceException;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.common.base.Throwables;
+
 import unit.TestUtil;
 import dropbox.gson.DbxAccount;
 
@@ -31,6 +40,7 @@ public class UserTest extends BaseModelTest {
         if (user != null) {
             TestUtil.deleteUser(user);
         }
+        Cache.clear();
     }
 
     @Test
@@ -66,7 +76,6 @@ public class UserTest extends BaseModelTest {
         User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
         user.save();
         User user2 = User.findById(ID);
-        assertNotSame(user2, user);
         assertEquals(user2, user);
     }
 
@@ -97,6 +106,22 @@ public class UserTest extends BaseModelTest {
         assertNotNull(u.created);
         assertTrue(u.modified.after(u.created));
         assertTrue(u.modified.after(mod1));
+    }
+
+    @Test
+    public void testCache() {
+        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        user.save();
+
+        User user2 = newUser(ID, TOKEN, EMAIL, SECRET, "new");
+        // Force the Cache value to be different from datastore
+        Cache.set(User.key(ID).toString(), user2);
+        assertFalse(User.findById(ID).equals(user));
+        assertEquals(User.findById(ID), user2);
+
+        user.save();
+        assertFalse(User.findById(ID).equals(user2));
+        assertEquals(User.findById(ID), user);
     }
 
     private static User newUser(Long id, String token, String email, String secret, String name) {
