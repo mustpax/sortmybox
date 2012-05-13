@@ -10,6 +10,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.SortDirection;
 
 /**
  * POJO for file moves.
@@ -62,6 +63,7 @@ public class FileMove implements Serializable {
     public static List<FileMove> findByOwner(Long owner, int maxRows) {
         Query query = new Query(FileMove.class.getSimpleName());
         query.addFilter("owner", FilterOperator.EQUAL, owner);
+        query.addSort("when", SortDirection.DESCENDING);
         return DatastoreUtil.asList(query,
                        FetchOptions.Builder.withLimit(maxRows),
                        FileMoveMapper.INSTANCE);
