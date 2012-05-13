@@ -1,19 +1,20 @@
-<!DOCTYPE html>
+#{extends 'main.html' /} 
+#{set title:'Not Found' /}
 
-<html>
-    <head>
-        <title>Not found</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    
-    </head>
-    <body>
+    <div class="center">
         #{if play.mode.name() == 'DEV'}
             #{404 result /}
         #{/if}
         #{else}
-            <h1>Not found</h1>
+             <h1>Doh! An error has occurred</h1>
             <p>
-                ${result.message}
+                We have been notified. You can 
+                <a href="mailto: ${play.configuration.getProperty("sortbox.email")}">contact us</a> 
+                with any additional information.
+            </p>
+            <p>
+                <img src="#{static-path '/public/img/Homer_Simpson_Error.jpg'/}" />
             </p>
         #{/else}
-    </body>
-</html>
+    </div>
+

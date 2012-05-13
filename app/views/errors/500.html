@@ -1,21 +1,25 @@
-<!DOCTYPE html>
+#{extends 'main.html' /} 
+#{set title:'Application Error' /}
 
-<html>
-    <head>
-        <title>Application error</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>	
-    </head>
-    <body>
-        #{if play.mode.name() == 'DEV'}
-            #{500 exception /}
-        #{/if}
-        #{else}
-            <h1>Oops, an error occured</h1>
-            #{if exception instanceof play.exceptions.PlayException}
-                <p>
-                    This exception has been logged with id <strong>${exception.id}</strong>.
-                </p>
-            #{/if}
-        #{/else}
-    </body>
-</html>
+<div class="center">
+    #{if play.mode.name() == 'DEV'} 
+        #{500 exception /} 
+    #{/if} 
+    #{else}
+        <h1>Doh! An error has occurred</h1>
+        <p>
+            We have been notified. You can 
+            <a href="mailto: ${play.configuration.getProperty("sortbox.email")}">contact us</a> 
+            with any additional information.
+        </p>
+        <p>
+            <img src="#{static-path '/public/img/Homer_Simpson_Error.jpg'/}" />
+        </p>
+        #{if exception instanceof play.exceptions.PlayException}
+        <p>
+            This exception has been logged with id <strong>${exception.id}</strong>.
+        </p>
+        #{/if} 
+    #{/else}
+</div>
+
