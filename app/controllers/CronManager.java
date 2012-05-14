@@ -6,6 +6,7 @@ import play.Logger;
 import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -23,6 +24,7 @@ import cron.Job;
  * 
  * @author syyang
  */
+@With({ ErrorReporter.class, Namespaced.class })
 public class CronManager extends Controller {
     public static void process(String jobPath) {
         Job job = null;

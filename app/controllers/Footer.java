@@ -4,7 +4,7 @@ import models.User;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(ErrorReporter.class)
+@With({ ErrorReporter.class, Namespaced.class })
 public class Footer extends Controller {
 
     public static void team() {

@@ -17,7 +17,7 @@ import common.request.Headers;
  * 
  * @author syyang
  */
-@With(ErrorReporter.class)
+@With({ ErrorReporter.class, Namespaced.class })
 public class TaskManager extends Controller {
 
     /**

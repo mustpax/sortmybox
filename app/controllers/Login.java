@@ -33,7 +33,7 @@ import dropbox.gson.DbxAccount;
  *
  * @author mustpax
  */
-@With(ErrorReporter.class)
+@With({ErrorReporter.class, Namespaced.class})
 public class Login extends Controller {
     private static final String REDIRECT_URL = "url";
 
@@ -79,18 +79,6 @@ public class Login extends Controller {
         }
     }
 
-    @Before(priority=1)
-    static void setNamespace() {
-        if (NamespaceManager.get() == null) {
-            Logger.info("Updating namespace.");
-            String namespace = System.getenv("NAMESPACE");
-            if (namespace != null && ! namespace.isEmpty()) {
-                Logger.info("Namespace: %s", namespace);
-                NamespaceManager.set(namespace);
-            }
-        }
-    }
-    
     public static void alt() {
         boolean alt = true;
         flash.keep(REDIRECT_URL);
