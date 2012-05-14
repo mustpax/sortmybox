@@ -10,6 +10,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
+import play.mvc.Http.Request;
 import play.mvc.Router;
 import play.mvc.With;
 
@@ -40,6 +41,7 @@ public class Login extends Controller {
         static final String TOKEN = "token";
         static final String SECRET = "secret";
         static final String UID = "uid";
+        static final String IP = "ip";
     }
     
     @Before(priority=10)
@@ -118,6 +120,7 @@ public class Login extends Controller {
             Logger.info("Succesfully authenticated with Dropbox.");
             User u = upsertUser(oauthResponse.token, oauthResponse.secret);
             session.put(SessionKeys.UID, u.id);
+            session.put(SessionKeys.IP, request.remoteAddress);
             session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
             redirectToOriginalURL();
         } else {
@@ -165,8 +168,22 @@ public class Login extends Controller {
             return null;
         }
 
+        String ip = session.get(SessionKeys.IP);
+        if (ip == null) {
+            Logger.info("Session IP address marker missing.");
+            session.remove(SessionKeys.UID);
+            return null;
+        }
+
+        if (! ip.equals(request.remoteAddress)) {
+            Logger.warn("Session does not match expected IP. Saved: %s Actual: %s",
+                        ip, request.remoteAddress);
+            return null;
+        }
+
         try {
             User user = User.findById(Long.valueOf(uid));
+
             if (user == null) {
                 Logger.warn("Session has uid, but user missing from datastore. Uid: %s", uid);
             }
