@@ -15,6 +15,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
 public class FileMove implements Serializable {
+    private static final FileMoveMapper MAPPER = new FileMoveMapper();
 
     private static final long serialVersionUID = 45L;
 
@@ -74,12 +75,12 @@ public class FileMove implements Serializable {
         Query query = all().setAncestor(User.key(owner))
 	                       .addSort("when", SortDirection.DESCENDING);
         return DatastoreUtil.asList(query,
-                       FetchOptions.Builder.withLimit(maxRows),
-                       FileMoveMapper.INSTANCE);
+			                        FetchOptions.Builder.withLimit(maxRows),
+			                        MAPPER);
     }
 
     public static void save(List<FileMove> fileMoves) {
-        DatastoreUtil.put(fileMoves, FileMoveMapper.INSTANCE);
+        DatastoreUtil.put(fileMoves, MAPPER);
     }
 
     public static Query all() {
@@ -91,9 +92,6 @@ public class FileMove implements Serializable {
     }
 
     private static class FileMoveMapper implements Mapper<FileMove> {
-
-        static final FileMoveMapper INSTANCE = new FileMoveMapper();
-
         private FileMoveMapper() {}
 
         @Override
