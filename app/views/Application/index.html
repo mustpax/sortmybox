@@ -54,24 +54,11 @@
 </div>
 
 <div class="row">
-  <div class="span12">
-	<div class="page-header">
-	  <h1>Recent activity</h1>
-	</div>
-      <ul class="moves">
-          #{list items:moves, as:'move'}
-              #{if move.successful}
-                  <li class="move-success">Moved <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code>. (${move.when.since()})
-              #{/if}
-              #{else}
-	              <li class="move-fail">Failed to move <code>${move.fromFile}</code> to <code>${move.toDir}/${move.fromFile}</code> since
-                                    there is already a file with the same name at the location. (${move.when.since()})
-              #{/else}
-          #{/list}
-      </ul>
-      #{else}
-          <em>None yet. Create some rules and save files in your Sortbox folder to get going.</em>
-      #{/else}
+    <div class="span12">
+        <div class="page-header">
+            <h1>Recent activity</h1>
+        </div>
+        <div class="moves"></div>
     </div>
 </div>
 

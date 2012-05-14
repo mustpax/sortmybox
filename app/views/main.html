@@ -76,9 +76,7 @@
     
     <script>
 	    window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
-	    _.templateSettings = {
-	        escape : /\{\{(.+?)\}\}/g
-        };
+	    _.templateSettings.escape = /\{\{(.+?)\}\}/g;
 	    $(function() {
 	        $('.dropdown-toggle').dropdown();
 	        $('.easter').live('click', function() {

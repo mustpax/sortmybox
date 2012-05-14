@@ -230,6 +230,31 @@
             rule.find('.status').addClass('icon-remove');
         }
     };
+    
+    function updateActivity() {
+        $('.moves').empty().append(template('moves-loading'));
+
+        $.ajax({
+            type: 'GET',
+            url: '/activity',
+            data: {
+                'authenticityToken' : window.csrfToken
+            },
+            success: function(moves) {
+		        var el = $('.moves');
+		        el.empty()
+		        if (_.isEmpty(moves)) {
+		            el.append(template('moves-empty'));
+		        } else {
+		            el.append(template('moves-list', { moves : moves }));
+		        }
+            },
+            error: function() {
+		        $('.moves').empty().append(template('moves-error'));
+            }
+        });
+    };
+    $(updateActivity);
 
     function loading() {
         $('.rules .rule .status').addClass('icon-refresh')
@@ -288,7 +313,7 @@
                          },
                 error: function (badRequest) {
 					doneLoading();
-					if (badRequest.status===400){
+					if (badRequest.status === 400){
 						alert("You have too many rules defined, please delete a few and try again.");
 					}
             	}

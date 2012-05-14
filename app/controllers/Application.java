@@ -1,6 +1,8 @@
 package controllers;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
 
 import models.FileMove;
@@ -9,9 +11,14 @@ import models.User;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.templates.JavaExtensions;
 import rules.RuleType;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
@@ -24,15 +31,32 @@ import dropbox.gson.DbxMetadata;
  */
 @With(Login.class)
 public class Application extends Controller {
-    
+    /**
+     * We want to serialize {@link Date} objects as "x minutes since"
+     * so we provide our own Gson serialization adaptor.
+     */
+    private static class DateSinceSerializer implements JsonSerializer<Date> {
+        @Override
+        public JsonElement serialize(Date d, Type t,
+                JsonSerializationContext ctx) {
+            return new JsonPrimitive(JavaExtensions.since(d));
+        }
+    }
+
     public static final int MAX_FILE_MOVES = 10;
     
     public static void index() {
         User user = Login.getLoggedInUser();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
-        List<FileMove> moves = FileMove.findByOwner(user.id, MAX_FILE_MOVES);
-        render(user, rules, moves, initResult);
+        render(user, rules, initResult);
+    }
+
+    public static void activity() {
+        checkAuthenticity();
+        User user = Login.getLoggedInUser();
+        renderJSON(FileMove.findByOwner(user.id, MAX_FILE_MOVES),
+                   new DateSinceSerializer());
     }
     
     public static void dirs(String path) {

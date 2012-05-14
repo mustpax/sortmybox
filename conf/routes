@@ -5,6 +5,7 @@
 # Home page
 GET     /rules                                  Application.index
 GET     /dirs                                   Application.dirs
+GET     /activity                               Application.activity
 
 # Account
 GET     /account/settings                       Accounts.settings
