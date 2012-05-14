@@ -99,8 +99,8 @@ public class FileMove implements Serializable {
         @Override
         public Entity toEntity(FileMove mv) {
             Entity entity = DatastoreUtil.newEntity(User.key(mv.owner), KIND, mv.id);
-            entity.setProperty("fromFile", mv.fromFile);
-            entity.setProperty("toDir", mv.toDir);
+            entity.setUnindexedProperty("fromFile", mv.fromFile);
+            entity.setUnindexedProperty("toDir", mv.toDir);
             entity.setProperty("when", mv.when);
             entity.setProperty("successful", mv.successful);
             return entity;
