@@ -1,18 +1,15 @@
 package controllers;
 
-import java.lang.reflect.Constructor;
-import java.util.Map;
-
-import com.google.common.base.Throwables;
-
-import common.reflection.ReflectionUtils;
-import common.request.Headers;
-
 import play.Logger;
 import play.Play;
 import play.mvc.Controller;
+import play.mvc.With;
 import tasks.Task;
 import tasks.TaskContext;
+
+import com.google.common.base.Throwables;
+import common.reflection.ReflectionUtils;
+import common.request.Headers;
 
 /**
  * This class is responsible for relaying a GET request to an appropriate task.
@@ -20,17 +17,13 @@ import tasks.TaskContext;
  * 
  * @author syyang
  */
+@With(ErrorReporter.class)
 public class TaskManager extends Controller {
 
     /**
      * Executes the task specified by the request url.
      */
     public static void process() {
-        if (Play.mode.isProd() && !isRequestFromQueueService()) {
-            Logger.warn("TaskManager:request is not from queue service.");
-            forbidden();
-        }
-        
         Task task = null;
         TaskContext context = null;
         try {
@@ -58,7 +51,22 @@ public class TaskManager extends Controller {
             Throwables.propagate(t);
         }
     }
-    
+
+    static void checkPermission() {
+        if (! Play.mode.isProd()) {
+            return;
+        }
+        if (isRequestFromQueueService()) {
+            return;
+        }
+        if (Login.isAdmin()) {
+            return;
+        }
+
+        Logger.warn("TaskManager:request is not from queue service.");
+        forbidden();
+    }
+
     private static boolean isRequestFromQueueService() {
         String queueName = Headers.first(request, Headers.QUEUE_NAME);
         return queueName != null;

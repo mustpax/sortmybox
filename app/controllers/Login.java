@@ -107,6 +107,11 @@ public class Login extends Controller {
         }
     }
 
+    public static boolean isAdmin() {
+        User u = getLoggedInUser();
+        return u != null && u.isAdmin();
+    }
+
     public static boolean isLoggedIn() {
         return getLoggedInUser() != null;
     }

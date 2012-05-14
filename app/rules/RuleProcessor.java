@@ -1,15 +1,17 @@
 package rules;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import models.User;
 import play.Logger;
+import play.mvc.With;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+
+import controllers.ErrorReporter;
 
 import cron.Job;
 
@@ -18,6 +20,7 @@ import cron.Job;
  * 
  * @author syyang
  */
+@With(ErrorReporter.class)
 public class RuleProcessor implements Job {
     /** Indicates how many users to process per task */
     public static final int DEFAULT_CHUNK_SIZE = 20;

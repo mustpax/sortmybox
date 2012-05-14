@@ -63,10 +63,20 @@ public class CronManager extends Controller {
     
     @Before
     static void checkCronService() {
-        String isCron = Headers.first(request, Headers.CRON);
-        if (Play.mode.isProd() && !"true".equals(isCron)) {
-            Logger.warn("CronManager: request is not from cron service: " + request.url);
-            forbidden();
+        if (! Play.mode.isProd()) {
+            return;
         }
+
+        String isCron = Headers.first(request, Headers.CRON);
+        if ("true".equals(isCron)) {
+            return;
+        }
+
+        if (Login.isAdmin()) {
+            return;
+        }
+
+        Logger.warn("CronManager: request is not from cron service: " + request.url);
+        forbidden();
     }
 }
