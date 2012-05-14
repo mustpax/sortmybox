@@ -42,7 +42,7 @@ public class UsageStats {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(User.class)
+        return Objects.toStringHelper(UsageStats.class)
             .add("id", id)
             .add("users", users)
             .add("rules", rules)
