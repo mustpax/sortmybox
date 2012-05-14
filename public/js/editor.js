@@ -309,6 +309,7 @@
 	                             setTimeout(function(){
 	                                msg.popover("hide");
 	                             }, 2000);
+	                             updateActivity();
                              }
                          },
                 error: function (badRequest) {
