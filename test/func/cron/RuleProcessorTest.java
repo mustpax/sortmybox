@@ -34,7 +34,7 @@ import com.google.common.collect.Maps;
 public class RuleProcessorTest extends BaseTaskQueueTest {
 
     private static final String QUEUE_NAME = ChunkedRuleProcessor.class.getSimpleName();
-    private static final int CHUNK_SIZE = 2;
+    private static final int CHUNK_SIZE = 100;
 
     private LocalTaskQueue taskQueue;
 
@@ -46,7 +46,7 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     
         // create 4 users
         int id = 100;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 1200; i++) {
             TestUtil.createUser(id);
             id += 100;
         }
@@ -71,7 +71,7 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
         
         // 2. Verify the number of enqueued tasks.
         QueueStateInfo queueInfo = getQueueStateInfo();
-        assertEquals(2, queueInfo.getCountTasks());
+        assertEquals(12, queueInfo.getCountTasks());
         
         // 3. Manually processes the tasks
         for (TaskStateInfo taskInfo : queueInfo.getTaskInfo()) {
