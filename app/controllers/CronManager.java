@@ -24,9 +24,6 @@ import cron.Job;
  * @author syyang
  */
 public class CronManager extends Controller {
-
-    public static final String pJOB_NAME = "jobName";
-    
     public static void process(String jobPath) {
         Job job = null;
         try {
