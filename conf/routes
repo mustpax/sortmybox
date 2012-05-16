@@ -49,6 +49,7 @@ GET     /offline                                Login.offline
 
 # Redirect for favicon.ico
 GET     /robots.txt                             staticFile:public/robots.txt
+GET     /humans.txt                             staticFile:public/humans.txt
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

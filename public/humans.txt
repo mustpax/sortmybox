@@ -1,0 +1,21 @@
+Sortbox brought to you by:
+
+The devleopment team:
+
+- Mustafa “Let’s do it in JavaScript” Paksoy
+- Sid “This codebase needs more FactoryImpl’s” Yang
+- Kanishka “That should be centered” Maheshwari
+
+Design and usability supervision by:
+
+- Canmert “Michael Jackson” Koral
+
+Special thanks to:
+
+- Bootstrap for making clean HTML easy. (And pretty.)
+- jQuery for being jQuery.
+- Play Framework for taking back Java web development from the architecture astronauts.
+- Hosting by Google App Engine
+- GitHub for source hosting.
+- Logo based on design by Haziq Mir via Creative Market
+- Background pattern by Dan Krause via Subtle Patterns
