@@ -53,16 +53,19 @@ class DropboxClientImpl implements DropboxClient {
             .addPair("include_deleted", "false")
             .create();
 
-        HttpResponse resp = ws.get();
-        if (resp.success()) {
-            DbxMetadata ret = new Gson().fromJson(resp.getJson(), DbxMetadata.class);
-            if (ret.isDeleted()) {
-                return null;
+        try {
+            HttpResponse resp = ws.get();
+            if (resp.success()) {
+                DbxMetadata ret = new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+                if (ret.isDeleted()) {
+                    return null;
+                }
+                return ret;
             }
-            return ret;
+            Logger.warn("Failed getting metadata for '%s'. %s", path, getError(resp));
+        } catch (RuntimeException e) {
+            Logger.warn(e, "Exception while trying to fetch metadata for '%s'.");
         }
-
-        Logger.warn("Failed getting metadata for '%s'. %s", path, getError(resp));
         return null;
     }
 
