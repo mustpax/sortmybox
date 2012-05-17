@@ -15,6 +15,9 @@
     <link href="#{static-path '/public/css/styles.css'/}" rel="stylesheet">
     
     <link rel="shortcut icon" href="#{static-path '/public/img/favicon.png'/}">
+   <script>
+       var _gaq= _gaq || [];
+   </script>
     #{get 'head'}#{/get}
   </head>
 
@@ -89,7 +92,6 @@
     #{get 'script' /}
    <!-- Asynchronous Google Analytics snippet. mathiasbynens.be/notes/async-analytics-snippet -->
    <script>
-       var _gaq= _gaq || [];
        _gaq.push(['_setAccount','UA-31266349-1']);
        _gaq.push(['_trackPageview']);
        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
