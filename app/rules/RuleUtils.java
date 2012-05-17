@@ -18,6 +18,7 @@ import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
 
 public class RuleUtils {
+    private static final int MAX_TRIES = 10;
 
     /**
      * Return a regex pattern that will match the given glob pattern.
@@ -116,14 +117,28 @@ public class RuleUtils {
                 if (r.matches(base)) {
                     Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
                     boolean success = true;
-                    try {
-                        String dest = r.dest +
-                                      (r.dest.endsWith("/") ? "" : "/") +
-                                      base;
-                        client.move(file, dest);
-                    } catch (FileMoveCollisionException e) {
-                        success = false;
+                    String dest = null;
+                    String suffix = null;
+                    int tries = 0;
+                    while (tries < MAX_TRIES) {
+	                    try {
+	                        dest = r.dest + (r.dest.endsWith("/") ? "" : "/") + base;
+	                        if (suffix != null) {
+	                            dest += suffix + (tries > 1 ? " " + tries : "");
+	                        }
+	                        client.move(file, dest);
+	                        break;
+	                    } catch (FileMoveCollisionException e) {
+	                        success = false;
+	                        suffix = "conflict";
+	                    }
+	                    tries++;
                     }
+
+                    if (tries >= MAX_TRIES) {
+                        Logger.error("Cannot move file '%s' to '%s' after %d tries. Skipping.", file, r.dest, MAX_TRIES);
+                    }
+                        
                     fileMoves.add(new FileMove(user.id, base, r.dest, success));
                     break;
                 }
