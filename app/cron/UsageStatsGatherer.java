@@ -29,13 +29,13 @@ public class UsageStatsGatherer implements Job {
 
     @Override
     public void execute(Map<String, String> jobData) {
-        int numUsers = DatastoreUtil.count(User.all());
-        int numRules = DatastoreUtil.count(Rule.all());
+        long numUsers = DatastoreUtil.count(User.all());
+        long numRules = DatastoreUtil.count(Rule.all());
         
         Date to = DateTime.now().toDateMidnight().toDate();
         Date from = DateTime.now().minusDays(1).toDateMidnight().toDate();
 
-        int numFileMoves = countFileMoves(from, to);
+        long numFileMoves = countFileMoves(from, to);
         
         UsageStats stats = new UsageStats(numUsers, numRules, numFileMoves);
         stats.save();

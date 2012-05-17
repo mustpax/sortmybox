@@ -4,6 +4,8 @@ import java.util.List;
 
 import models.Blacklist;
 import models.CascadingDelete;
+import models.DatastoreUtil;
+import models.UsageStats;
 import models.User;
 
 import org.mortbay.log.Log;
@@ -13,7 +15,9 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -22,6 +26,15 @@ public class Admin extends Controller {
 
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
     private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
+
+    public static void usageStats() {
+        User user = Login.getLoggedInUser();
+  
+        Query q = UsageStats.all().addSort("created", SortDirection.DESCENDING);
+        List<UsageStats> stats = DatastoreUtil.asList(q, UsageStats.MAPPER);
+
+        render(user, stats);
+    }
 
     public static void searchUser(String query) {
         boolean ranSearch = false;

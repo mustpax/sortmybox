@@ -1,5 +1,7 @@
 package models;
 
+import static com.google.appengine.api.datastore.FetchOptions.Builder.*;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -141,6 +143,10 @@ public class DatastoreUtil {
         return Iterables.transform(pq.asIterable(), TO_KEY);
     }
 
+    public static <T> List<T> asList(Query q, Mapper<T> mapper) {
+        return Lists.newArrayList(query(q, withDefaults(), mapper));
+    }
+    
     public static <T> List<T> asList(Query q, FetchOptions options, Mapper<T> mapper) {
         return Lists.newArrayList(query(q, options, mapper));
     }

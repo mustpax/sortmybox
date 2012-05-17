@@ -1,23 +1,28 @@
 package models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Objects;
 
-public class UsageStats {
-    private static final Mapper<UsageStats> MAPPER = new UsageStatsMapper();
+public class UsageStats implements Serializable {
+
+    private static final long serialVersionUID = 45L;
+
+    public static final Mapper<UsageStats> MAPPER = new UsageStatsMapper();
     private static final String KIND = "UsageStats";
 
     public Long id;
-    public Integer users;
-    public Integer rules;
-    public Integer fileMoves;
+    public Long users;
+    public Long rules;
+    public Long fileMoves;
     public Date created;
 
-    public UsageStats(Integer users, Integer rules, Integer fileMoves) {
+    public UsageStats(Long users, Long rules, Long fileMoves) {
         this.users = users;
         this.rules = rules;
         this.fileMoves = fileMoves;
@@ -26,14 +31,18 @@ public class UsageStats {
     
     private UsageStats(Entity entity) {
         this.id = entity.getKey().getId();
-        this.users = (Integer) entity.getProperty("users");
-        this.rules = (Integer) entity.getProperty("rules");
-        this.fileMoves = (Integer) entity.getProperty("fileMoves");
+        this.users = (Long) entity.getProperty("users");
+        this.rules = (Long) entity.getProperty("rules");
+        this.fileMoves = (Long) entity.getProperty("fileMoves");
         this.created = (Date) entity.getProperty("created");
     }
 
     public static Key key(long id) {
         return KeyFactory.createKey(KIND, id);
+    }
+
+    public static Query all() {
+        return new Query(KIND);
     }
 
     public void save() {
@@ -54,9 +63,9 @@ public class UsageStats {
         @Override
         public Entity toEntity(UsageStats model) {
             Entity ret = DatastoreUtil.newEntity(KIND, model.id);
-            ret.setProperty("users", model.users);
-            ret.setProperty("rules", model.rules);
-            ret.setProperty("fileMoves", model.fileMoves);
+            ret.setUnindexedProperty("users", model.users);
+            ret.setUnindexedProperty("rules", model.rules);
+            ret.setUnindexedProperty("fileMoves", model.fileMoves);
             ret.setProperty("created", model.created);
             return ret;
         }
