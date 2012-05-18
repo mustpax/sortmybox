@@ -38,6 +38,11 @@
 	        <li class="move-success">
                 Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.fromFile}}</code>. ({{move.when}})
             </li>
+        <% } else if (move.resolvedName) { %>
+            <li class="move-fail">
+                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.resolvedName}}</code> since
+                there is already a file with the same name at the location. ({{move.when}})
+            </li>
         <% } else { %>
             <li class="move-fail">
                 Failed to move <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.fromFile}}</code> since
