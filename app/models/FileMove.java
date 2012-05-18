@@ -28,16 +28,36 @@ public class FileMove implements Serializable {
     public String toDir;
     public Date when;
     public Long owner;
+    /**
+     * True iff the file was moved to the destination folder with exactly the same name.
+     * If the file was moved to the destination with a different name due to a file name
+     * collision this flag will be false.
+     */
     public Boolean successful;
     
+    /**
+     * When a file name collision occurs we try alternate file names to save 
+     * the file to.
+     * This field contains the file name that ultimately got used for the file
+     * move.
+     *
+     * Will be null if successful == true.
+     */
+    public String resolvedName;
+
     public FileMove() {}
 
-    public FileMove(Long owner, String from, String dest, boolean success) {
+    public FileMove(Long owner, String from, String dest, boolean success, String resolvedName) {
         this.toDir = dest;
         this.fromFile = from;
         this.when = new Date();
         this.successful = success;
         this.owner = owner;
+        this.resolvedName = resolvedName;
+    }
+
+    public FileMove(Long owner, String from, String dest, boolean success) {
+	    this(owner, from, dest, success, null);
     }
     
     public boolean isSuccessful() {
@@ -99,6 +119,7 @@ public class FileMove implements Serializable {
             Entity entity = DatastoreUtil.newEntity(User.key(mv.owner), KIND, mv.id);
             entity.setUnindexedProperty("fromFile", mv.fromFile);
             entity.setUnindexedProperty("toDir", mv.toDir);
+            entity.setUnindexedProperty("resolvedName", mv.resolvedName);
             entity.setProperty("when", mv.when);
             entity.setProperty("successful", mv.successful);
             return entity;
@@ -111,6 +132,7 @@ public class FileMove implements Serializable {
             mv.owner = entity.getKey().getParent().getId();
             mv.fromFile = (String) entity.getProperty("fromFile");
             mv.toDir = (String) entity.getProperty("toDir");
+            mv.resolvedName = (String) entity.getProperty("resolvedName");
             mv.when = (Date) entity.getProperty("when");
             mv.successful = (Boolean) entity.getProperty("successful");
             return mv;

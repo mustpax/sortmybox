@@ -25,7 +25,7 @@ public enum RuleType {
     EXT_EQ {
         @Override 
         public boolean matches(String pattern, String fileName) {
-            String ext = RuleUtils.getExtFromName(fileName);
+            String ext = RuleUtils.getExt(fileName);
             if ((ext == null) ||
                 (pattern == null)) {
                 return false;

@@ -1,0 +1,55 @@
+package unit;
+
+import org.junit.Test;
+
+import com.google.appengine.repackaged.com.google.common.base.Pair;
+
+import play.test.UnitTest;
+import rules.RuleUtils;
+
+public class RuleUtilsTest extends UnitTest {
+    @Test
+    public void testBasename() {
+        assertEquals("foo", RuleUtils.basename("foo"));
+        assertEquals("foo", RuleUtils.basename("a/foo"));
+        assertEquals("foo", RuleUtils.basename("/a/foo"));
+        assertEquals(" f oo", RuleUtils.basename(" f oo"));
+        assertEquals(" f oo", RuleUtils.basename("/a/a/ f oo"));
+        assertEquals(" f oo", RuleUtils.basename("/ f oo"));
+    }
+
+    @Test
+    public void testGetExt() {
+        assertEquals(" a b c", RuleUtils.getExt("a. a b c"));
+        assertEquals(" a b c", RuleUtils.getExt("x.b.a. a b c"));
+        assertEquals("ppt", RuleUtils.getExt("foo.ppt"));
+        assertNull(RuleUtils.getExt(".bash rc"));
+        assertNull(RuleUtils.getExt(".bashrc"));
+    }
+
+    @Test
+    public void testSplit() {
+        Pair<String, String> p = RuleUtils.splitName("a. a b c");
+        assertEquals("a", p.first);
+        assertEquals(" a b c", p.second);
+
+        p = RuleUtils.splitName(".bashrc");
+        assertEquals(".bashrc", p.first);
+        assertNull(p.second);
+        
+        p = RuleUtils.splitName("tab\ttab");
+        assertEquals("tab\ttab", p.first);
+        assertNull(p.second);
+    }
+
+    @Test
+    public void testInsert() {
+        assertEquals("a insert.b", RuleUtils.insertIntoName("a.b", " insert"));
+        assertEquals("a.b", RuleUtils.insertIntoName("a.b", null));
+        assertEquals("a.b", RuleUtils.insertIntoName("a.b", ""));
+
+        assertEquals("foobar", RuleUtils.insertIntoName("foo", "bar"));
+        assertEquals(".foobar", RuleUtils.insertIntoName(".foo", "bar"));
+        assertEquals(".foo", RuleUtils.insertIntoName(".foo", null));
+    }
+}
