@@ -4,6 +4,7 @@ import java.util.List;
 
 import models.Blacklist;
 import models.CascadingDelete;
+import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
@@ -31,9 +32,12 @@ public class Admin extends Controller {
         User user = Login.getLoggedInUser();
   
         Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<UsageStats> stats = DatastoreUtil.asList(q, UsageStats.MAPPER);
+        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
 
-        render(user, stats);
+        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
+
+        render(user, aggrStats, dailyStats);
     }
 
     public static void searchUser(String query) {
