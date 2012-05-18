@@ -30,7 +30,7 @@ public class Admin extends Controller {
     public static void usageStats() {
         User user = Login.getLoggedInUser();
   
-        Query q = UsageStats.all().addSort("created", SortDirection.DESCENDING);
+        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
         List<UsageStats> stats = DatastoreUtil.asList(q, UsageStats.MAPPER);
 
         render(user, stats);

@@ -63,8 +63,8 @@ public class UsageStats implements Serializable {
         @Override
         public Entity toEntity(UsageStats model) {
             Entity ret = DatastoreUtil.newEntity(KIND, model.id);
-            ret.setUnindexedProperty("users", model.users);
-            ret.setUnindexedProperty("rules", model.rules);
+            ret.setProperty("users", model.users);
+            ret.setProperty("rules", model.rules);
             ret.setUnindexedProperty("fileMoves", model.fileMoves);
             ret.setProperty("created", model.created);
             return ret;
