@@ -14,12 +14,12 @@ import com.google.common.base.Objects;
  *
  * @author syyang
  */
-public class UsageDailyStats implements Serializable {
+public class DailyUsageStats implements Serializable {
 
     private static final long serialVersionUID = 45L;
     
-    public static final Mapper<UsageDailyStats> MAPPER = new UsageDailyStatsMapper();
-    private static final String KIND = "UsageDailyStats";
+    public static final Mapper<DailyUsageStats> MAPPER = new UsageDailyStatsMapper();
+    public static final String KIND = "DailyUsageStats";
 
     public Long id;
     public Long users;
@@ -27,14 +27,19 @@ public class UsageDailyStats implements Serializable {
     public Long fileMoves;
     public Date created;
 
-    public UsageDailyStats(Long users, Long rules, Long fileMoves) {
+    public DailyUsageStats(Long users, Long rules, Long fileMoves) {
+        this(users, rules, fileMoves, new Date());
+    }
+
+    // exposed for tests
+    public DailyUsageStats(Long users, Long rules, Long fileMoves, Date created) {
         this.users = users;
         this.rules = rules;
         this.fileMoves = fileMoves;
-        this.created = new Date();
+        this.created = created;
     }
-    
-    private UsageDailyStats(Entity entity) {
+
+    private DailyUsageStats(Entity entity) {
         this.id = entity.getKey().getId();
         this.users = (Long) entity.getProperty("users");
         this.rules = (Long) entity.getProperty("rules");
@@ -56,7 +61,7 @@ public class UsageDailyStats implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(UsageDailyStats.class)
+        return Objects.toStringHelper(DailyUsageStats.class)
             .add("id", id)
             .add("users", users)
             .add("rules", rules)
@@ -64,9 +69,9 @@ public class UsageDailyStats implements Serializable {
             .toString();
     }
         
-    private static class UsageDailyStatsMapper implements Mapper<UsageDailyStats> {
+    private static class UsageDailyStatsMapper implements Mapper<DailyUsageStats> {
         @Override
-        public Entity toEntity(UsageDailyStats model) {
+        public Entity toEntity(DailyUsageStats model) {
             Entity ret = DatastoreUtil.newEntity(KIND, model.id);
             ret.setProperty("users", model.users);
             ret.setProperty("rules", model.rules);
@@ -76,17 +81,17 @@ public class UsageDailyStats implements Serializable {
         }
 
         @Override
-        public UsageDailyStats toModel(Entity entity) {
-            return new UsageDailyStats(entity);
+        public DailyUsageStats toModel(Entity entity) {
+            return new DailyUsageStats(entity);
         }
 
         @Override
-        public Class<UsageDailyStats> getType() {
-            return UsageDailyStats.class;
+        public Class<DailyUsageStats> getType() {
+            return DailyUsageStats.class;
         }
 
         @Override
-        public Key toKey(UsageDailyStats model) {
+        public Key toKey(DailyUsageStats model) {
             return key(model.id);
         }
     };

@@ -1,6 +1,6 @@
 package models;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.*;
+import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
 
 import java.util.Collections;
 import java.util.Date;
@@ -16,12 +16,12 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.QueryResultList;
 import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.base.Supplier;
 
 /**
  * Persistence utils.
@@ -162,11 +162,20 @@ public class DatastoreUtil {
         return pq.countEntities(withDefaults());
     }
 
+    /**
+     * Returns the count of entities for the specified date range.
+     * 
+     * @param dateProperty date property name
+     * @param from upper date (inclusive)
+     * @param to lower date range (inclusive)
+     * @param factory supplier for Query object
+     * @return the count of entities for the specified date range
+     */
     public static int count(String dateProperty, Date from, Date to, Supplier<Query> factory) {
         int count = 0;
         Cursor cursor = null;
         while (true) {
-            Query query = FileMove.all()
+            Query query = factory.get()
                 .addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
                 .addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
                 .setKeysOnly();

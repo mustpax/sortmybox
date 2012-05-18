@@ -3,33 +3,18 @@ package cron;
 import java.util.Date;
 import java.util.Map;
 
+import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.FileMove;
+import models.QuerySupplier;
 import models.Rule;
-import models.UsageDailyStats;
 import models.User;
 
 import org.joda.time.DateTime;
 
 import play.Logger;
 
-import com.google.appengine.api.datastore.Query;
-import com.google.common.base.Supplier;
-
-public class UsageDailyStatsGatherer implements Job {
-
-    private static class QuerySupplier implements Supplier<Query> {
-        private final String kind;
-        
-        QuerySupplier(String kind) {
-            this.kind = kind;
-        }
-        
-        @Override
-        public Query get() {
-            return new Query(kind);
-        }
-    }
+public class DailyUsageStatsGatherer implements Job {
 
     @Override
     public void execute(Map<String, String> jobData) {
@@ -40,7 +25,7 @@ public class UsageDailyStatsGatherer implements Job {
         long rulesDelta = DatastoreUtil.count("created", from, to, new QuerySupplier(Rule.KIND));
         long fileMovesDelta = DatastoreUtil.count("when", from, to, new QuerySupplier(FileMove.KIND));
         
-        UsageDailyStats delta = new UsageDailyStats(usersDelta, rulesDelta, fileMovesDelta);
+        DailyUsageStats delta = new DailyUsageStats(usersDelta, rulesDelta, fileMovesDelta);
         delta.save();
         
         Logger.info("Finished collecting daily stats: " + delta);
