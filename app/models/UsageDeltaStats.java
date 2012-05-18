@@ -9,12 +9,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Objects;
 
-public class UsageStats implements Serializable {
+public class UsageDeltaStats implements Serializable {
 
     private static final long serialVersionUID = 45L;
-
-    public static final Mapper<UsageStats> MAPPER = new UsageStatsMapper();
-    private static final String KIND = "UsageStats";
+    
+    public static final Mapper<UsageDeltaStats> MAPPER = new UsageDeltaStatsMapper();
+    private static final String KIND = "UsageDeltaStats";
 
     public Long id;
     public Long users;
@@ -22,14 +22,14 @@ public class UsageStats implements Serializable {
     public Long fileMoves;
     public Date created;
 
-    public UsageStats(Long users, Long rules, Long fileMoves) {
+    public UsageDeltaStats(Long users, Long rules, Long fileMoves) {
         this.users = users;
         this.rules = rules;
         this.fileMoves = fileMoves;
         this.created = new Date();
     }
     
-    private UsageStats(Entity entity) {
+    private UsageDeltaStats(Entity entity) {
         this.id = entity.getKey().getId();
         this.users = (Long) entity.getProperty("users");
         this.rules = (Long) entity.getProperty("rules");
@@ -51,17 +51,17 @@ public class UsageStats implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(UsageStats.class)
+        return Objects.toStringHelper(UsageDeltaStats.class)
             .add("id", id)
             .add("users", users)
             .add("rules", rules)
             .add("fileMoves", fileMoves)
             .toString();
     }
-
-    private static class UsageStatsMapper implements Mapper<UsageStats> {
+        
+    private static class UsageDeltaStatsMapper implements Mapper<UsageDeltaStats> {
         @Override
-        public Entity toEntity(UsageStats model) {
+        public Entity toEntity(UsageDeltaStats model) {
             Entity ret = DatastoreUtil.newEntity(KIND, model.id);
             ret.setProperty("users", model.users);
             ret.setProperty("rules", model.rules);
@@ -71,18 +71,19 @@ public class UsageStats implements Serializable {
         }
 
         @Override
-        public UsageStats toModel(Entity entity) {
-            return new UsageStats(entity);
+        public UsageDeltaStats toModel(Entity entity) {
+            return new UsageDeltaStats(entity);
         }
 
         @Override
-        public Class<UsageStats> getType() {
-            return UsageStats.class;
+        public Class<UsageDeltaStats> getType() {
+            return UsageDeltaStats.class;
         }
 
         @Override
-        public Key toKey(UsageStats model) {
+        public Key toKey(UsageDeltaStats model) {
             return key(model.id);
         }
-    }
+    };
+
 }

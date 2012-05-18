@@ -3,8 +3,10 @@ package models;
 import static com.google.appengine.api.datastore.FetchOptions.Builder.*;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -14,9 +16,12 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.base.Supplier;
 
 /**
  * Persistence utils.
@@ -154,9 +159,36 @@ public class DatastoreUtil {
     public static int count(Query q) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q.setKeysOnly());
-        return pq.countEntities(FetchOptions.Builder.withDefaults());
+        return pq.countEntities(withDefaults());
     }
 
+    public static int count(String dateProperty, Date from, Date to, Supplier<Query> factory) {
+        int count = 0;
+        Cursor cursor = null;
+        while (true) {
+            Query query = FileMove.all()
+                .addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
+                .addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
+                .setKeysOnly();
+            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+            PreparedQuery pq = ds.prepare(query);
+
+            FetchOptions fetchOptions = withDefaults();
+            if (cursor != null) {
+                fetchOptions.startCursor(cursor);
+            }
+            
+            QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+            if (results == null || results.isEmpty()) {
+                break;
+            }
+            
+            count += results.size();
+            cursor = results.getCursor();            
+        }
+        return count;
+    }
+    
     public static <T> void delete(T model, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         if (Cache.get().isCachable(mapper)) {

@@ -3,6 +3,7 @@ package models;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
@@ -58,7 +59,8 @@ public class Rule implements Serializable {
     public String pattern;
     public String dest;
     public Integer rank;
-
+    public Date created;
+    
     public Rule() {}
     
     public Rule(RuleType type, String pattern, String dest, Integer rank, Long owner) {
@@ -67,6 +69,7 @@ public class Rule implements Serializable {
         this.dest = dest;
         this.rank = rank;
         this.owner = owner;
+        this.created = new Date();
     }
     
     private Rule(Entity entity) {
@@ -76,6 +79,7 @@ public class Rule implements Serializable {
         this.pattern = (String) entity.getProperty("pattern");
         this.dest = (String) entity.getProperty("dest");
         this.rank = ((Long) entity.getProperty("rank")).intValue();
+        this.created = (Date) entity.getProperty("created");
     }
 
     /** 
@@ -197,7 +201,8 @@ public class Rule implements Serializable {
             .append(this.pattern, other.pattern)
             .append(this.dest, other.dest)
             .append(this.rank, other.rank)
-            .append(this.owner, other.owner);
+            .append(this.owner, other.owner)
+            .append(this.created, other.created);
         return eq.isEquals();
     }
     
@@ -210,6 +215,7 @@ public class Rule implements Serializable {
             .add("dest", dest)
             .add("rank", rank)
             .add("owner", owner)
+            .add("created", created)
             .toString();
     }
 
@@ -304,6 +310,7 @@ public class Rule implements Serializable {
             entity.setProperty("pattern", r.pattern);
             entity.setProperty("dest", r.dest);
             entity.setProperty("rank", r.rank);
+            entity.setProperty("created", new Date());
             return entity;
         }
 
