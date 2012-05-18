@@ -48,7 +48,6 @@ public class CronManager extends Controller {
             job.execute(jobData);
             Logger.info("CronManager successfully executed: " + jobName);
         } catch (Throwable t) {
-            // TODO (syyang): we should send out a gack here...
             Logger.error("CronManager failed to execute: " + jobName, t);
             // queued tasks rely on propagating the exception for retry
             Throwables.propagate(t);

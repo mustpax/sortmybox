@@ -45,7 +45,6 @@ public class TaskManager extends Controller {
             task.execute(context);
             Logger.info("TaskManager succesfully executed: " + taskName);
         } catch (Throwable t) {
-            // TODO(syyang): we should send out a gack here...
             Logger.error("TaskManager:" + taskName + ":failed to execute", t);
             // queued tasks rely on propagating the exception for retry
             Throwables.propagate(t);
