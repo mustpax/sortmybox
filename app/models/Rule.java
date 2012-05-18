@@ -21,13 +21,9 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -185,7 +181,8 @@ public class Rule implements Serializable {
             .append(this.pattern)
             .append(this.dest)
             .append(this.rank)
-            .append(this.owner);
+            .append(this.owner)
+            .append(this.created);
         return hash.hashCode();
     }
 

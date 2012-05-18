@@ -16,5 +16,11 @@
         <description>Runs UsageStatsGatherer</description>
         <schedule>every day 1:00</schedule>
         <timezone>America/Los_Angeles</timezone>
-    </cron>    
+    </cron>
+    <cron>
+        <url>/cron/cron/DailyUsageStatsGatherer</url>
+        <description>Runs DailyUsageStatsGatherer</description>
+        <schedule>every day 1:30</schedule>
+        <timezone>America/Los_Angeles</timezone>
+    </cron>
 </cronentries>

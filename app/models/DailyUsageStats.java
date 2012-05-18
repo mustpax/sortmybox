@@ -58,7 +58,7 @@ public class DailyUsageStats implements Serializable {
     public void save() {
         DatastoreUtil.put(this, MAPPER);
     }
-    
+
     @Override
     public String toString() {
         return Objects.toStringHelper(DailyUsageStats.class)
@@ -66,9 +66,10 @@ public class DailyUsageStats implements Serializable {
             .add("users", users)
             .add("rules", rules)
             .add("fileMoves", fileMoves)
+            .add("created", created)
             .toString();
     }
-        
+
     private static class UsageDailyStatsMapper implements Mapper<DailyUsageStats> {
         @Override
         public Entity toEntity(DailyUsageStats model) {
