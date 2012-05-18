@@ -9,12 +9,17 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Objects;
 
-public class UsageDeltaStats implements Serializable {
+/**
+ * Collects daily usage stats
+ *
+ * @author syyang
+ */
+public class UsageDailyStats implements Serializable {
 
     private static final long serialVersionUID = 45L;
     
-    public static final Mapper<UsageDeltaStats> MAPPER = new UsageDeltaStatsMapper();
-    private static final String KIND = "UsageDeltaStats";
+    public static final Mapper<UsageDailyStats> MAPPER = new UsageDailyStatsMapper();
+    private static final String KIND = "UsageDailyStats";
 
     public Long id;
     public Long users;
@@ -22,14 +27,14 @@ public class UsageDeltaStats implements Serializable {
     public Long fileMoves;
     public Date created;
 
-    public UsageDeltaStats(Long users, Long rules, Long fileMoves) {
+    public UsageDailyStats(Long users, Long rules, Long fileMoves) {
         this.users = users;
         this.rules = rules;
         this.fileMoves = fileMoves;
         this.created = new Date();
     }
     
-    private UsageDeltaStats(Entity entity) {
+    private UsageDailyStats(Entity entity) {
         this.id = entity.getKey().getId();
         this.users = (Long) entity.getProperty("users");
         this.rules = (Long) entity.getProperty("rules");
@@ -51,7 +56,7 @@ public class UsageDeltaStats implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(UsageDeltaStats.class)
+        return Objects.toStringHelper(UsageDailyStats.class)
             .add("id", id)
             .add("users", users)
             .add("rules", rules)
@@ -59,9 +64,9 @@ public class UsageDeltaStats implements Serializable {
             .toString();
     }
         
-    private static class UsageDeltaStatsMapper implements Mapper<UsageDeltaStats> {
+    private static class UsageDailyStatsMapper implements Mapper<UsageDailyStats> {
         @Override
-        public Entity toEntity(UsageDeltaStats model) {
+        public Entity toEntity(UsageDailyStats model) {
             Entity ret = DatastoreUtil.newEntity(KIND, model.id);
             ret.setProperty("users", model.users);
             ret.setProperty("rules", model.rules);
@@ -71,17 +76,17 @@ public class UsageDeltaStats implements Serializable {
         }
 
         @Override
-        public UsageDeltaStats toModel(Entity entity) {
-            return new UsageDeltaStats(entity);
+        public UsageDailyStats toModel(Entity entity) {
+            return new UsageDailyStats(entity);
         }
 
         @Override
-        public Class<UsageDeltaStats> getType() {
-            return UsageDeltaStats.class;
+        public Class<UsageDailyStats> getType() {
+            return UsageDailyStats.class;
         }
 
         @Override
-        public Key toKey(UsageDeltaStats model) {
+        public Key toKey(UsageDailyStats model) {
             return key(model.id);
         }
     };
