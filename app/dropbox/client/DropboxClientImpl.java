@@ -62,9 +62,14 @@ class DropboxClientImpl implements DropboxClient {
                 }
                 return ret;
             }
-            Logger.warn("Failed getting metadata for '%s'. %s", path, getError(resp));
+
+            if (Integer.valueOf(404).equals(resp.getStatus())) {
+	            Logger.warn("File missing, cannot get metadata '%s'. %s", path, getError(resp));
+            } else {
+	            Logger.error("Failed getting metadata for '%s'. %s", path, getError(resp));
+            }
         } catch (RuntimeException e) {
-            Logger.warn(e, "Exception while trying to fetch metadata for '%s'.");
+            Logger.error(e, "Exception while trying to fetch metadata for '%s'.", path);
         }
         return null;
     }
@@ -111,12 +116,16 @@ class DropboxClientImpl implements DropboxClient {
             .addPair("path", path)
             .create();
 
-        HttpResponse resp = ws.get();
-        if (resp.success()) {
-            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
-        }
+        try {
+	        HttpResponse resp = ws.get();
+	        if (resp.success()) {
+	            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+	        }
 
-        Logger.error("Failed creating folder at '%s'. %s", path, getError(resp));
+	        Logger.error("Failed creating folder at '%s'. %s", path, getError(resp));
+        } catch (RuntimeException e) {
+	        Logger.error(e, "Exception when trying to creating folder at '%s'", path);
+        }
         return null;
     }
     
@@ -132,17 +141,23 @@ class DropboxClientImpl implements DropboxClient {
             .addPair("from_path", from)
             .addPair("to_path", to)
             .create();
-        HttpResponse resp = ws.post();
         
-        if (resp.success()) {
-            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
-            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
-        }
+        try {
+	        HttpResponse resp = ws.post();
 
-        String err = getError(resp);
-        Logger.warn("Failed to move files. " + err);
-        if (Integer.valueOf(403).equals(resp.getStatus())) {
-            throw new FileMoveCollisionException(err);
+	        if (resp.success()) {
+	            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
+	            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+	        }
+
+	        String err = getError(resp);
+	        if (Integer.valueOf(403).equals(resp.getStatus())) {
+		        Logger.warn("File collision when trying to move from '%s' to '%s'. %s", from, to, err);
+	            throw new FileMoveCollisionException(err);
+	        }
+	        Logger.error("Failed to move files. " + err);
+        } catch (RuntimeException e) {
+            Logger.error(e, "Exception when trying to move from '%s' to '%s'", from, to);
         }
 
         return null;
