@@ -192,6 +192,19 @@ code {
     background-color: #FAE5E3;    
 }
 
+.testimonials {
+    background-color: whiteSmoke;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.testimonials p {
+    text-align: left;
+}
+
+.testimonials img {
+    margin-right: 5px;
+}
 
 /*
 * jQuery Mobile Framework
