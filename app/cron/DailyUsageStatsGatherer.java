@@ -6,7 +6,6 @@ import java.util.Map;
 import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.FileMove;
-import models.QuerySupplier;
 import models.Rule;
 import models.User;
 
@@ -26,9 +25,9 @@ public class DailyUsageStatsGatherer implements Job {
         Date to = DateTime.now().toDateMidnight().toDate();
         Date from = DateTime.now().minusDays(1).toDateMidnight().toDate();  
 
-        long usersDelta = DatastoreUtil.count("created", from, to, new QuerySupplier(User.KIND));
-        long rulesDelta = DatastoreUtil.count("created", from, to, new QuerySupplier(Rule.KIND));
-        long fileMovesDelta = DatastoreUtil.count("when", from, to, new QuerySupplier(FileMove.KIND));
+        long usersDelta = DatastoreUtil.count("created", from, to, User.all());
+        long rulesDelta = DatastoreUtil.count("created", from, to, Rule.all());
+        long fileMovesDelta = DatastoreUtil.count("when", from, to, FileMove.all());
         
         DailyUsageStats delta = new DailyUsageStats(usersDelta, rulesDelta, fileMovesDelta);
         delta.save();

@@ -171,15 +171,14 @@ public class DatastoreUtil {
      * @param factory supplier for Query object
      * @return the count of entities for the specified date range
      */
-    public static int count(String dateProperty, Date from, Date to, Supplier<Query> factory) {
+    public static int count(String dateProperty, Date from, Date to, Query q) {
         int count = 0;
         Cursor cursor = null;
+        Query query = q.addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
+		               .addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
+		               .setKeysOnly();
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         while (true) {
-            Query query = factory.get()
-                .addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
-                .addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
-                .setKeysOnly();
-            DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
             PreparedQuery pq = ds.prepare(query);
 
             FetchOptions fetchOptions = withDefaults();

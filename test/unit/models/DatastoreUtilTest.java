@@ -5,7 +5,6 @@ import java.util.Date;
 
 import models.DailyUsageStats;
 import models.DatastoreUtil;
-import models.QuerySupplier;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -30,9 +29,9 @@ public class DatastoreUtilTest extends BaseModelTest {
 
         DatastoreUtil.put(Arrays.asList(s1, s2, s3), DailyUsageStats.MAPPER);
         
-        assertEquals(3, DatastoreUtil.count("created", d1, d3, new QuerySupplier(DailyUsageStats.KIND)));
-        assertEquals(2, DatastoreUtil.count("created", d2, d3, new QuerySupplier(DailyUsageStats.KIND)));
-        assertEquals(1, DatastoreUtil.count("created", d3, d3, new QuerySupplier(DailyUsageStats.KIND)));
+        assertEquals(3, DatastoreUtil.count("created", d1, d3, DailyUsageStats.all()));
+        assertEquals(2, DatastoreUtil.count("created", d2, d3, DailyUsageStats.all()));
+        assertEquals(1, DatastoreUtil.count("created", d3, d3, DailyUsageStats.all()));
     }
 
 }
