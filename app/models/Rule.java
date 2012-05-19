@@ -198,8 +198,7 @@ public class Rule implements Serializable {
             .append(this.pattern, other.pattern)
             .append(this.dest, other.dest)
             .append(this.rank, other.rank)
-            .append(this.owner, other.owner)
-            .append(this.created, other.created);
+            .append(this.owner, other.owner);
         return eq.isEquals();
     }
     
