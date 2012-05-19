@@ -173,27 +173,17 @@ public class DatastoreUtil {
      */
     public static int count(String dateProperty, Date from, Date to, Query q) {
         int count = 0;
-        Cursor cursor = null;
         Query query = q.addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
 		               .addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
 		               .setKeysOnly();
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        while (true) {
-            PreparedQuery pq = ds.prepare(query);
+        PreparedQuery pq = ds.prepare(query);
 
-            FetchOptions fetchOptions = withDefaults();
-            if (cursor != null) {
-                fetchOptions.startCursor(cursor);
-            }
-            
-            QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
-            if (results == null || results.isEmpty()) {
-                break;
-            }
-            
-            count += results.size();
-            cursor = results.getCursor();            
+        // We use an iterator for loop to count all entities
+        for (@SuppressWarnings("unused") Entity e: pq.asIterable()) {
+            count++;
         }
+
         return count;
     }
     
