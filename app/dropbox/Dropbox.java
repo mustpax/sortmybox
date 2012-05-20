@@ -10,6 +10,10 @@ public class Dropbox {
     public static final int API_VERSION = 1;
 
     public static String getSortboxPath() {
+        return "/SortMyBox";
+    }
+    
+    public static String getOldSortboxPath() {
         return "/Sortbox";
     }
     

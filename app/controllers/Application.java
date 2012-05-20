@@ -76,8 +76,16 @@ public class Application extends Controller {
     private static InitResult initSortbox(User user) {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
+        boolean updatedSortingFolder = false;
         DropboxClient client = DropboxClientFactory.create(user);
-        String sortboxPath = Dropbox.getSortboxPath();
+        //re-branding requires us to change the sorting folder name
+        if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)){
+        	user.sortingFolder = Dropbox.getSortboxPath();//updating to new name
+        	user.save();
+        	updatedSortingFolder = true;
+        }
+        //now get the new sorting folder path for the user and keep going forward
+        String sortboxPath = user.sortingFolder;
         DbxMetadata file = client.getMetadata(sortboxPath);
         if (file == null) {
             // 1. create missing Sortbox folder
@@ -88,7 +96,7 @@ public class Application extends Controller {
                 createdCannedRules = createCannedRules(user);
             }
         }
-        return new InitResult(createdSortboxDir, createdCannedRules);
+        return new InitResult(createdSortboxDir, createdCannedRules, updatedSortingFolder);
     }
 
     /**
@@ -117,9 +125,12 @@ public class Application extends Controller {
         /** whether the app populated canned rules */
         final public boolean createdCannedRules;
         
-        InitResult(boolean createdSortboxDir, boolean createdCannedRules) {
+        final public boolean updatedSortingFolder;
+        
+        InitResult(boolean createdSortboxDir, boolean createdCannedRules,boolean updatedSortingFolder) {
             this.createdSortboxDir = createdSortboxDir;
             this.createdCannedRules = createdCannedRules;
+            this.updatedSortingFolder = updatedSortingFolder;
         }
     }
 }

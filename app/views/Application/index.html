@@ -14,9 +14,22 @@
 		</div>
 	</div>
 </div>
+
 <script>
-	_gaq.push(['_trackEvent', 'user', 'reg']);
+    _gaq.push(['_trackEvent', 'user', 'reg']);
 </script>
+#{/if}
+
+#{if initResult.updatedSortingFolder }
+<div class="row">
+    <div class="span12">
+        <div class="alert alert-info alert-created hide">
+            <a class="close" data-dismiss="alert">×</a>
+            <h4 class="alert-heading">Your Sortbox folder was renamed to SortMyBox</h4>
+            Add your files to the <strong>SortMyBox</strong> folder to get them sorted!
+        </div>
+    </div>
+</div>
 #{/if}
 
 <div class="row">
