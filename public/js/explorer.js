@@ -94,21 +94,8 @@
         if (isLoading) {
             exp.append(loading());
         } else {
-            if (_.isUndefined(dirs)){
-                exp.append($("<li><a><em>Can't list folder contents</em></a></li>"));
-            } else {
-	            dirs.sort();
-	            if (_.isEmpty(dirs)) {
-	                exp.append($("<li><a><em>No more folders</em></a></li>"));
-	            } else {
-		            $.each(dirs, function(i, v) {
-		                exp.append(sortbox.template('exp-folder', {
-		                    path: basename(v),
-		                    dataPath: v
-		                }));
-		            });
-	            }
-            }
+            exp.append(sortbox.template('exp-folders', { dirs: dirs,
+                                                         basename : basename }));
         }
     };
     

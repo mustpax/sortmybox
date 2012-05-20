@@ -13,13 +13,25 @@
 </li>
 </script>
 
-<script type="text/template" id="exp-folder">
-    <li class="folder">
-        <a href="#" data-path="{{dataPath}}">
-		    <i class="icon-folder-open"></i>
-            {{path}}
-        </a>
-    </li>
+<script type="text/template" id="exp-folders">
+<% if (_.isUndefined(dirs)) { %>
+<li>
+    <a><em>Can't list folder contents</em></a>
+</li>
+<% } else if (! dirs) { %>
+<li>
+    <a><em>No more folders</em></a>
+</li>
+<% } else {
+	   _.each(dirs, function(dir) { %>
+		    <li class="folder">
+		        <a href="#" data-path="{{basename(dir)}}">
+				    <i class="icon-folder-open"></i>
+		            {{dir}}
+		        </a>
+		    </li>
+<%     });
+   } %>
 </script>
 
 <script type="text/template" id="exp-select">
