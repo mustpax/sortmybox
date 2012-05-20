@@ -3,7 +3,6 @@ package rules;
 import java.util.regex.Matcher;
 
 public enum RuleType {
-    
     NAME_CONTAINS {
         @Override
         public boolean matches(String pattern, String fileName) {
@@ -30,11 +29,23 @@ public enum RuleType {
                 (pattern == null)) {
                 return false;
             }
-
-            return ext.equalsIgnoreCase(pattern);
+            
+            if (! pattern.contains(EXT_DELIM)) {
+                return ext.equalsIgnoreCase(pattern);
+            }
+            
+            String[] extensions = ext.split(EXT_DELIM);
+            for (String subExt: extensions) {
+                if (subExt.trim().equalsIgnoreCase(ext)) {
+                    return true;
+                }
+            }
+            return false;
         }
     };
-    
+
+    public static final String EXT_DELIM = ",";
+
     /**
      * Apply a match to a file based on the rule type.
      * 

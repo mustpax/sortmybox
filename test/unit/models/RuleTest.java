@@ -101,6 +101,13 @@ public class RuleTest extends BaseModelTest {
 
         r.pattern = "p d f";
         assertTrue(r.matches("file.p d F"));
+
+        r.pattern = "a,b ,  pdf   ";
+        assertTrue(r.matches("file.a"));
+        assertTrue(r.matches("file.b"));
+        assertTrue(r.matches("file.pdf"));
+        assertFalse(r.matches("file.a,b,c"));
+        assertFalse(r.matches(".a"));
     }
 
     @Test
