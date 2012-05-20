@@ -1,4 +1,4 @@
-(function(window, $, undefined) {
+(function($) {
     'use strict';
     /**
      * Convert the current rule set into a JSON-serializable object.
@@ -17,7 +17,7 @@
                 ret.push(cur);
             });
         return ret;
-    };
+    }
 
     $('.rule .dest').live('focus', function() {
         var cell = $(this).parents('td').first();
@@ -30,19 +30,19 @@
     $('.exp a[href]').live('click', function(e) {
         var path = $(this).attr('data-path');
         if (path) {
-	        var input = $(this).parents('td').first().find('input');
-	        input.val(path);
-	        input.trigger('change');
-	        input.focus();
+            var input = $(this).parents('td').first().find('input');
+            input.val(path);
+            input.trigger('change');
+            input.focus();
         }
         return false;
     });
 
     function clearIfUnfocused(elem) {
         if (! $(elem).attr('data-focus')) {
-	        $(elem).parents('td').first().removeClass('exp-active');
+            $(elem).parents('td').first().removeClass('exp-active');
         }
-	}
+    }
 
     $('.rule .dest').live('blur', function() {
         $(this).parents('td')
@@ -85,7 +85,7 @@
         } else {
             rule.find('.status').addClass('icon-remove');
         }
-    };
+    }
     
     function updateActivity() {
         $('.moves').empty().append(sortbox.template('moves-loading'));
@@ -97,19 +97,19 @@
                 'authenticityToken' : window.csrfToken
             },
             success: function(moves) {
-		        var el = $('.moves');
-		        el.empty()
-		        if (_.isEmpty(moves)) {
-		            el.append(sortbox.template('moves-empty'));
-		        } else {
-		            el.append(sortbox.template('moves-list', { moves : moves }));
-		        }
+                var el = $('.moves');
+                el.empty();
+                if (_.isEmpty(moves)) {
+                    el.append(sortbox.template('moves-empty'));
+                } else {
+                    el.append(sortbox.template('moves-list', { moves : moves }));
+                }
             },
             error: function() {
-		        $('.moves').empty().append(sortbox.template('moves-error'));
+                $('.moves').empty().append(sortbox.template('moves-error'));
             }
         });
-    };
+    }
     $(updateActivity);
 
     function loading() {
@@ -117,11 +117,11 @@
             .addClass('spin')
             .removeClass('icon-ok')
             .removeClass('icon-remove');
-    };
+    }
 
     function doneLoading() {
         $('.rules .rule .status').removeClass('icon-refresh').removeClass('spin');
-    };
+    }
 
 
     $(document).ready(function() {
@@ -146,7 +146,7 @@
                 url: '/rules',
                 data: {
                     'rules': JSON.stringify(rules),
-	                'authenticityToken' : window.csrfToken
+                    'authenticityToken' : window.csrfToken
                 },
                 success: function(data) {
                              var hasErrors = false,
@@ -158,22 +158,22 @@
                                  hasErrors = hasErrors || !! v.length;
                              });
                              if (! hasErrors) {
-	                             msg = $('.save').popover({ title:   "Success!", 
-                             						        content: "Your rules will run every 15 minutes.",
-                             						        trigger: "manual"})
-                             				     .popover('show');
-	                             setTimeout(function(){
-	                                msg.popover("hide");
-	                             }, 2000);
-	                             updateActivity();
+                                 msg = $('.save').popover({ title:   "Success!", 
+                                                             content: "Your rules will run every 15 minutes.",
+                                                             trigger: "manual"})
+                                                  .popover('show');
+                                 setTimeout(function(){
+                                    msg.popover("hide");
+                                 }, 2000);
+                                 updateActivity();
                              }
                          },
                 error: function (badRequest) {
-					doneLoading();
-					if (badRequest.status === 400){
-						alert("You have too many rules defined, please delete a few and try again.");
-					}
-            	}
+                    doneLoading();
+                    if (badRequest.status === 400){
+                        alert("You have too many rules defined, please delete a few and try again.");
+                    }
+                }
             });
         });
 
@@ -183,4 +183,4 @@
     $(function() {
         $('.rule .dest').explorer();
     });
-})(window, jQuery);
+})(jQuery);

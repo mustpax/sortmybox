@@ -1,4 +1,4 @@
-!function($) {
+(function($) {
     'use strict';
 
     var dirCache = {};
@@ -50,15 +50,15 @@
         
         curReq = { path : path,
                    req  : req };
-    };
+    }
 
     function basename(path) {
         return _.chain(path.split('/')).filter(function(x) {
-		                                    return !!x;
-		                                })
-		                               .last()
-		                               .value();
-    };
+                                            return !!x;
+                                        })
+                                       .last()
+                                       .value();
+    }
 
     function displayDirs(path, dirs, cell, isLoading) {
         var pathList = _.filter(path.split('/'), function(x) { return !!x; });
@@ -74,12 +74,12 @@
         function select() {
             return sortbox.template('exp-select', { path: basename(path),
                                                      dataPath: path });
-        };
+        }
 
         function upLink() {
             var upPath = '/'  + pathList.slice(0, pathList.length - 1).join('/');
             return sortbox.template('exp-uplink', {dataPath : upPath});
-        };
+        }
         
         // Add up link if not top dir
         if (! _.isEmpty(pathList)) {
@@ -97,21 +97,21 @@
             exp.append(sortbox.template('exp-folders', { dirs: dirs,
                                                          basename : basename }));
         }
-    };
+    }
     
     function dirUpdater() {
-        var cell = $(this).parents('td').first();
-        var path = $(this).val() || '/';
+        var cell = $(this).parents('td').first(),
+            path = $(this).val() || '/';
         displayDirs(path, null, cell, true);
         getDirs(path, function(dirs) {
             displayDirs(path, dirs, cell);
         });
-    };
+    }
     
     
     $.fn.explorer = function() {
         var $this = $(this);
-	    $this.live('focus change', dirUpdater);
-	    $this.live('keyup', _.debounce(dirUpdater, 1500));
-    }
-}(window.jQuery);
+        $this.live('focus change', dirUpdater);
+        $this.live('keyup', _.debounce(dirUpdater, 1500));
+    };
+})(window.jQuery);

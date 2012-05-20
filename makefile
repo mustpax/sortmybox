@@ -1,7 +1,7 @@
 alljs = public/js/all.js
 jsfiles = public/js/json2.js public/js/jquery-1.7.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js
 
-all: deps js
+all: deps js lint
 	build/prep-webxml.py
 
 test: all
@@ -38,6 +38,9 @@ deploy: all static
 dev: all static
 	-play gae:deploy
 
+lint:
+	jshint public/
+
 clean:
 	play clean
 	rm $(alljs)
@@ -47,4 +50,4 @@ superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
 	git clean -dxf
 
-.PHONY : all run js static deps stage deploy dev clean superclean
+.PHONY : all run js static deps stage deploy dev clean superclean lint

@@ -1,0 +1,11 @@
+{
+    "predef": [
+        "_",
+        "sortbox"
+    ],
+
+    "browser" : true,
+    "jquery" : true,
+    "devel" : true,
+    "validthis": true
+}
