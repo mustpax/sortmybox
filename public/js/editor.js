@@ -19,28 +19,6 @@
         return ret;
     };
 
-    var templateCache = {};
-    /**
-     * Render the template with the given name into a jQuery
-     * wrapped unattached DOM element.
-     */
-    function template(name, context) {
-        var t = templateCache[name];
-        if (! t) {
-            var e = $('#' + name);
-            if (! e.length) {
-                throw 'Cannot find template with name: ' + name;
-            }
-            
-            t = _.template(e.html());
-            templateCache[name] = t;
-        }
-
-        return $(t(context));
-    };
-    sortbox.template = template;
-    
-
     $('.rule .dest').live('focus', function() {
         var cell = $(this).parents('td').first();
         cell.find('.exp-status')
@@ -110,7 +88,7 @@
     };
     
     function updateActivity() {
-        $('.moves').empty().append(template('moves-loading'));
+        $('.moves').empty().append(sortbox.template('moves-loading'));
 
         $.ajax({
             type: 'GET',
@@ -122,13 +100,13 @@
 		        var el = $('.moves');
 		        el.empty()
 		        if (_.isEmpty(moves)) {
-		            el.append(template('moves-empty'));
+		            el.append(sortbox.template('moves-empty'));
 		        } else {
-		            el.append(template('moves-list', { moves : moves }));
+		            el.append(sortbox.template('moves-list', { moves : moves }));
 		        }
             },
             error: function() {
-		        $('.moves').empty().append(template('moves-error'));
+		        $('.moves').empty().append(sortbox.template('moves-error'));
             }
         });
     };
