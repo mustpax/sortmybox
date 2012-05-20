@@ -29,7 +29,7 @@ public class Admin extends Controller {
     private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
 
     public static void usageStats() {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
   
         Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
         List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
@@ -81,19 +81,19 @@ public class Admin extends Controller {
             }
         }
 
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         render(user, query, ranSearch, results);
     }
 
     public static void blacklistedUsers() {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         
         List<Blacklist> blacklist = Lists.newArrayList(Blacklist.query(Blacklist.all(), BLACKLIST_MAX_FETCH_SIZE));
         render(user, blacklist);
     }
 
     public static void addToBlacklist(String userIdString) {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
 
         if (!User.isValidId(userIdString)) {
             flash.error("Invalid user id: " + userIdString);
@@ -129,7 +129,7 @@ public class Admin extends Controller {
     }
 
     public static void deleteUser() {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         render(user);
     }
 
@@ -140,7 +140,7 @@ public class Admin extends Controller {
     public static void deleteUserPost(String userIdString) {
         checkAuthenticity();
         
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
 
         if (!User.isValidId(userIdString)) {
             flash.error("Invalid user id: " + userIdString);
@@ -171,7 +171,7 @@ public class Admin extends Controller {
 
     @Before
     static void checkAccess() {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         if (user == null || ! user.isAdmin()) {
             Logger.warn("Non-admin user attempted to access admin page: %s", user);
             forbidden("Must be admin.");

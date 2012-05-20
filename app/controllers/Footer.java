@@ -24,7 +24,7 @@ public class Footer extends Controller {
     }
     
     private static void renderInner() {
-        User user = Login.getLoggedInUser();        
+        User user = Login.getUser();        
         if (user == null) {
             render();
         } else {

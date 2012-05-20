@@ -96,12 +96,12 @@ public class Login extends Controller {
     }
 
     public static boolean isAdmin() {
-        User u = getLoggedInUser();
+        User u = getUser();
         return u != null && u.isAdmin();
     }
 
     public static boolean isLoggedIn() {
-        return getLoggedInUser() != null;
+        return getUser() != null;
     }
 
     public static void authCallback() throws Exception {
@@ -154,7 +154,7 @@ public class Login extends Controller {
     /**
      * @return the currently logged in user, null if no logged in user
      */
-    public static User getLoggedInUser() {
+    public static User getUser() {
         String uid = session.get(SessionKeys.UID);
         if (uid == null) {
             Logger.info("User not logged in: no uid in session.");

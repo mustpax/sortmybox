@@ -11,7 +11,7 @@ import play.mvc.With;
 public class Accounts extends Controller {
 	public static void settingsPost(boolean periodicSort) {
 	    checkAuthenticity();
-	    User user = Login.getLoggedInUser();
+	    User user = Login.getUser();
 	    user.periodicSort = periodicSort;
 	    user.save();
 	    if (periodicSort) {
@@ -24,19 +24,19 @@ public class Accounts extends Controller {
 	}
 	
 	public static void settings() {
-	    User user = Login.getLoggedInUser();
+	    User user = Login.getUser();
 	    render(user);
 	}
 
 	public static void delete() {
-		User user = Login.getLoggedInUser();
+		User user = Login.getUser();
 		String contact = Mails.CONTACT_EMAIL;
 		render(user, contact);
 	}
 	
     public static void deletePost() {
         checkAuthenticity();
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
 
         CascadingDelete.delete(user);
 

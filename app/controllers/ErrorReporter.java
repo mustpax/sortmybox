@@ -13,7 +13,7 @@ import play.mvc.Controller;
 public class ErrorReporter extends Controller {
     @Catch(Exception.class)
     static void logError(Throwable e) {
-        User u = Login.getLoggedInUser();
+        User u = Login.getUser();
         Long id = u == null ? null : u.id;
         Mails.logError(id, e, request.headers.values());
     }

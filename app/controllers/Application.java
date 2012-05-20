@@ -47,7 +47,7 @@ public class Application extends Controller {
     public static final int MAX_FILE_MOVES = 10;
     
     public static void index() {
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
         render(user, rules, initResult);
@@ -55,14 +55,14 @@ public class Application extends Controller {
 
     public static void activity() {
         checkAuthenticity();
-        User user = Login.getLoggedInUser();
+        User user = Login.getUser();
         renderJSON(FileMove.findByOwner(user.id, MAX_FILE_MOVES),
                    new DateSinceSerializer());
     }
     
     public static void dirs(String path) {
         checkAuthenticity();
-        User u = Login.getLoggedInUser();
+        User u = Login.getUser();
         DropboxClient client = DropboxClientFactory.create(u);
         try {
 	        renderJSON(client.listDir(path, ListingType.DIRS));

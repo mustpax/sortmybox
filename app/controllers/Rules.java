@@ -25,7 +25,7 @@ public class Rules extends Controller {
             Type t = new TypeToken<List<Rule>>(){}.getType();
             List<Rule> ruleList = new Gson().fromJson(rules, t);
 
-            User user = Login.getLoggedInUser();
+            User user = Login.getUser();
             List<List<RuleError>> allErrors = Lists.newArrayList();
             if (Rule.replace(user, ruleList, allErrors)) {
                 Logger.info("New rules inserted with no errors so running rules.");
