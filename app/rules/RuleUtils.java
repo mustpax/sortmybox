@@ -1,6 +1,7 @@
 package rules;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
+import dropbox.client.InvalidTokenException;
 
 public class RuleUtils {
     private static final int MAX_TRIES = 10;
@@ -109,67 +111,83 @@ public class RuleUtils {
 
         List<FileMove> fileMoves = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(user);
-        Set<String> files = client.listDir(Dropbox.getSortboxPath());
+        try {
+            Set<String> files = client.listDir(Dropbox.getSortboxPath());
 
-        if (files.isEmpty()) {
-            Logger.info("Ran rules for %s, no files to process.", user);
-            return fileMoves;
-        }
+            if (files.isEmpty()) {
+                Logger.info("Ran rules for %s, no files to process.", user);
+                return fileMoves;
+            }
 
-        List<Rule> rules = Rule.findByUserId(user.id);
-        Logger.info("Running rules for %s", user);
-        
-        for (String file: files) {
-            String base = basename(file);
-            for (Rule r : rules) {
-                if (r.matches(base)) {
-                    Logger.info("Moving file '%s' to '%s'. Rule id: %s", file, r.dest, r.id);
-                    boolean success = true;
-                    String resolvedName = null;
-                    int tries = 0;
-                    while (tries < MAX_TRIES) {
-	                    try {
-	                        String suffix = null;
-	                        if (! success) {
-		                        suffix = " conflict" + (tries > 1 ? " " + tries : "");
-	                        }
+            List<Rule> rules = Rule.findByUserId(user.id);
+            Logger.info("Running rules for %s", user);
 
-	                        resolvedName = insertIntoName(base, suffix);
-	                        String dest = r.dest +
-			                              (r.dest.endsWith("/") ? "" : "/") +
-			                              resolvedName;
-	                        client.move(file, dest);
-	                        break;
-	                    } catch (FileMoveCollisionException e) {
-	                        success = false;
-	                    }
-	                    tries++;
+            for (String file : files) {
+                String base = basename(file);
+                for (Rule r : rules) {
+                    if (r.matches(base)) {
+                        Logger.info("Moving file '%s' to '%s'. Rule id: %s",
+                                file, r.dest, r.id);
+                        boolean success = true;
+                        String resolvedName = null;
+                        int tries = 0;
+                        while (tries < MAX_TRIES) {
+                            try {
+                                String suffix = null;
+                                if (!success) {
+                                    suffix = " conflict"
+                                            + (tries > 1 ? " " + tries : "");
+                                }
+
+                                resolvedName = insertIntoName(base, suffix);
+                                String dest = r.dest
+                                        + (r.dest.endsWith("/") ? "" : "/")
+                                        + resolvedName;
+                                client.move(file, dest);
+                                break;
+                            } catch (FileMoveCollisionException e) {
+                                success = false;
+                            }
+                            tries++;
+                        }
+
+                        if (success) {
+                            // If we moved the file to the correct destination
+                            // on first try
+                            // resolved name is same as original name so leave
+                            // it as null.
+                            resolvedName = null;
+                        } else if (tries >= MAX_TRIES) {
+                            // If we failed to move the file to any location
+                            // leave this field
+                            // as null to indicate complete failure.
+                            resolvedName = null;
+                            Logger.error(
+                                    "Cannot move file '%s' to '%s' after %d tries. Skipping.",
+                                    file, r.dest, MAX_TRIES);
+                        }
+
+                        fileMoves.add(new FileMove(user.id, base, r.dest,
+                                success, resolvedName));
+                        break;
                     }
-
-                    if (success) {
-                        // If we moved the file to the correct destination on first try
-                        // resolved name is same as original name so leave it as null.
-                        resolvedName = null;
-                    } else if (tries >= MAX_TRIES) {
-                        // If we failed to move the file to any location leave this field
-                        // as null to indicate complete failure.
-                        resolvedName = null;
-                        Logger.error("Cannot move file '%s' to '%s' after %d tries. Skipping.", file, r.dest, MAX_TRIES);
-                    } 
-
-                    fileMoves.add(new FileMove(user.id, base, r.dest, success, resolvedName));
-                    break;
                 }
             }
-        }
-        
-        Logger.info("Done running rules for %s. %d moves performed", user, fileMoves.size());
-        if (!fileMoves.isEmpty()) {
-            user.incrementFileMoves(fileMoves.size());
-            FileMove.save(fileMoves);
-        }
 
-        return fileMoves;
+            Logger.info("Done running rules for %s. %d moves performed", user,
+                    fileMoves.size());
+            if (!fileMoves.isEmpty()) {
+                user.incrementFileMoves(fileMoves.size());
+                FileMove.save(fileMoves);
+            }
+
+            return fileMoves;
+        } catch (InvalidTokenException e) {
+            Logger.error(e, "Disabling periodic sort, invalid OAuth token for user: %s", user);
+            user.periodicSort = false;
+            user.save();
+        }
+        return Collections.emptyList();
     }
     
     public static String insertIntoName(String fileName, String suffix) {

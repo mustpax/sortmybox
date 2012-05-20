@@ -24,6 +24,7 @@ import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClient.ListingType;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.InvalidTokenException;
 import dropbox.gson.DbxMetadata;
 
 /**
@@ -61,9 +62,13 @@ public class Application extends Controller {
     
     public static void dirs(String path) {
         checkAuthenticity();
-        DropboxClient client = DropboxClientFactory.create(Login.getLoggedInUser());
+        User u = Login.getLoggedInUser();
+        DropboxClient client = DropboxClientFactory.create(u);
         try {
 	        renderJSON(client.listDir(path, ListingType.DIRS));
+        } catch (InvalidTokenException e) {
+            Logger.error(e, "Invalid OAuth token for user %s", u);
+            Login.logout();
         } catch (IllegalArgumentException e) {
             badRequest();
         }
@@ -78,15 +83,21 @@ public class Application extends Controller {
         boolean createdCannedRules = false;
         DropboxClient client = DropboxClientFactory.create(user);
         String sortboxPath = Dropbox.getSortboxPath();
-        DbxMetadata file = client.getMetadata(sortboxPath);
-        if (file == null) {
-            // 1. create missing Sortbox folder
-            Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
-            createdSortboxDir = client.mkdir(sortboxPath) != null;
-            if (createdSortboxDir) {
-                // 2. create canned rules
-                createdCannedRules = createCannedRules(user);
-            }
+        DbxMetadata file;
+        try {
+            file = client.getMetadata(sortboxPath);
+	        if (file == null) {
+	            // 1. create missing Sortbox folder
+	            Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
+	            createdSortboxDir = client.mkdir(sortboxPath) != null;
+	            if (createdSortboxDir) {
+	                // 2. create canned rules
+	                createdCannedRules = createCannedRules(user);
+	            }
+	        }
+        } catch (InvalidTokenException e) {
+            Logger.error(e, "Invalid OAuth token for user %s", user);
+            Login.logout();
         }
         return new InitResult(createdSortboxDir, createdCannedRules);
     }

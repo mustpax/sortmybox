@@ -44,7 +44,7 @@ class DropboxClientImpl implements DropboxClient {
     }
 
     @Override
-    public DbxMetadata getMetadata(String path) {
+    public DbxMetadata getMetadata(String path) throws InvalidTokenException {
         Preconditions.checkNotNull(path, "Path missing.");
         path = path.startsWith("/") ? path : "/" + path;
 
@@ -54,7 +54,7 @@ class DropboxClientImpl implements DropboxClient {
             .create();
 
         try {
-            HttpResponse resp = ws.get();
+            HttpResponse resp = get(ws);
             if (resp.success()) {
                 DbxMetadata ret = new Gson().fromJson(resp.getJson(), DbxMetadata.class);
                 if (ret.isDeleted()) {
@@ -79,12 +79,12 @@ class DropboxClientImpl implements DropboxClient {
     }
 
     @Override
-    public Set<String> listDir(String path) {
+    public Set<String> listDir(String path) throws InvalidTokenException {
         return listDir(path, ListingType.FILES);
     }
 
     @Override
-    public Set<String> listDir(String path, ListingType listingType) {
+    public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException {
         Set<String> files = Sets.newHashSet();
         DbxMetadata metadata = getMetadata(path);
 
@@ -130,7 +130,8 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     @Override
-    public DbxMetadata move(String from, String to) throws FileMoveCollisionException {
+    public DbxMetadata move(String from, String to) throws FileMoveCollisionException,
+                                                           InvalidTokenException {
         Preconditions.checkArgument(from != null && to != null,
                 "To and from paths cannot be null.");
         Preconditions.checkArgument((from.charAt(0) == '/') && (to.charAt(0) == '/'),
@@ -143,7 +144,7 @@ class DropboxClientImpl implements DropboxClient {
             .create();
         
         try {
-	        HttpResponse resp = ws.post();
+	        HttpResponse resp = post(ws);
 
 	        if (resp.success()) {
 	            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
@@ -242,5 +243,20 @@ class DropboxClientImpl implements DropboxClient {
             return OAuth.percentEncode(param);
         } 
     }
+    
+    private static HttpResponse get(WSRequest req) throws InvalidTokenException {
+        HttpResponse ret = req.get();
+        if (Integer.valueOf(401).equals(ret.getStatus())) {
+            throw new InvalidTokenException();
+        }
+        return ret;
+    }
 
+    private static HttpResponse post(WSRequest req) throws InvalidTokenException {
+        HttpResponse ret = req.post();
+        if (Integer.valueOf(401).equals(ret.getStatus())) {
+            throw new InvalidTokenException();
+        }
+        return ret;
+    }
 }

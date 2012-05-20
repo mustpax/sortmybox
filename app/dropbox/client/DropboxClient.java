@@ -25,8 +25,10 @@ public interface DropboxClient {
      * Get file or directory metadata.
      * @param path file path
      * @return file or directory metadata, null if not found.
+     * 
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @CheckForNull DbxMetadata getMetadata(String path);
+    @CheckForNull DbxMetadata getMetadata(String path) throws InvalidTokenException;
 
     /**
      * Moves a file or folder to a new location.
@@ -34,16 +36,22 @@ public interface DropboxClient {
      * @param from A file or folder to move
      * @param to The new destination
      * @return The metadata for the moved file or folder, null if there's a failure
+     * 
+     * @throws FileMoveCollisionException if file move failed since there is already another file with
+     * the same name at the destination
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @Nullable DbxMetadata move(String from, String to) throws FileMoveCollisionException;
+    @Nullable DbxMetadata move(String from, String to) throws FileMoveCollisionException, InvalidTokenException;
     
     /**
      * Get all files, excluding directories, inside the given directory.
      * 
      * @param path path to the directory to check with the leading /
      * @return set of files (not directories) inside the directory
+     * 
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @Nonnull Set<String> listDir(String path);
+    @Nonnull Set<String> listDir(String path) throws InvalidTokenException;
     
     /**
      * Get all files, excluding directories, inside the given directory.
@@ -51,13 +59,17 @@ public interface DropboxClient {
      * @param path path to the directory, leading / optional
      * @param listingType which types of entries to return
      * @return set of files (not directories) inside the directory
+     * 
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @Nonnull Set<String> listDir(String path, ListingType listingType);
+    @Nonnull Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException;
 
     /**
      * Create a directory at the specified location 
      * @param path the full path of the directory to create
      * @return metadata for the newly created directory
+     * 
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @Nullable DbxMetadata mkdir(String path);
 
