@@ -81,6 +81,7 @@
     
     <script>
 	    window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
+	    window.sortbox = {};
 	    _.templateSettings.escape = /\{\{(.+?)\}\}/g;
 	    $(function() {
 	        $('.dropdown-toggle').dropdown();
