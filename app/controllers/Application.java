@@ -81,7 +81,7 @@ public class Application extends Controller {
         DbxMetadata file = client.getMetadata(sortboxPath);
         if (file == null) {
             // 1. create missing Sortbox folder
-            Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
+            Logger.info("SortMyBox folder missing for user '%s' at path '%s'", user, sortboxPath);
             createdSortboxDir = client.mkdir(sortboxPath) != null;
             if (createdSortboxDir) {
                 // 2. create canned rules
