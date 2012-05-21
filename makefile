@@ -32,11 +32,11 @@ stage: all static
 
 deploy: all static
 	build/checkbranch.sh prod
-	-play gae:deploy
+	play gae:deploy
 	git push origin prod
 
 dev: all static
-	-play gae:deploy
+	play gae:deploy
 
 lint:
 	jshint public/
