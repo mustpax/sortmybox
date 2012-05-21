@@ -79,7 +79,8 @@ public class User implements Serializable {
         this.lastLogin = (Date) entity.getProperty("lastLogin");
         this.token = (String) entity.getProperty("token");
         this.secret = (String) entity.getProperty("secret");
-        this.fileMoves = ((Long) entity.getProperty("fileMoves")).intValue();
+        Long tmpFileMoves = (Long) entity.getProperty("fileMoves");
+        this.fileMoves = tmpFileMoves == null ? 0 : tmpFileMoves.intValue();
     }
 
     private static Set<Long> getAdmins() {
