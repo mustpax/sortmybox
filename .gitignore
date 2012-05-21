@@ -46,6 +46,7 @@ tmp/
 db/
 precompiled/
 modules/
+submodules/
 lib/
 test-result/
 
