@@ -153,9 +153,8 @@ public class RuleUtils {
 
                         if (success) {
                             // If we moved the file to the correct destination
-                            // on first try
-                            // resolved name is same as original name so leave
-                            // it as null.
+                            // on first try resolved name is same as original
+                            // name so leave it as null.
                             resolvedName = null;
                         } else if (tries >= MAX_TRIES) {
                             // If we failed to move the file to any location
