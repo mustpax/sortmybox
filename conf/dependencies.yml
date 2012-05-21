@@ -2,7 +2,14 @@
 
 require:
     - play
-    - play -> gae 1.6.0
+    - play-gae -> play-gae
     - play -> mockito 0.1
     - com.google.guava -> guava r09
     - commons-lang 2.5
+
+repositories:
+    - My modules:
+        type:       local
+        artifact:   ${application.path}/submodules/[module]
+        contains:
+            - play-gae
