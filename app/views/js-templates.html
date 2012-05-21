@@ -25,9 +25,9 @@
 <% } else {
 	   _.each(dirs, function(dir) { %>
 		    <li class="folder">
-		        <a href="#" data-path="{{basename(dir)}}">
+		        <a href="#" data-path="{{dir}}">
 				    <i class="icon-folder-open"></i>
-		            {{dir}}
+		            {{basename(dir)}}
 		        </a>
 		    </li>
 <%     });
