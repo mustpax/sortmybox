@@ -29,6 +29,7 @@ import dropbox.gson.DbxMetadata;
  */
 class DropboxClientImpl implements DropboxClient {
     
+    private static final int HTTP_UNAUTHORIZED = 401;
     private final String token;
     private final String secret;
     
@@ -246,7 +247,7 @@ class DropboxClientImpl implements DropboxClient {
     
     private static HttpResponse get(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.get();
-        if (Integer.valueOf(401).equals(ret.getStatus())) {
+        if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
             throw new InvalidTokenException();
         }
         return ret;
@@ -254,7 +255,7 @@ class DropboxClientImpl implements DropboxClient {
 
     private static HttpResponse post(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.post();
-        if (Integer.valueOf(401).equals(ret.getStatus())) {
+        if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
             throw new InvalidTokenException();
         }
         return ret;
