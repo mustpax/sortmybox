@@ -83,27 +83,26 @@ public class Application extends Controller {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
         boolean updatedSortingFolder = false;
-        DropboxClient client = DropboxClientFactory.create(user);
-        //re-branding requires us to change the sorting folder name
-        if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)){
-        	//now we need to move the Sortbox folder to SortMyBox
-        	try {
-				client.move(Dropbox.getOldSortboxPath(), Dropbox.getSortboxPath());
-				user.sortingFolder = Dropbox.getSortboxPath();//updating to new name
-	        	user.save();
-				updatedSortingFolder = true;
-			} catch (FileMoveCollisionException e) {
-				Logger.info("SortMyBox folder already exists for user '%s' at path '%s'", user);
-			}
-        }
-
-        //now get the new sorting folder path for the user and keep going forward
-        String sortboxPath = user.sortingFolder;
-        DbxMetadata file = client.getMetadata(sortboxPath);
         try {
+            DropboxClient client = DropboxClientFactory.create(user);
+            // re-branding requires us to change the sorting folder name
+            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
+                // now we need to move the Sortbox folder to SortMyBox
+                client.move(Dropbox.getOldSortboxPath(),
+	                        Dropbox.getSortboxPath());
+                user.sortingFolder = Dropbox.getSortboxPath();
+                user.save();
+                updatedSortingFolder = true;
+            }
+
+            // now get the new sorting folder path for the user and keep going
+            // forward
+            String sortboxPath = user.sortingFolder;
+            DbxMetadata file = client.getMetadata(sortboxPath);
             if (file == null) {
                 // 1. create missing Sortbox folder
-                Logger.info("SortMyBox folder missing for user '%s' at path '%s'", user, sortboxPath);
+                Logger.info("SortMyBox folder missing for user '%s' at path '%s'",
+	                        user, sortboxPath);
                 createdSortboxDir = client.mkdir(sortboxPath) != null;
                 if (createdSortboxDir) {
                     // 2. create canned rules
@@ -113,7 +112,9 @@ public class Application extends Controller {
         } catch (InvalidTokenException e) {
             Logger.error(e, "Invalid OAuth token for user %s", user);
             Login.logout();
-        }
+        } catch (FileMoveCollisionException e) {
+            Logger.warn("SortMyBox folder already exists for user '%s'", user);
+		}
         return new InitResult(createdSortboxDir, createdCannedRules, updatedSortingFolder);
     }
 
