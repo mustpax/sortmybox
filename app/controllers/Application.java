@@ -81,24 +81,26 @@ public class Application extends Controller {
     private static InitResult initSortbox(User user) {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
-        DropboxClient client = DropboxClientFactory.create(user);
-        String sortboxPath = Dropbox.getSortboxPath();
-        DbxMetadata file;
         try {
-            file = client.getMetadata(sortboxPath);
-	        if (file == null) {
-	            // 1. create missing Sortbox folder
-	            Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
-	            createdSortboxDir = client.mkdir(sortboxPath) != null;
-	            if (createdSortboxDir) {
-	                // 2. create canned rules
-	                createdCannedRules = createCannedRules(user);
-	            }
-	        }
+            DropboxClient client = DropboxClientFactory.create(user);
+            // now get the new sorting folder path for the user and keep going
+            // forward
+            String sortboxPath = Dropbox.getSortboxPath();
+            DbxMetadata file = client.getMetadata(sortboxPath);
+            if (file == null) {
+                // 1. create missing Sortbox folder
+                Logger.info("SortMyBox folder missing for user '%s' at path '%s'",
+	                        user, sortboxPath);
+                createdSortboxDir = client.mkdir(sortboxPath) != null;
+                if (createdSortboxDir) {
+                    // 2. create canned rules
+                    createdCannedRules = createCannedRules(user);
+                }
+            }
         } catch (InvalidTokenException e) {
             Logger.error(e, "Invalid OAuth token for user %s", user);
             Login.logout();
-        }
+		}
         return new InitResult(createdSortboxDir, createdCannedRules);
     }
 
