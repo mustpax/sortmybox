@@ -24,6 +24,7 @@ import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClient.ListingType;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.FileMoveCollisionException;
 import dropbox.gson.DbxMetadata;
 
 /**
@@ -47,6 +48,8 @@ public class Application extends Controller {
     
     public static void index() {
         User user = Login.getLoggedInUser();
+//        user.sortingFolder = Dropbox.getOldSortboxPath();
+//        user.save();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
         render(user, rules, initResult);
@@ -80,12 +83,20 @@ public class Application extends Controller {
         DropboxClient client = DropboxClientFactory.create(user);
         //re-branding requires us to change the sorting folder name
         if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)){
-        	user.sortingFolder = Dropbox.getSortboxPath();//updating to new name
-        	user.save();
-        	updatedSortingFolder = true;
+        	//now we need to move the Sortbox folder to SortMyBox
+        	try {
+				client.move(Dropbox.getOldSortboxPath(), Dropbox.getSortboxPath());
+				user.sortingFolder = Dropbox.getSortboxPath();//updating to new name
+	        	user.save();
+				updatedSortingFolder = true;
+			} catch (FileMoveCollisionException e) {
+				Logger.info("SortMyBox folder already exists for user '%s' at path '%s'", user);
+			}
         }
+        
         //now get the new sorting folder path for the user and keep going forward
         String sortboxPath = user.sortingFolder;
+//        System.out.println("sortingFolder " + sortboxPath);
         DbxMetadata file = client.getMetadata(sortboxPath);
         if (file == null) {
             // 1. create missing Sortbox folder
