@@ -1,6 +1,6 @@
 Sortbox brought to you by:
 
-The devleopment team:
+The development team:
 
 - Mustafa “Let’s do it in JavaScript” Paksoy
 - Sid “This codebase needs more FactoryImpl’s” Yang

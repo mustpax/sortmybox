@@ -25,6 +25,7 @@ import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClient.ListingType;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.InvalidTokenException;
+import dropbox.client.FileMoveCollisionException;
 import dropbox.gson.DbxMetadata;
 
 /**
@@ -48,6 +49,8 @@ public class Application extends Controller {
     
     public static void index() {
         User user = Login.getUser();
+//        user.sortingFolder = Dropbox.getOldSortboxPath();
+//        user.save();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
         render(user, rules, initResult);
@@ -81,25 +84,40 @@ public class Application extends Controller {
     private static InitResult initSortbox(User user) {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
+        boolean updatedSortingFolder = false;
         DropboxClient client = DropboxClientFactory.create(user);
-        String sortboxPath = Dropbox.getSortboxPath();
-        DbxMetadata file;
+        //re-branding requires us to change the sorting folder name
+        if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)){
+        	//now we need to move the Sortbox folder to SortMyBox
+        	try {
+				client.move(Dropbox.getOldSortboxPath(), Dropbox.getSortboxPath());
+				user.sortingFolder = Dropbox.getSortboxPath();//updating to new name
+	        	user.save();
+				updatedSortingFolder = true;
+			} catch (FileMoveCollisionException e) {
+				Logger.info("SortMyBox folder already exists for user '%s' at path '%s'", user);
+			}
+        }
+
+        //now get the new sorting folder path for the user and keep going forward
+        String sortboxPath = user.sortingFolder;
+//        System.out.println("sortingFolder " + sortboxPath);
+        DbxMetadata file = client.getMetadata(sortboxPath);
         try {
-            file = client.getMetadata(sortboxPath);
-	        if (file == null) {
-	            // 1. create missing Sortbox folder
-	            Logger.info("Sortbox folder missing for user '%s' at path '%s'", user, sortboxPath);
-	            createdSortboxDir = client.mkdir(sortboxPath) != null;
-	            if (createdSortboxDir) {
-	                // 2. create canned rules
-	                createdCannedRules = createCannedRules(user);
-	            }
-	        }
+            if (file == null) {
+                // 1. create missing Sortbox folder
+                Logger.info("SortMyBox folder missing for user '%s' at path '%s'", user, sortboxPath);
+                createdSortboxDir = client.mkdir(sortboxPath) != null;
+                if (createdSortboxDir) {
+                    // 2. create canned rules
+                    createdCannedRules = createCannedRules(user);
+                }
+            }
         } catch (InvalidTokenException e) {
             Logger.error(e, "Invalid OAuth token for user %s", user);
             Login.logout();
         }
-        return new InitResult(createdSortboxDir, createdCannedRules);
+        return new InitResult(createdSortboxDir, createdCannedRules, updatedSortingFolder);
     }
 
     /**
@@ -128,9 +146,12 @@ public class Application extends Controller {
         /** whether the app populated canned rules */
         final public boolean createdCannedRules;
         
-        InitResult(boolean createdSortboxDir, boolean createdCannedRules) {
+        final public boolean updatedSortingFolder;
+        
+        InitResult(boolean createdSortboxDir, boolean createdCannedRules,boolean updatedSortingFolder) {
             this.createdSortboxDir = createdSortboxDir;
             this.createdCannedRules = createdCannedRules;
+            this.updatedSortingFolder = updatedSortingFolder;
         }
     }
 }

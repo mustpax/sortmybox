@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 
+import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
 
 @Cacheable
@@ -46,6 +47,7 @@ public class User implements Serializable {
     public String email;
     public Boolean periodicSort;
     public Integer fileMoves;
+    public String sortingFolder;
 
     public Date created;
     public Date modified;
@@ -59,6 +61,7 @@ public class User implements Serializable {
         this.modified = this.created = this.lastLogin = new Date();
         this.periodicSort = true;
         this.fileMoves = 0;
+        this.sortingFolder = Dropbox.getSortboxPath();
     }
 
     public User(DbxAccount account, String token, String secret) {
@@ -81,6 +84,10 @@ public class User implements Serializable {
         this.secret = (String) entity.getProperty("secret");
         Long tmpFileMoves = (Long) entity.getProperty("fileMoves");
         this.fileMoves = tmpFileMoves == null ? 0 : tmpFileMoves.intValue();
+        this.sortingFolder = (String) entity.getProperty("sortingFolder");
+		if (this.sortingFolder == null) {
+			this.sortingFolder = Dropbox.getOldSortboxPath();
+		}
     }
 
     private static Set<Long> getAdmins() {
@@ -101,7 +108,8 @@ public class User implements Serializable {
         this.name = name;
         this.nameLower = name.toLowerCase();
     }
-
+    
+    
     /**
      * Only for testing.
      */
@@ -277,6 +285,7 @@ public class User implements Serializable {
             .append(this.modified)
             .append(this.lastSync)
             .append(this.lastLogin)
+            .append(this.sortingFolder)
             .hashCode();
     }
 
@@ -299,6 +308,7 @@ public class User implements Serializable {
             .append(this.modified, other.modified)
             .append(this.lastSync, other.lastSync)
             .append(this.lastLogin, other.lastLogin)
+            .append(this.sortingFolder, other.sortingFolder)
             .isEquals();
     }
     
@@ -322,6 +332,7 @@ public class User implements Serializable {
             .add("last_update", modified)
             .add("last_sync", lastSync)
             .add("last_login", lastLogin)
+            .add("sortingFolder", sortingFolder)
             .toString();
     }
 
@@ -340,6 +351,7 @@ public class User implements Serializable {
             entity.setProperty("secret", model.secret);
             entity.setProperty("fileMoves", model.fileMoves);
             entity.setProperty("lastLogin", model.lastLogin);
+            entity.setProperty("sortingFolder", model.sortingFolder);
             return entity;
         }
 
@@ -359,3 +371,4 @@ public class User implements Serializable {
         }
     }
 }
+
