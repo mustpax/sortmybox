@@ -20,6 +20,7 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Throwables;
 
 import unit.TestUtil;
+import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -134,7 +135,19 @@ public class UserTest extends BaseModelTest {
         assertFalse(User.findById(ID).equals(user2));
         assertEquals(User.findById(ID), user);
     }
-
+    
+    @Test
+    public void testSortingFolderUpdate() {
+    	//set the sortingFolder to null for existing users
+    	User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+    	user.sortingFolder = null;
+        user.save();
+        //now lets get the user from the DB
+        User newUser = User.findById(ID);
+        //verify that the sortingFolder is set to the old value - /Sortbox
+        assertEquals("Did not find expected sortingFolder for old users!",Dropbox.getOldSortboxPath(),newUser.sortingFolder);
+    }
+    
     public static User newUser() {
         return newUser(ID, TOKEN, EMAIL, SECRET, NAME);
     }

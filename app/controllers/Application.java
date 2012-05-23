@@ -49,8 +49,6 @@ public class Application extends Controller {
     
     public static void index() {
         User user = Login.getUser();
-//        user.sortingFolder = Dropbox.getOldSortboxPath();
-//        user.save();
         InitResult initResult = initSortbox(user);
         List<Rule> rules = Rule.findByUserId(user.id);
         render(user, rules, initResult);
@@ -101,7 +99,6 @@ public class Application extends Controller {
 
         //now get the new sorting folder path for the user and keep going forward
         String sortboxPath = user.sortingFolder;
-//        System.out.println("sortingFolder " + sortboxPath);
         DbxMetadata file = client.getMetadata(sortboxPath);
         try {
             if (file == null) {
