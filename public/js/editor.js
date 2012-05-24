@@ -61,6 +61,39 @@
         $(this).attr('data-focus', '');
     });
 
+    $('.pattern').live('focus', function() {
+        var typeahead = $(this).data('typeahead');
+        if (!typeahead) {
+            $(this).typeahead({
+                matcher: function(item) {
+                    // match the part of the query following the last comma 
+                    var query = this.query.substring(this.query.lastIndexOf(',') + 1, this.query.legnth);
+                    return ~item.toLowerCase().indexOf($.trim(query).toLowerCase());
+                },
+                updater: function(item) {
+                    var idx = this.query.lastIndexOf(',');
+                    var ret = $.trim(item).toLowerCase();
+                    if (!~idx) {
+                        // item is the only query term
+                        return ret;
+                    } else {
+                        // qppend item to the end of query term
+                        return this.query.substring(0, idx) + ", " + ret;
+                    }
+                }
+            });
+            typeahead = $(this).data('typeahead');
+        }
+
+        var ruleType = $(this).parents('tr').first()
+            .find('select[name="type"] option:selected').val();
+        if (ruleType === 'EXT_EQ') {
+            typeahead.source = sortbox.ext;
+        } else {
+            typeahead.source = [];
+        }
+    });
+
     /**
      * Display the given errors to the given rule.
      * @param i the rank of the rule to add errors to
