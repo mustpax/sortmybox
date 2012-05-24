@@ -77,7 +77,7 @@
                         // item is the only query term
                         return ret;
                     } else {
-                        // qppend item to the end of query term
+                        // append item to the end of query terms
                         return this.query.substring(0, idx) + ", " + ret;
                     }
                 }
