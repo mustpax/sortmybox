@@ -2,7 +2,6 @@ package dropbox.client;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import oauth.signpost.OAuth;
 import play.Logger;
@@ -17,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
+import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.DropboxURLs;
 import dropbox.gson.DbxAccount;
@@ -28,10 +28,9 @@ import dropbox.gson.DbxMetadata;
  * @author mustpax
  * @author syyang
  */
-public class DropboxClientImpl implements DropboxClient {
+class DropboxClientImpl implements DropboxClient {
     
     private static final int HTTP_UNAUTHORIZED = 401;
-    public static final Pattern DISALLOWED_FILENAME_CHARS = Pattern.compile("[*\\\\:?<>\"|]", Pattern.CASE_INSENSITIVE);
     private final String token;
     private final String secret;
     
@@ -139,7 +138,7 @@ public class DropboxClientImpl implements DropboxClient {
                 "To and from paths cannot be null.");
         Preconditions.checkArgument((from.charAt(0) == '/') && (to.charAt(0) == '/'),
                 "To and from paths should start with /");
-        Preconditions.checkArgument(! DISALLOWED_FILENAME_CHARS.matcher(to).find(),
+        Preconditions.checkArgument(! Dropbox.DISALLOWED_FILENAME_CHARS.matcher(to).find(),
                 "To path contains bad characters: '" + to + "' Bad chars: \\ : ? * < > \"");
         
         WSRequest ws = new WSRequestFactory(DropboxURLs.MOVE, token, secret)

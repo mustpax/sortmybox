@@ -3,7 +3,7 @@ package unit;
 import org.junit.Test;
 
 import play.test.UnitTest;
-import dropbox.client.DropboxClientImpl;
+import dropbox.Dropbox;
 
 /**
  * 
@@ -16,12 +16,12 @@ public class FileMovePatternTest extends UnitTest {
         String[] good = {"/a / b $#@", "a"};
         for (String str: bad) {
             assertTrue("Filename should be bad but isn't: " + str,
-                        DropboxClientImpl.DISALLOWED_FILENAME_CHARS.matcher(str).find());
+                        Dropbox.DISALLOWED_FILENAME_CHARS.matcher(str).find());
         }
         
         for (String str: good) {
             assertFalse("Filename should be good but isn't: " + str,
-                        DropboxClientImpl.DISALLOWED_FILENAME_CHARS.matcher(str).find());
+                        Dropbox.DISALLOWED_FILENAME_CHARS.matcher(str).find());
         }
     }
 
