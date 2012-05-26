@@ -20,6 +20,10 @@ public class Dropbox {
     }
 
     public static final Pattern DISALLOWED_FILENAME_CHARS = Pattern.compile("[*\\\\:?<>\"|]", Pattern.CASE_INSENSITIVE);
+
+    public static boolean isValidFilename(String name) {
+        return ! DISALLOWED_FILENAME_CHARS.matcher(name).find();
+    }
     
     private Dropbox() {}
  } 
