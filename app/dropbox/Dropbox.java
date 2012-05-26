@@ -1,5 +1,7 @@
 package dropbox;
 
+import java.util.regex.Pattern;
+
 import play.Play;
 
 public class Dropbox {
@@ -16,6 +18,8 @@ public class Dropbox {
     public static String getOldSortboxPath() {
         return "/Sortbox";
     }
+
+    public static final Pattern DISALLOWED_FILENAME_CHARS = Pattern.compile("[*\\\\:?<>\"|]", Pattern.CASE_INSENSITIVE);
     
     private Dropbox() {}
  } 
