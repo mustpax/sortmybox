@@ -48,6 +48,10 @@ select[size] {
     left: 16px;
 }
 
+.exp .folder {
+    white-space: nowrap;
+}
+
 .exp .folder i {
     margin-right: 5px;
 }
