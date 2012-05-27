@@ -6,4 +6,6 @@ public/js/jquery-1.7.2.min.js
 public/js/json2.js
 public/js/underscore-min.js
 public/js/underscore.js
+public/js/jquery-ui-1.8.20.custom.min.js
+public/js/jquery-ui-1.8.20.custom.js
 modules
