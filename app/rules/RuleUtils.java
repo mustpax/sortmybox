@@ -21,6 +21,7 @@ import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 
 public class RuleUtils {
+    private static final String INVALID_CHAR_REPLACEMENT = "-";
     private static final int MAX_TRIES = 10;
 
     /**
@@ -131,8 +132,7 @@ public class RuleUtils {
                                 file, r.dest, r.id);
                         boolean success = true;
                         String resolvedName = null;
-                        int tries = 0;
-                        while (tries < MAX_TRIES) {
+                        for (int tries = 0; tries < MAX_TRIES; tries++) {
                             try {
                                 String suffix = null;
                                 if (!success) {
@@ -140,34 +140,25 @@ public class RuleUtils {
                                             + (tries > 1 ? " " + tries : "");
                                 }
 
-                                resolvedName = insertIntoName(base, suffix);
-                                String dest = r.dest
-                                        + (r.dest.endsWith("/") ? "" : "/")
-                                        + resolvedName;
+                                resolvedName = removeInvalidChars(insertIntoName(base, suffix));
+
+                                String dest = r.dest +
+                                              (r.dest.endsWith("/") ? "" : "/") +
+                                              resolvedName;
                                 client.move(file, dest);
                                 break;
                             } catch (FileMoveCollisionException e) {
                                 success = false;
+                                resolvedName = null;
                             }
-                            tries++;
                         }
 
-                        if (success) {
-                            // If we moved the file to the correct destination
-                            // on first try resolved name is same as original
-                            // name so leave it as null.
-                            resolvedName = null;
-                        } else if (tries >= MAX_TRIES) {
-                            // If we failed to move the file to any location
-                            // leave this field
-                            // as null to indicate complete failure.
-                            resolvedName = null;
+                        if (!success && (resolvedName == null)) {
                             Logger.error("Cannot move file '%s' to '%s' after %d tries. Skipping.",
 	                                     file, r.dest, MAX_TRIES);
                         }
 
-                        fileMoves.add(new FileMove(user.id, base, r.dest,
-                                success, resolvedName));
+                        fileMoves.add(new FileMove(user.id, base, r.dest, success, resolvedName));
                         break;
                     }
                 }
@@ -189,6 +180,20 @@ public class RuleUtils {
         return Collections.emptyList();
     }
     
+    /**
+     * @return file name with invalid file name characters replaced with
+     * {@link #INVALID_CHAR_REPLACEMENT}
+     */
+    private static String removeInvalidChars(String name) {
+        if (Dropbox.isValidFilename(name)) {
+            return name;
+        }
+
+        return Dropbox.DISALLOWED_FILENAME_CHARS
+                      .matcher(name)
+                      .replaceAll(INVALID_CHAR_REPLACEMENT);
+    }
+
     public static String insertIntoName(String fileName, String suffix) {
         assert ! fileName.contains("/") : "Cannot process paths, can only process basenames.";
         Pair<String, String> fileAndExt = splitName(fileName);

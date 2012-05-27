@@ -36,19 +36,16 @@ public class FileMove implements Serializable {
     public Boolean successful;
     
     /**
-     * When a file name collision occurs we try alternate file names to save 
-     * the file to.
-     * This field contains the file name that ultimately got used for the file
-     * move.
-     *
-     * Will be null if successful == true.
+     * Files can be renamed while moving.
+     * If this field is not null, it contains the actual name the file was saved under.
+     * If this field is null, it means the file was saved under the name {@link #fromFile}
      */
     public String resolvedName;
 
     public FileMove() {}
 
-    public FileMove(Long owner, String from, String dest, boolean success, String resolvedName) {
-        this.toDir = dest;
+    public FileMove(Long owner, String from, String toDir, boolean success, String resolvedName) {
+        this.toDir = toDir;
         this.fromFile = from;
         this.when = new Date();
         this.successful = success;
