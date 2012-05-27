@@ -129,12 +129,12 @@ public class RuleUtils {
                     if (r.matches(base)) {
                         Logger.info("Moving file '%s' to '%s'. Rule id: %s",
                                 file, r.dest, r.id);
-                        boolean success = true;
+                        boolean hasCollision = false;
                         String resolvedName = null;
                         for (int tries = 0; tries < MAX_TRIES; tries++) {
                             try {
                                 String suffix = null;
-                                if (!success) {
+                                if (hasCollision) {
                                     suffix = " conflict"
                                             + (tries > 1 ? " " + tries : "");
                                 }
@@ -147,17 +147,17 @@ public class RuleUtils {
                                 client.move(file, dest);
                                 break;
                             } catch (FileMoveCollisionException e) {
-                                success = false;
+                                hasCollision = true;
                                 resolvedName = null;
                             }
                         }
 
-                        if (!success && (resolvedName == null)) {
+                        if (hasCollision && (resolvedName == null)) {
                             Logger.error("Cannot move file '%s' to '%s' after %d tries. Skipping.",
 	                                     file, r.dest, MAX_TRIES);
                         }
 
-                        fileMoves.add(new FileMove(user.id, base, r.dest, success, resolvedName));
+                        fileMoves.add(new FileMove(user.id, base, r.dest, hasCollision, resolvedName));
                         break;
                     }
                 }

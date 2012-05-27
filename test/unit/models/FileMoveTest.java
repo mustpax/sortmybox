@@ -11,8 +11,10 @@ import models.User;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import com.google.appengine.api.datastore.DatastoreFailureException;
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -29,13 +31,13 @@ public class FileMoveTest extends BaseModelTest {
         FileMove mv = Iterables.getFirst(fileMoves, null);
         assertEquals("foo", mv.fromFile);
         assertEquals("bar", mv.toDir);
-        assertTrue(mv.successful);
+        assertTrue(mv.hasCollision);
 
         fileMoves = FileMove.findByOwner(2L, 2);
         mv = Iterables.getFirst(fileMoves, null);
         assertEquals("tom", mv.fromFile);
         assertEquals("jerry", mv.toDir);
-        assertFalse(mv.successful);
+        assertFalse(mv.hasCollision);
     }
 
     @Test
@@ -68,5 +70,48 @@ public class FileMoveTest extends BaseModelTest {
         Query q = new Query(FileMove.KIND).setAncestor(User.key(1L));
         List moves = Lists.newArrayList(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable());
         assertEquals(2, moves.size());
+    }
+    
+    /**
+     * Ensure that the successful column
+     * gets migrated properly
+     */
+    @Test
+    public void testSuccess() {
+        FileMove mv = new FileMove(1L, "foo", "bar", true);
+        mv.id = 1L;
+        FileMove.save(Arrays.asList(mv));
+        
+        // ignore successful if hasCollision is set
+        setSuccess(mv, true, true);
+        mv = FileMove.findByOwner(1L, 1).get(0);
+        assertTrue(mv.hasCollision);
+
+        // read successful if hasCollision is null
+        setSuccess(mv, null, false);
+        mv = FileMove.findByOwner(1L, 1).get(0);
+        assertTrue(mv.hasCollision);
+        
+        // read successful if hasCollision is null
+        setSuccess(mv, null, true);
+        mv = FileMove.findByOwner(1L, 1).get(0);
+        assertFalse(mv.hasCollision);
+        
+        // default to false if both are null
+        setSuccess(mv, null, null);
+        mv = FileMove.findByOwner(1L, 1).get(0);
+        assertFalse(mv.hasCollision);
+    }
+    
+    private static void setSuccess(FileMove fm, Boolean hasCollision, Boolean successful) {
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Entity e = ds.get(FileMove.key(fm.owner, fm.id));
+            e.setProperty("successful", successful);
+            e.setProperty("hasCollision", hasCollision);
+            ds.put(e);
+        } catch (EntityNotFoundException e) {
+            fail("Could not find record we just created.");
+        }
     }
 }
