@@ -13,6 +13,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.common.base.Objects;
 
 public class FileMove implements Serializable {
     private static final FileMoveMapper MAPPER = new FileMoveMapper();
@@ -57,19 +58,16 @@ public class FileMove implements Serializable {
 	    this(owner, from, dest, success, null);
     }
     
-    public boolean isSuccessful() {
-        return this.successful == null ? true : this.successful;
-    }
-
     @Override
     public String toString() {
-        if (isSuccessful()) {
-            return String.format("Moved file '%s' to '%s' at %s",
-			                     this.fromFile, this.toDir, this.when);
-        }
-
-        return String.format("Failed to move file '%s' to '%s' at %s",
-			                 this.fromFile, this.toDir, this.when);
+        return Objects.toStringHelper(FileMove.class)
+                      .add("id", id)
+                      .add("fromFile", fromFile)
+                      .add("toDir", toDir)
+                      .add("when", when)
+                      .add("owner", owner)
+                      .add("successful", successful)
+                      .toString();
     }
 
     @Override
