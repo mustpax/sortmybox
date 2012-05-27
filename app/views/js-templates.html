@@ -47,7 +47,7 @@
 <ul>
     <% _.each(moves, function(move) {   
            var toFile = move.resolvedName || move.fromFile;
-           if (move.successful) {
+           if (! move.hasCollision) {
     %>
 	        <li class="move-success">
                 Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code>. ({{move.when}})

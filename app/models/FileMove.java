@@ -30,11 +30,9 @@ public class FileMove implements Serializable {
     public Date when;
     public Long owner;
     /**
-     * True iff the file was moved to the destination folder with exactly the same name.
-     * If the file was moved to the destination with a different name due to a file name
-     * collision this flag will be false.
+     * True iff there was a filename collision when trying to move the file.
      */
-    public Boolean successful;
+    public Boolean hasCollision;
     
     /**
      * Files can be renamed while moving.
@@ -45,17 +43,17 @@ public class FileMove implements Serializable {
 
     public FileMove() {}
 
-    public FileMove(Long owner, String from, String toDir, boolean success, String resolvedName) {
+    public FileMove(Long owner, String from, String toDir, boolean hasCollision, String resolvedName) {
         this.toDir = toDir;
         this.fromFile = from;
         this.when = new Date();
-        this.successful = success;
+        this.hasCollision = hasCollision;
         this.owner = owner;
         this.resolvedName = resolvedName;
     }
 
-    public FileMove(Long owner, String from, String dest, boolean success) {
-	    this(owner, from, dest, success, null);
+    public FileMove(Long owner, String from, String dest, boolean hasCollision) {
+	    this(owner, from, dest, hasCollision, null);
     }
     
     @Override
@@ -66,7 +64,7 @@ public class FileMove implements Serializable {
                       .add("toDir", toDir)
                       .add("when", when)
                       .add("owner", owner)
-                      .add("successful", successful)
+                      .add("hasCollision", hasCollision)
                       .toString();
     }
 
@@ -80,7 +78,7 @@ public class FileMove implements Serializable {
         EqualsBuilder eq = new EqualsBuilder()
             .append(this.fromFile, other.fromFile)
             .append(this.toDir, other.toDir)
-            .append(this.successful, other.successful)
+            .append(this.hasCollision, other.hasCollision)
             .append(this.when, other.when)
             .append(this.owner, other.owner);
         return eq.isEquals();
@@ -116,7 +114,7 @@ public class FileMove implements Serializable {
             entity.setUnindexedProperty("toDir", mv.toDir);
             entity.setUnindexedProperty("resolvedName", mv.resolvedName);
             entity.setProperty("when", mv.when);
-            entity.setProperty("successful", mv.successful);
+            entity.setProperty("hasCollision", mv.hasCollision);
             return entity;
         }
 
@@ -129,7 +127,19 @@ public class FileMove implements Serializable {
             mv.toDir = (String) entity.getProperty("toDir");
             mv.resolvedName = (String) entity.getProperty("resolvedName");
             mv.when = (Date) entity.getProperty("when");
-            mv.successful = (Boolean) entity.getProperty("successful");
+            mv.hasCollision = (Boolean) entity.getProperty("hasCollision");
+
+            // If hasCollision column is null we read from the "successful" column
+            // hasCollision is the inverse of successfull
+            // If successful is null we assume success
+            if (mv.hasCollision == null) {
+	            Boolean success = (Boolean) entity.getProperty("successful");
+	            if (success == null) {
+	                mv.hasCollision = false;
+	            } else {
+	                mv.hasCollision = ! success;
+	            }
+            }
             return mv;
         }
 
