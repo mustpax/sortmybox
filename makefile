@@ -48,6 +48,6 @@ clean:
 
 superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
-	git clean -dxf
+	git clean -f
 
 .PHONY : all run js static deps stage deploy dev clean superclean lint
