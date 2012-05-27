@@ -162,9 +162,8 @@ public class RuleUtils {
                             // leave this field
                             // as null to indicate complete failure.
                             resolvedName = null;
-                            Logger.error(
-                                    "Cannot move file '%s' to '%s' after %d tries. Skipping.",
-                                    file, r.dest, MAX_TRIES);
+                            Logger.error("Cannot move file '%s' to '%s' after %d tries. Skipping.",
+	                                     file, r.dest, MAX_TRIES);
                         }
 
                         fileMoves.add(new FileMove(user.id, base, r.dest,
