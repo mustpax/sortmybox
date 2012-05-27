@@ -156,8 +156,47 @@
         $('.rules .rule .status').removeClass('icon-refresh').removeClass('spin');
     }
 
+    function save() {
+        var rules = serialize();
+        console.log('serialed rules', rules);
+        loading();
+        $.ajax({
+            type: 'POST',
+            url: '/rules',
+            data: {
+                'rules': JSON.stringify(rules),
+                'authenticityToken' : window.csrfToken
+            },
+            success: function(data) {
+                var hasErrors = false,
+                    msg       = null;
+                doneLoading();
+                console.log('save success');
+                $.each(data, function(i, v) {
+                    addErrors(i, v);
+                    hasErrors = hasErrors || !! v.length;
+                });
+                if (! hasErrors) {
+                    msg = $('.save').popover({ title:   "Success!",
+                                               content: "Your rules will run every 15 minutes.",
+                                               trigger: "manual" })
+                                    .popover('show');
+                    setTimeout(function(){
+                        msg.popover("hide");
+                    }, 2000);
+                    updateActivity();
+                }
+            },
+            error: function (badRequest) {
+                doneLoading();
+                if (badRequest.status === 400){
+                    alert("You have too many rules, delete a few and try again.");
+                }
+            }
+        });
+    }
 
-    $(document).ready(function() {
+    $(function() {
         $('.new').bind('click', function() {
             var new2 = $('.rule-template').clone();
             new2.removeClass('rule-template').addClass('rule');
@@ -167,48 +206,10 @@
         });
 
         $('.rules .del').live('click', function() {
-            $(this).parents('tr').first().hide('fast', function() { $(this).remove(); });
+            $(this).parents('tr').first().remove();
         });
 
-        $('.save').live('click', function() {
-            var rules = serialize();
-            console.log('serialed rules', rules);
-            loading();
-            $.ajax({
-                type: 'POST',
-                url: '/rules',
-                data: {
-                    'rules': JSON.stringify(rules),
-                    'authenticityToken' : window.csrfToken
-                },
-                success: function(data) {
-                             var hasErrors = false,
-                                 msg       = null;
-                             doneLoading();
-                             console.log('save success');
-                             $.each(data, function(i, v) {
-                                 addErrors(i, v);
-                                 hasErrors = hasErrors || !! v.length;
-                             });
-                             if (! hasErrors) {
-                                 msg = $('.save').popover({ title:   "Success!", 
-                                                             content: "Your rules will run every 15 minutes.",
-                                                             trigger: "manual"})
-                                                  .popover('show');
-                                 setTimeout(function(){
-                                    msg.popover("hide");
-                                 }, 2000);
-                                 updateActivity();
-                             }
-                         },
-                error: function (badRequest) {
-                    doneLoading();
-                    if (badRequest.status === 400){
-                        alert("You have too many rules defined, please delete a few and try again.");
-                    }
-                }
-            });
-        });
+        $('.save').live('click', save);
 
         $('.alert-created').slideDown('slow');
     });
