@@ -217,4 +217,8 @@
     $(function() {
         $('.rule .dest').explorer();
     });
+
+    $(function() {
+        $('.rules tbody').sortable({ 'cursor': 'move' });
+    });
 })(jQuery);

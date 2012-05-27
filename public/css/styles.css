@@ -16,6 +16,10 @@
     display: none;
 }
 
+.rule {
+    cursor: move;
+}
+
 select[size] {
     height: 28px;
 }

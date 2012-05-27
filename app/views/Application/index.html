@@ -46,22 +46,24 @@
         <th>Move file to</th>
         <th></th>
       </thead>
-      #{list items:rules, as:'rule'}
-	      #{rule rule:rule, class:'rule' /}
-      #{/list}
-      #{else}
-	      #{rule class:'rule' /}
-      #{/else}
+      <tbody>
+          #{list items:rules, as:'rule'}
+              #{rule rule:rule, class:'rule' /}
+          #{/list}
+          #{else}
+              #{rule class:'rule' /}
+          #{/else}
 
-
-      <tr class="new-rule-row">
-        <td colspan="3"></td>
-        <td class="center">
-          <button class="btn new">New rule</button>
-        </td>
-      </tr>
-
-      #{rule class:'rule-template' /}
+          #{rule class:'rule-template' /}
+      </tbody>
+      <tfoot>
+          <tr class="new-rule-row">
+            <td colspan="3"></td>
+            <td class="center">
+              <button class="btn new">New rule</button>
+            </td>
+          </tr>
+      </tfoot>
     </table>
     <p>
     <a class="btn btn-primary btn-large save">Save &amp; Run Rules</a>
