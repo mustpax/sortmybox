@@ -26,6 +26,8 @@ import com.google.appengine.repackaged.com.google.common.primitives.Ints;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
+import dropbox.Dropbox;
+
 /**
  * A sorting rule that allows files to be moved to a specified
  * location when certain criteria are met.
@@ -166,6 +168,8 @@ public class Rule implements Serializable {
             ret.add(new RuleError("dest", "Can't be empty."));
         } else if (! dest.startsWith("/")) {
             ret.add(new RuleError("dest", "Must start with a slash (/)."));
+        } else if (! Dropbox.isValidFilename(dest)) {
+            ret.add(new RuleError("dest", "Can't contain \\ : ? * < > \" |"));
         }
         
         // TODO check dest is not a file
@@ -225,8 +229,10 @@ public class Rule implements Serializable {
     public static boolean replace(User user,
                                   List<Rule> ruleList,
                                   @CheckForNull List<List<RuleError>> allErrors) {
-        if ((ruleList == null) || (ruleList.size() > MAX_RULES)) {
-            throw new IllegalArgumentException("Rules missing or too many rules.");
+        Preconditions.checkNotNull(ruleList);
+        if (ruleList.size() > MAX_RULES) {
+            throw new TooManyRulesException(String.format("Can only have max %d rules, attempting to create %d.",
+                                                          MAX_RULES, ruleList.size()));
         }
 
         play.cache.Cache.delete(cacheKey(user.id));

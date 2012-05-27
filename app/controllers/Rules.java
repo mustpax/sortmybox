@@ -5,6 +5,7 @@ import java.util.List;
 
 import models.Rule;
 import models.Rule.RuleError;
+import models.TooManyRulesException;
 import models.User;
 import play.Logger;
 import play.mvc.Controller;
@@ -33,12 +34,12 @@ public class Rules extends Controller {
             }
 
             renderJSON(allErrors);
-        } catch (IllegalArgumentException e) {
+        } catch (TooManyRulesException e) {
             //TODO:
             //  1. preemptively check the count on the client side
             //  2. we should display an appropriate error message
             //     rather than issuing 400 error
-            Logger.warn("User missing rule list or too many rules.");
+            Logger.warn(e, "Attempted to insert too many rules.");
             badRequest();
         }
     }
