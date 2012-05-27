@@ -138,7 +138,7 @@ class DropboxClientImpl implements DropboxClient {
                 "To and from paths cannot be null.");
         Preconditions.checkArgument((from.charAt(0) == '/') && (to.charAt(0) == '/'),
                 "To and from paths should start with /");
-        Preconditions.checkArgument(! Dropbox.DISALLOWED_FILENAME_CHARS.matcher(to).find(),
+        Preconditions.checkArgument(Dropbox.isValidFilename(to),
                 "To path contains bad characters: '" + to + "' Bad chars: \\ : ? * < > \"");
         
         WSRequest ws = new WSRequestFactory(DropboxURLs.MOVE, token, secret)

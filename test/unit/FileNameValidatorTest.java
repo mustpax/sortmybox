@@ -6,14 +6,14 @@ import play.test.UnitTest;
 import dropbox.Dropbox;
 
 /**
- * 
+ * Verifies that file names are validated properly
  * @author mustpax
  */
-public class FileMovePatternTest extends UnitTest {
+public class FileNameValidatorTest extends UnitTest {
     @Test
     public void testFileMovePattern() {
-        String[] bad = { "foo:", "foo\\", "bar*", "   ?", "sd<", ">", "\"", "|"};
-        String[] good = {"/a / b $#@", "a"};
+        String[] bad = { "f/oo:", "foo\\", "bar*", "   ?", "sd<", ">", "\"", "|"};
+        String[] good = {"/a:/ b $#@", "a", "", null};
         for (String str: bad) {
             assertFalse("Filename should be bad but isn't: " + str,
                         Dropbox.isValidFilename(str));
