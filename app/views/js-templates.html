@@ -46,18 +46,20 @@
 <script type="text/template" id="moves-list">
 <ul>
     <% _.each(moves, function(move) {   
-           if (move.successful) { %>
+           var toFile = move.resolvedName || move.fromFile;
+           if (move.successful) {
+    %>
 	        <li class="move-success">
-                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.fromFile}}</code>. ({{move.when}})
+                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code>. ({{move.when}})
             </li>
         <% } else if (move.resolvedName) { %>
             <li class="move-fail">
-                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.resolvedName}}</code> since
+                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
                 there is already a file with the same name at the location. ({{move.when}})
             </li>
         <% } else { %>
             <li class="move-fail">
-                Failed to move <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{move.fromFile}}</code> since
+                Failed to move <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
                 there is already a file with the same name at the location. ({{move.when}})
             </li>
         <% }   
