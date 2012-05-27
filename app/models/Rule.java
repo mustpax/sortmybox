@@ -24,6 +24,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dropbox.Dropbox;
@@ -168,8 +169,6 @@ public class Rule implements Serializable {
             ret.add(new RuleError("dest", "Can't be empty."));
         } else if (! dest.startsWith("/")) {
             ret.add(new RuleError("dest", "Must start with a slash (/)."));
-        } else if (! Dropbox.isValidFilename(dest)) {
-            ret.add(new RuleError("dest", "Can't contain \\ : ? * < > \" |"));
         }
         
         // TODO check dest is not a file
