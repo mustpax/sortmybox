@@ -77,6 +77,15 @@ public class SingleUserRunRulesTest extends BaseModelTest {
         verify(testClient).move(Dropbox.getSortboxPath() + "/foo:*?", "/foo:*?/foo---");
     }
 
+    @Test
+    public void testPriority() throws Exception {
+        addToSortbox("foo");
+        setRules(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 0, null),
+                 new Rule(RuleType.NAME_CONTAINS, "foo", "/bar", 0, null));
+        RuleUtils.runRules(u);
+        verify(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo");
+    }
+
     private static void addToSortbox(String... files) throws Exception {
         Set<String> ret = Sets.newHashSet();
         for (String file: files) {
