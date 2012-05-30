@@ -113,7 +113,7 @@ public class Application extends Controller {
     private static boolean createCannedRules(final User user) {
         if (!Rule.ruleExists(user.id)) {
             List<Rule> rules = Lists.newArrayListWithCapacity(3);
-            rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
+            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.id));
             rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
             rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
             Rule.replace(user, rules, null);
