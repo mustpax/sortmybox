@@ -87,6 +87,7 @@ public class Application extends Controller {
             DropboxClient client = DropboxClientFactory.create(user);
             // re-branding requires us to change the sorting folder name
             if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
+                // TODO check if folder exists before moving
                 // now we need to move the Sortbox folder to SortMyBox
                 client.move(Dropbox.getOldSortboxPath(),
 	                        Dropbox.getSortboxPath());
@@ -127,7 +128,7 @@ public class Application extends Controller {
     private static boolean createCannedRules(final User user) {
         if (!Rule.ruleExists(user.id)) {
             List<Rule> rules = Lists.newArrayListWithCapacity(3);
-            rules.add(new Rule(RuleType.EXT_EQ, "jpg", "/Photos", 0, user.id));
+            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.id));
             rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
             rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
             Rule.replace(user, rules, null);

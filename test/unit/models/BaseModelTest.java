@@ -16,7 +16,7 @@ import play.test.UnitTest;
 public abstract class BaseModelTest extends UnitTest {
 
     protected final LocalServiceTestHelper helper =
-        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig().setNoStorage(true));
 
     @Before
     public void setUp() throws Exception {
