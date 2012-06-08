@@ -7,6 +7,3 @@ install:
   - export PLAY_PATH=`pwd`/play-${PLAY_VERSION}
   - export PATH=${PATH}:${PLAY_PATH}
 script: make auto-test
-branches:
-  except:
-    - master
