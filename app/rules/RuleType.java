@@ -34,9 +34,9 @@ public enum RuleType {
                 return ext.equalsIgnoreCase(pattern);
             }
             
-            String[] extensions = ext.split(EXT_DELIM);
-            for (String subExt: extensions) {
-                if (subExt.trim().equalsIgnoreCase(ext)) {
+            for (String subExt: pattern.split(EXT_DELIM)) {
+                String trimmed = subExt.trim();
+                if (! trimmed.isEmpty() && trimmed.equalsIgnoreCase(ext)) {
                     return true;
                 }
             }

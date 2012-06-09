@@ -91,6 +91,7 @@ public class RuleTest extends BaseModelTest {
         assertFalse(r.matches(".pdf"));
         assertFalse(r.matches("pdf"));
         assertFalse(r.matches("pdf.txt"));
+        assertFalse(r.matches("pdf.other"));
         assertFalse(r.matches("foo.pdf.txt"));
         assertFalse(r.matches("file. pdf"));
         assertFalse(r.matches("file.pdf "));
@@ -102,11 +103,19 @@ public class RuleTest extends BaseModelTest {
         r.pattern = "p d f";
         assertTrue(r.matches("file.p d F"));
 
-        r.pattern = "a,b ,  pdf   ";
+        r.pattern = "a,b ,  pdf,   ";
         assertTrue(r.matches("file.a"));
         assertTrue(r.matches("file.b"));
+        assertTrue(r.matches("file.B"));
         assertTrue(r.matches("file.pdf"));
+        assertTrue(r.matches("file.PdF"));
         assertFalse(r.matches("file.a,b,c"));
+        assertFalse(r.matches("file.txt"));
+        assertFalse(r.matches("file."));
+        assertFalse(r.matches("file. "));
+        assertFalse(r.matches("file"));
+        assertFalse(r.matches("file,tmp"));
+        assertFalse(r.matches("file.with spaces"));
         assertFalse(r.matches(".a"));
     }
 
