@@ -1,16 +1,16 @@
-# [Sortbox][sortbox]
+# [SortMyBox][sortbox]
 
 Like e-mail filters, for your Dropbox.
 
-Sortbox is a magic folder in your Dropbox that moves files saved to it to
+SortMyBox is a magic folder in your Dropbox that moves files saved to it to
 their correct location based on sorting rules that *you* create.
 
 [sortbox]: http://www.sortmybox.com
 
-## How to use Sortbox
+## How to use SortMyBox
 
-1. Log in to Sortbox at http://www.sortmybox.com
-2. Save files in to the <code>Sortbox</code> folder inside your Dropbox folder.
+1. Log in to SortMyBox at http://www.sortmybox.com
+2. Save files in to the <code>SortMyBox</code> folder inside your Dropbox folder.
 3. Watch your files get moved magically.
 
 ## Credits
@@ -51,6 +51,6 @@ Special thanks to:
 [jQuery]: http://jquery.com/
 [Bootstrap]: https://github.com/twitter/bootstrap
 [play]: http://www.playframework.org
-[GitHub]: https://github.com/mustpax/sortbox
+[GitHub]: https://github.com/mustpax/sortmybox
 [appengine]: http://appengine.google.com
 
