@@ -51,7 +51,7 @@ public interface DropboxClient {
      * 
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @Nonnull Set<String> listDir(String path) throws InvalidTokenException;
+    @Nonnull Set<String> listDir(String path) throws InvalidTokenException, NotADirectoryException;
     
     /**
      * Get all files, excluding directories, inside the given directory.
@@ -62,7 +62,7 @@ public interface DropboxClient {
      * 
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
-    @Nonnull Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException;
+    @Nonnull Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException, NotADirectoryException;
 
     /**
      * Create a directory at the specified location 

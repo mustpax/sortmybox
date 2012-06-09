@@ -19,6 +19,7 @@ import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
+import dropbox.client.NotADirectoryException;
 
 public class RuleUtils {
     private static final String INVALID_CHAR_REPLACEMENT = "-";
@@ -172,6 +173,8 @@ public class RuleUtils {
             }
 
             return fileMoves;
+        } catch (NotADirectoryException e) {
+            Logger.error(e, "User has a file where the SortMyBox folder should be: %s", user);
         } catch (InvalidTokenException e) {
             Logger.error(e, "Disabling periodic sort, invalid OAuth token for user: %s", user);
             user.periodicSort = false;

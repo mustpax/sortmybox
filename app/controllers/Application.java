@@ -2,6 +2,7 @@ package controllers;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import dropbox.client.DropboxClient.ListingType;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.FileMoveCollisionException;
+import dropbox.client.NotADirectoryException;
 import dropbox.gson.DbxMetadata;
 
 /**
@@ -67,6 +69,9 @@ public class Application extends Controller {
         DropboxClient client = DropboxClientFactory.create(u);
         try {
 	        renderJSON(client.listDir(path, ListingType.DIRS));
+        } catch (NotADirectoryException e) {
+            Logger.error(e, "User attempt to list a directory which is infact a file: %s", u);
+            renderJSON(Collections.emptyList());
         } catch (InvalidTokenException e) {
             Logger.error(e, "Invalid OAuth token for user %s", u);
             Login.logout();

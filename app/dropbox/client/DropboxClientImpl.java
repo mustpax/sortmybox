@@ -81,18 +81,18 @@ class DropboxClientImpl implements DropboxClient {
     }
 
     @Override
-    public Set<String> listDir(String path) throws InvalidTokenException {
+    public Set<String> listDir(String path) throws InvalidTokenException, NotADirectoryException {
         return listDir(path, ListingType.FILES);
     }
 
     @Override
-    public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException {
+    public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException, NotADirectoryException {
         Set<String> files = Sets.newHashSet();
         DbxMetadata metadata = getMetadata(path);
 
         if (metadata != null) {
             if (!metadata.isDir) {
-                throw new IllegalArgumentException("Expecting dir, got a file: " + path);
+                throw new NotADirectoryException("Expecting dir, got a file: " + path);
             }
 
             for (DbxMetadata entry: metadata.contents) {
