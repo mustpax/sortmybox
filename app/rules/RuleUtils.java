@@ -109,8 +109,6 @@ public class RuleUtils {
      * @return list of file moves performed
      */
     public static List<FileMove> runRules(User user) {
-        user.updateLastSyncDate();
-
         List<FileMove> fileMoves = Lists.newArrayList();
         DropboxClient client = DropboxClientFactory.create(user);
         try {
@@ -121,6 +119,8 @@ public class RuleUtils {
                 Logger.info("Ran rules for %s, no files to process.", user);
                 return fileMoves;
             }
+
+            user.updateLastSyncDate();
 
             List<Rule> rules = Rule.findByUserId(user.id);
             Logger.info("Running rules for %s", user);
