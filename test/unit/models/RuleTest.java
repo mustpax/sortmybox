@@ -71,6 +71,15 @@ public class RuleTest extends BaseModelTest {
         assertTrue(r.matches("bar foo baz"));
         assertTrue(r.matches("   foo"));
         assertTrue(r.matches(" foo&."));
+
+        r.pattern = "\\w";
+        assertFalse(r.matches("a"));
+        assertTrue(r.matches("\\w"));
+
+        r.pattern = "foo.";
+        assertFalse(r.matches("foo"));
+        assertFalse(r.matches("foox"));
+        assertTrue(r.matches("foo."));
     }
 
     @Test
