@@ -251,7 +251,7 @@ class DropboxClientImpl implements DropboxClient {
     private static HttpResponse get(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.get();
         if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
-            throw new InvalidTokenException();
+            throw new InvalidTokenException(getError(ret));
         }
         return ret;
     }
@@ -259,7 +259,7 @@ class DropboxClientImpl implements DropboxClient {
     private static HttpResponse post(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.post();
         if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
-            throw new InvalidTokenException();
+            throw new InvalidTokenException(getError(ret));
         }
         return ret;
     }
