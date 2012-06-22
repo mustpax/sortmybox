@@ -73,18 +73,23 @@ select[size] {
     font-size: 110%;
 }
 
-.hero-unit {
+.landing {
     margin-top: 90px;
     text-align: center;
     background-color: #CAE0FD;
     padding-bottom: 25px;
 }
-
-.hero-unit h1 {
+.press {
+    margin-top: 90px;
+    text-align: center;
+    padding-bottom: 25px;
+    background-color: initial;
+}
+.landing h1 {
     line-height: 36px;
 }
 
-.hero-unit h1 small {
+.landing h1 small {
     letter-spacing: normal;
     color: #333;
     font-weight: 200;
@@ -128,6 +133,16 @@ select[size] {
 
 .navbar .container {
     width: 940px;
+}
+
+li:nth-child(odd) {
+    text-align: left;
+    list-style-type: none;
+}
+
+li:nth-child(even) {
+    text-align: right;
+    list-style-type: none;
 }
 
 .periodicSort form {
@@ -214,6 +229,14 @@ code {
 
 .testimonials img {
     margin-right: 5px;
+}
+
+.press-heading {
+    font-size: 140%;
+}
+
+.press-quote {
+    font-size: 120%;
 }
 
 /*
