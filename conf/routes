@@ -19,6 +19,7 @@ GET     /terms                                  Footer.terms
 GET     /privacy                                Footer.privacy
 GET     /contact                                Footer.contact
 GET     /faq                                	Footer.faq
+GET     /press                                  Footer.press
 
 # Admin
 GET    /admin/error                             Admin.forceError

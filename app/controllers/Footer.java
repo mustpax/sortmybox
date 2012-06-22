@@ -23,6 +23,10 @@ public class Footer extends Controller {
         renderInner();
     }
     
+    public static void press() { 
+    	renderInner();
+    }
+    
     private static void renderInner() {
         User user = Login.getUser();        
         if (user == null) {
