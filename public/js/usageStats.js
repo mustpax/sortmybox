@@ -1,6 +1,6 @@
 /*global google:true */
 
-(function($, google) {
+(function($, google, _) {
     'use strict';
 
     var cols = [
@@ -14,21 +14,36 @@
     $.each(cols, function(i, v) {
         colIndex[v.name] = i;
     });
-                        
-        
-    function tablify(data) {
+
+
+    /**
+     * @param data JSON representation for usage stats gathered
+     * @param (optional) selectedColumn if present, only display columns with this name
+     */
+    function tablify(data, selectedColumn) {
         var ret = new google.visualization.DataTable();
-        $.each(cols, function(k, v) {
-            ret.addColumn(v.type, v.label);
+        $.each(cols, function(i, v) {
+            if ((i === 0) ||
+                (! selectedColumn) ||
+                (selectedColumn === v.name)) {
+                ret.addColumn(v.type, v.label);
+            }
         });
 
         $.each(data, function(i, v) {
             var row = [];
             $.each(cols, function(j, col) {
-                if ('date' === col.type) {
-                    row.push(new Date(v[col.name]));
-                } else {
-                    row.push(v[col.name]);
+                // Always include Label column (the first column)
+                // If selected column specified, only diplay that column
+                if ((j === 0) ||
+                    (! selectedColumn) ||
+                    (selectedColumn === col.name)) {
+
+                    if ('date' === col.type) {
+                        row.push(new Date(v[col.name]));
+                    } else {
+                        row.push(v[col.name]);
+                    }
                 }
             });
             ret.addRow(row);
@@ -38,22 +53,25 @@
     }
 
     function displayCharts(data) {
-        console.log(data);
-
-        // Set chart options
-        
-        new google.visualization.LineChart(document.getElementById('aggr_chart'))
-            .draw(tablify(data.aggr), {'title': 'Aggregate usage stats',
-                                        'width': 1000,
-                                        'height': 420 });
-
-        new google.visualization.LineChart(document.getElementById('daily_chart'))
-            .draw(tablify(data.daily), {'title': 'Daily usage stats',
-                                        'width': 1000,
-                                        'height': 420 });
+        _.each(['daily', 'aggr'], function(scope) {
+            _.each(_.rest(cols), function(col) { 
+                var elem = $('.chart.' + scope + '.' + col.name).get(0);
+                console.log(scope, col, elem);
+                new google.visualization.LineChart(elem)
+                    .draw(tablify(data[scope], col.name), { 'title': scope + ' usage stats: ' + col.label,
+                                                          'width': 1000,
+                                                          'height': 420 });
+            });
+        });
     }
     
     function init() {
+        _.each(['daily', 'aggr'], function(scope) {
+            _.each(_.rest(cols), function(col) {
+                $('.charts').append(sortbox.template('stats-chart', {'scope' : scope, 'column' : col.name}));
+            });
+        });
+
         $.ajax({
             type: 'GET',
             url: '/admin/stats',
@@ -71,4 +89,4 @@
                     'packages' : ['corechart'],
                     'callback' : init
                 });
-})(jQuery, google);
+})(jQuery, google, _);

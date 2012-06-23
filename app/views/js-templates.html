@@ -79,6 +79,14 @@
 	<em>Loading...</em><i class="icon-refresh spin"></i>
 </script>
 
+<script type="text/template" id="stats-chart">
+    <div class="row">
+        <div class="span12">
+            <div class="chart {{scope}} {{column}}"></div>
+        </div>
+    </div>
+</script>
+
 <script>
     _.templateSettings.escape = /\{\{(.+?)\}\}/g;
     !function($) {
