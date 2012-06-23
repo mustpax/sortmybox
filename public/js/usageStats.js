@@ -71,27 +71,4 @@
                     'packages' : ['corechart'],
                     'callback' : init
                 });
-
-    
-    /*
-        var data = google.visualization.arrayToDataTable([
-          ['Date', 'Users', 'Rules', 'File moves'],
-    #{list items:dailyStats, as:'stat'}
-          ['${stat.created.format('MM/dd/yyyy')}', ${stat.users}, ${stat.rules}, ${stat.fileMoves}],
-    #{/list}
-        ]);
-    
-    // Set chart options
-    var options = {
-      'title': 'Daily usage stats',
-      'width': 1000,
-      'height': 420
-    };
-    
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('daily_chart'));
-    chart.draw(data, options);
-    });
-
-    */
 })(jQuery, google);
