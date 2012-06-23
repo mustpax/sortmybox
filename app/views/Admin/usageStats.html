@@ -13,49 +13,5 @@
 
 #{set 'script'}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-  // Load the Visualization API and the chart package.
-  google.load('visualization', '1.0', {'packages':['corechart']});
-      
-  // Set a callback to run when the Google Visualization API is loaded.
-  google.setOnLoadCallback(function() {
-        var data = google.visualization.arrayToDataTable([
-          ['Date', 'Users', 'Rules', 'File moves'],
-#{list items:aggrStats, as:'stat'}
-          ['${stat.created.format('MM/dd/yyyy')}', ${stat.users}, ${stat.rules}, ${stat.fileMoves}],
-#{/list}
-        ]);
-
-    // Set chart options
-    var options = {
-      'title': 'Aggregate usage stats',
-      'width': 1000,
-      'height': 420
-    };
-
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('aggr_chart'));
-    chart.draw(data, options);
-  });
-
-  google.setOnLoadCallback(function() {
-        var data = google.visualization.arrayToDataTable([
-          ['Date', 'Users', 'Rules', 'File moves'],
-#{list items:dailyStats, as:'stat'}
-          ['${stat.created.format('MM/dd/yyyy')}', ${stat.users}, ${stat.rules}, ${stat.fileMoves}],
-#{/list}
-        ]);
-
-    // Set chart options
-    var options = {
-      'title': 'Daily usage stats',
-      'width': 1000,
-      'height': 420
-    };
-
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('daily_chart'));
-    chart.draw(data, options);
-  });
-</script>
+<script type="text/javascript" src="#{static-path '/public/js/usageStats.js' /}"></script>
 #{/set}

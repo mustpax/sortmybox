@@ -1,6 +1,9 @@
 package controllers;
 
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import models.Blacklist;
 import models.CascadingDelete;
@@ -9,9 +12,11 @@ import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
 
+import org.joda.time.DateTime;
 import org.mortbay.log.Log;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -20,7 +25,12 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 @With(Login.class)
 public class Admin extends Controller {
@@ -28,16 +38,35 @@ public class Admin extends Controller {
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
     private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
 
-    public static void usageStats() {
+    public static void usageStats(boolean fake) {
+        if (Play.mode.isDev() && fake) {
+            long users = 0L;
+            long rules = 30L;
+            long fileMoves = 100L;
+            for (int i = 0; i < 100; i++) {
+                long dUsers = Math.abs(new Random().nextInt()) % 100;
+                long dRules = Math.abs(new Random().nextInt()) % 300;
+                long dFileMoves = Math.abs(new Random().nextInt()) % 10000;
+
+                users += dUsers;
+                rules += dRules;
+                fileMoves += dFileMoves;
+
+
+                UsageStats us = new UsageStats(users, rules, fileMoves);
+
+                DailyUsageStats dus = new DailyUsageStats(dUsers, dRules, dFileMoves);
+
+                Date cur = new DateTime().plusDays(i).toDate();
+                us.created = cur;
+                us.save();
+                dus.created = cur;
+                dus.save();
+            }
+        }
+
         User user = Login.getUser();
-  
-        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
-
-        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
-
-        render(user, aggrStats, dailyStats);
+        render(user);
     }
 
     public static void searchUser(String query) {
@@ -135,6 +164,29 @@ public class Admin extends Controller {
 
     public static void forceError() {
         throw new IllegalArgumentException("Just pretending to fail.");
+    }
+
+    /**
+     * Serialize {@link Date} objects via {@link Date#getTime()} (milliseconds since epoch).
+     */
+    private static class EpochMillisSerializer implements JsonSerializer<Date> {
+        @Override
+        public JsonElement serialize(Date d, Type t,
+                JsonSerializationContext ctx) {
+            return new JsonPrimitive(d.getTime());
+        }
+    }
+
+    public static void stats() {
+        checkAuthenticity();
+
+        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
+
+        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
+
+        renderJSON(ImmutableMap.of("daily", aggrStats, "aggr", dailyStats), new EpochMillisSerializer());
     }
 
     public static void deleteUserPost(String userIdString) {
