@@ -32,6 +32,18 @@ import dropbox.gson.DbxAccount;
 
 @Cacheable
 public class User implements Serializable {
+    public static enum AccountType {
+        DROPBOX,
+        BOX;
+        
+	    public static AccountType fromDbValue(String dbValue) {
+	        for (AccountType type : AccountType.values()) {
+	            if (type.name().equals(dbValue)) return type;
+	        }
+
+	        return null;
+	    }
+    }
 	
     private static final long serialVersionUID = 45L;
     
@@ -54,13 +66,17 @@ public class User implements Serializable {
     public Date lastSync;
     public Date lastLogin;
 
+    public AccountType accountType;
+    
     private String token;
     private String secret;
+    
     
     public User() {
         this.modified = this.created = this.lastLogin = new Date();
         this.periodicSort = true;
         this.fileMoves = 0;
+        this.accountType = AccountType.DROPBOX;
         this.sortingFolder = Dropbox.getSortboxPath();
     }
 
@@ -88,6 +104,11 @@ public class User implements Serializable {
 		if (this.sortingFolder == null) {
 			this.sortingFolder = Dropbox.getOldSortboxPath();
 		}
+
+        this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
+        if (this.accountType == null) {
+            this.accountType = AccountType.DROPBOX;
+        }
     }
 
     private static Set<Long> getAdmins() {
