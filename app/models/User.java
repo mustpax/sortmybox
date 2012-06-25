@@ -342,6 +342,7 @@ public class User implements Serializable {
             .append(this.lastSync)
             .append(this.lastLogin)
             .append(this.sortingFolder)
+            .append(this.accountType)
             .hashCode();
     }
 
@@ -365,6 +366,7 @@ public class User implements Serializable {
             .append(this.lastSync, other.lastSync)
             .append(this.lastLogin, other.lastLogin)
             .append(this.sortingFolder, other.sortingFolder)
+            .append(this.accountType, other.accountType)
             .isEquals();
     }
     
@@ -380,6 +382,7 @@ public class User implements Serializable {
     public String toString() {
         return Objects.toStringHelper(User.class)
             .add("id", id)
+            .add("accountType", accountType)
             .add("name", name)
             .add("nameLower", nameLower)
             .add("email", email)
