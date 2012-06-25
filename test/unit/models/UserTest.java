@@ -54,7 +54,7 @@ public class UserTest extends BaseModelTest {
      */
     @Test
     public void testEncryptUnencrypted() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
 
         assertEquals(TOKEN, user.getToken());
         user.setTokenRaw(TOKEN);
@@ -67,7 +67,7 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testSave() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
         assertEquals(User.findById(AccountType.DROPBOX, ID), user);
         
@@ -84,7 +84,7 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testDelete() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
         assertNotNull(User.findById(AccountType.DROPBOX, ID));
         user.delete();
@@ -113,10 +113,10 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testCache() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
 
-        User user2 = newUser(ID, TOKEN, EMAIL, SECRET, "new");
+        User user2 = newUser();
         // Force the Cache value to be different from datastore
         Cache.set(User.key(ID).toString(), user2);
         assertFalse(User.findById(AccountType.DROPBOX, ID).equals(user));
@@ -142,7 +142,7 @@ public class UserTest extends BaseModelTest {
     @Test
     public void testAccountType() {
     	// Default should be Dropbox for new users
-    	User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+    	User user = newUser();
         user.save();
         user = User.findById(AccountType.DROPBOX, ID);
         assertSame(User.AccountType.DROPBOX, user.accountType);
@@ -155,7 +155,7 @@ public class UserTest extends BaseModelTest {
     }
 
     private void assertAccountType(AccountType expected, AccountType set) {
-    	User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+    	User user = newUser();
         user.accountType = set;
         user.save();
 
