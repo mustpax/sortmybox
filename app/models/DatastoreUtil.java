@@ -95,6 +95,22 @@ public class DatastoreUtil {
             return new Entity(KeyFactory.createKey(kind, id));
         }
     }
+
+    public static Entity newEntity(Key parent, String kind, String id) {
+        if (id == null) {
+            return new Entity(kind, parent);
+        } else {
+            return new Entity(parent.getChild(kind, id));
+        }
+    }
+
+    public static Entity newEntity(String kind, String id) {
+        if (id == null) {
+            return new Entity(kind);
+        } else {
+            return new Entity(KeyFactory.createKey(kind, id));
+        }
+    }
     
     public static <T> T get(Key key, Mapper<T> mapper) {
         try {

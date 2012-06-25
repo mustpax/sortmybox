@@ -12,12 +12,11 @@ public class BoxClientFactory {
     public static BoxClient create(User user) {
         Preconditions.checkNotNull(user, "User can't be null");
         assert AccountType.BOX == user.accountType : "User must be a Dropbox user";
-        return create(user.getToken(), user.getSecret());
+        return create(user.getToken());
     }
 
-    private static BoxClient create(String token, String secret) {
+    public static BoxClient create(String token) {
         Preconditions.checkNotNull(token, "Token can't be null");
-        Preconditions.checkNotNull(secret, "Secret can't be null");
-        return new BoxClientImpl(token, secret);
+        return new BoxClientImpl(token);
     }
 }

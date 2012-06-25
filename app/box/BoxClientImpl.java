@@ -1,11 +1,9 @@
 package box;
 
 public class BoxClientImpl implements BoxClient {
-    private final String token;
-    private final String secret;
+    public final String token;
 
-    BoxClientImpl(String token, String secret) {
+    BoxClientImpl(String token) {
         this.token = token;
-        this.secret = secret;
     }
 }

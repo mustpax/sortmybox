@@ -11,6 +11,7 @@ import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
+import models.User.AccountType;
 
 import org.joda.time.DateTime;
 import org.mortbay.log.Log;
@@ -84,7 +85,8 @@ public class Admin extends Controller {
                 User userById = null;
                 try {
                     Long userId = Long.parseLong(normalized);
-                    userById = User.findById(userId);
+                    // TODO - allow admin to specify account type
+                    userById = User.findById(AccountType.DROPBOX, userId);
                     if (userById != null) {
                         results.add(userById);
                     }
@@ -208,7 +210,8 @@ public class Admin extends Controller {
         }
 
         // check the user exists
-        User userToDelete = User.findById(userId);
+        // TODO handle non-Dropbox users
+        User userToDelete = User.findById(AccountType.DROPBOX, userId);
         if (userToDelete == null) {
             flash.error("Non-existant user: User id: %s", userIdString);
             deleteUser();

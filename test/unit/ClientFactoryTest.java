@@ -13,7 +13,7 @@ import play.test.UnitTest;
 
 public class ClientFactoryTest extends UnitTest {
     private User getUser() {
-        User u = new User();
+        User u = new User(AccountType.DROPBOX);
         u.setSecret("x");
         u.setToken("x");
         return u;

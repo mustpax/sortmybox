@@ -2,19 +2,18 @@ package controllers;
 
 import java.net.URLEncoder;
 
-import models.Blacklist;
 import models.User;
+import models.User.AccountType;
 import play.Logger;
 import play.libs.OAuth;
 import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-import play.mvc.Http.Request;
-import play.mvc.Router;
 import play.mvc.With;
+import box.Box;
+import box.BoxAccount;
 
-import com.google.appengine.api.NamespaceManager;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
 import common.request.Headers;
@@ -42,6 +41,7 @@ public class Login extends Controller {
         static final String SECRET = "secret";
         static final String UID = "uid";
         static final String IP = "ip";
+        static final String TYPE = "type";
     }
     
     @Before(priority=10)
@@ -68,7 +68,9 @@ public class Login extends Controller {
                                 request.url));
     }
 
-    @Before(unless={"login", "auth", "logout", "offline", "authCallback", "alt"}, priority=1000)
+    @Before(unless={"login", "auth", "logout", "authCallback", "alt",
+                    "boxLogin", "boxAuth", "boxAuthCallback"},
+            priority=1000)
     static void checkAccess() throws Throwable {
         if (!isLoggedIn()) {
             if ("GET".equals(request.method)) {
@@ -112,6 +114,7 @@ public class Login extends Controller {
         if (oauthResponse.error == null) {
             Logger.info("Succesfully authenticated with Dropbox.");
             User u = upsertUser(oauthResponse.token, oauthResponse.secret);
+            session.put(SessionKeys.TYPE, AccountType.DROPBOX.name());
             session.put(SessionKeys.UID, u.id);
             session.put(SessionKeys.IP, request.remoteAddress);
             session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
@@ -155,6 +158,12 @@ public class Login extends Controller {
      * @return the currently logged in user, null if no logged in user
      */
     public static User getUser() {
+        AccountType type = AccountType.fromDbValue(session.get(SessionKeys.TYPE));
+        if (type == null) {
+            Logger.info("User not logged in: no account type in session.");
+            return null;
+        }
+
         String uid = session.get(SessionKeys.UID);
         if (uid == null) {
             Logger.info("User not logged in: no uid in session.");
@@ -175,7 +184,7 @@ public class Login extends Controller {
         }
 
         try {
-            User user = User.findById(Long.valueOf(uid));
+            User user = User.findById(type, Long.valueOf(uid));
 
             if (user == null) {
                 Logger.warn("Session has uid, but user missing from datastore. Uid: %s", uid);
@@ -185,6 +194,32 @@ public class Login extends Controller {
             Logger.error(e, "Invalidly formatted or missing uid: %s", uid);
             return null;
         }
+    }
+
+    public static void boxLogin() {
+        if (isLoggedIn()) {
+            Logger.info("User visited login url, but already logged in.");
+            redirectToOriginalURL();
+        } else {
+            flash.keep(REDIRECT_URL);
+            String api = Box.API_KEY;
+            render(api);
+        } 
+    }
+
+    public static void boxAuth() {
+        flash.keep(REDIRECT_URL);
+        String ticket = Box.getTicket();
+        redirect(Box.getAuthUrl(ticket));
+    }
+
+    public static void boxAuthCallback(String ticket, String auth_token) {
+        BoxAccount ba = Box.getAccount(ticket);
+        User u = User.upsert(ba);
+        session.put(SessionKeys.TYPE, AccountType.BOX.name());
+        session.put(SessionKeys.UID, u.id);
+        session.put(SessionKeys.IP, request.remoteAddress);
+        Accounts.settings();
     }
 
     public static void logout() {

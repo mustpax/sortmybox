@@ -48,6 +48,9 @@ GET     /auth-cb                                Login.authCallback
 GET     /                                       Login.login
 GET     /alt                                    Login.alt
 GET     /logout                                 Login.logout
+GET     /box/login                              Login.boxLogin
+GET     /box/auth                               Login.boxAuth
+GET     /box/auth-cb                            Login.boxAuthCallback
 
 # Redirect for favicon.ico
 GET     /robots.txt                             staticFile:public/robots.txt

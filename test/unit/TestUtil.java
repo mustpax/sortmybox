@@ -1,11 +1,12 @@
 package unit;
 
 import models.User;
+import models.User.AccountType;
 
 public class TestUtil {
 
     public static User createUser(long id) throws Exception {
-        User user = new User();
+        User user = new User(AccountType.DROPBOX);
         user.id = id;
         user.save();
         return user;
