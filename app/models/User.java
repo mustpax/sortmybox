@@ -373,6 +373,9 @@ public class User implements Serializable {
             entity.setProperty("fileMoves", model.fileMoves);
             entity.setProperty("lastLogin", model.lastLogin);
             entity.setProperty("sortingFolder", model.sortingFolder);
+            if (model.accountType != null) {
+                entity.setProperty("accountType", model.accountType.name());
+            }
             return entity;
         }
 

@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.print.attribute.standard.MediaSize.NA;
 
 import models.User;
+import models.User.AccountType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -148,6 +149,28 @@ public class UserTest extends BaseModelTest {
         assertEquals("Did not find expected sortingFolder for old users!",Dropbox.getOldSortboxPath(),newUser.sortingFolder);
     }
     
+    @Test
+    public void testAccountType() {
+    	// Default should be Dropbox for new users
+    	User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        user.save();
+        user = User.findById(ID);
+        assertSame(User.AccountType.DROPBOX, user.accountType);
+
+    	// Dropbox should be default when accountType is null
+        assertAccountType(AccountType.DROPBOX, null);
+        assertAccountType(AccountType.BOX, AccountType.BOX);
+        assertAccountType(AccountType.DROPBOX, AccountType.DROPBOX);
+    }
+
+    private void assertAccountType(AccountType expected, AccountType set) {
+        User user = User.findById(ID);
+        user.accountType = set;
+        user.save();
+
+        assertSame(expected, User.findById(ID).accountType);
+    }
+
     public static User newUser() {
         return newUser(ID, TOKEN, EMAIL, SECRET, NAME);
     }
