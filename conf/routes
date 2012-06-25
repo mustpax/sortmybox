@@ -48,7 +48,6 @@ GET     /auth-cb                                Login.authCallback
 GET     /                                       Login.login
 GET     /alt                                    Login.alt
 GET     /logout                                 Login.logout
-GET     /offline                                Login.offline
 
 # Redirect for favicon.ico
 GET     /robots.txt                             staticFile:public/robots.txt
