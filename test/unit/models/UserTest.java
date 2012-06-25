@@ -165,6 +165,27 @@ public class UserTest extends BaseModelTest {
         user.delete();
     }
 
+    /**
+     * Verify that Box and Dropbox users are stored in isolation
+     */
+    @Test
+    public void testBoxUser() {
+        User dropbox = newUser();
+        dropbox.setName("dropbox");
+        dropbox.save();
+        dropbox = User.findById(AccountType.DROPBOX, ID);
+
+        User box = newUser();
+        box.setName("box");
+        box.accountType = AccountType.BOX;
+        box.save();
+        box = User.findById(AccountType.BOX, ID);
+
+        assertFalse(box.getName().equals(dropbox.getName()));
+        assertFalse(box.equals(dropbox));
+        assertNotSame(box.accountType, dropbox.accountType);
+    }
+
     public static User newUser() {
         return newUser(ID, TOKEN, EMAIL, SECRET, NAME);
     }
