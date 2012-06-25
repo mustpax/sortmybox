@@ -292,8 +292,9 @@ public class User implements Serializable {
         User user = findById(AccountType.BOX, account.id);
         if (user == null) {
             user = new User(AccountType.BOX);
+            user.id = account.id;
             Logger.info("Box user not found in datastore, creating new one: %s", user);
-        } 
+        }
 
         user.setToken(account.token);
         user.email = account.email;
