@@ -1,5 +1,7 @@
 package box;
 
-public interface BoxClient {
+import common.api.ApiClient;
+
+public interface BoxClient extends ApiClient {
 
 }

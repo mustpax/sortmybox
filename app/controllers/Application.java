@@ -20,10 +20,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import common.api.ApiClient;
+import common.api.ApiClient.ListingType;
 
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClient.ListingType;
 import dropbox.client.DropboxClientFactory;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.FileMoveCollisionException;
@@ -68,7 +69,7 @@ public class Application extends Controller {
         User u = Login.getUser();
         DropboxClient client = DropboxClientFactory.create(u);
         try {
-	        renderJSON(client.listDir(path, ListingType.DIRS));
+	        renderJSON(client.listDir(path, ApiClient.ListingType.DIRS));
         } catch (NotADirectoryException e) {
             Logger.error(e, "User attempt to list a directory which is infact a file: %s", u);
             renderJSON(Collections.emptyList());
