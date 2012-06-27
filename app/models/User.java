@@ -8,15 +8,11 @@ import javax.persistence.Cacheable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.w3c.dom.Document;
 
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
-import play.libs.XML;
-import play.libs.XPath;
-
 import box.BoxAccount;
 
 import com.google.appengine.api.datastore.Entity;

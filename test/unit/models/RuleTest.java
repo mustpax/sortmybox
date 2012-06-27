@@ -5,16 +5,11 @@ import java.util.List;
 import models.Rule;
 import models.User;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import play.cache.Cache;
-import play.test.UnitTest;
 import rules.RuleType;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
  
 public class RuleTest extends BaseModelTest {

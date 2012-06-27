@@ -1,19 +1,12 @@
 package dropbox.client;
 
-import java.util.Set;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import com.google.common.io.Files;
 import common.api.ApiClient;
 
-import play.Play;
-import play.libs.OAuth.ServiceInfo;
-
-import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxAccount;
+import dropbox.gson.DbxMetadata;
 
 public interface DropboxClient extends ApiClient {
 

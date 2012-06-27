@@ -1,12 +1,10 @@
 package dropbox.client;
 
+import models.User;
+import models.User.AccountType;
 import play.Play;
 
 import com.google.common.base.Preconditions;
-
-import models.User;
-import models.User.AccountType;
-import controllers.Login;
 
 /**
  * Factory for creating a {@link DropboxClient} implementation.

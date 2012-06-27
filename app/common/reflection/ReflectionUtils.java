@@ -5,8 +5,6 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import tasks.Task;
-
 /**
  * Reflection utilities
  *

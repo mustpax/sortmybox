@@ -2,15 +2,10 @@ package tasks;
 
 import java.util.Map;
 
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-
-import common.request.Headers;
-
-import play.mvc.Controller;
 import play.mvc.Http;
-import play.mvc.Http.Header;
+
+import com.google.common.base.Preconditions;
+import common.request.Headers;
 
 /**
  * A container for task context parameters.

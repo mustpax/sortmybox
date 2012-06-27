@@ -27,8 +27,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import dropbox.Dropbox;
-
 /**
  * A sorting rule that allows files to be moved to a specified
  * location when certain criteria are met.
@@ -88,6 +86,7 @@ public class Rule implements Serializable {
      * NOTE: the max number of rules is bound by {@link #MAX_RULES_TO_FETCH}
      */
     public static List<Rule> findByUserId(long userId) {
+        @SuppressWarnings("unchecked")
         List<Rule> rules = (List<Rule>) play.cache.Cache.get(cacheKey(userId));
 
         if (rules == null) {

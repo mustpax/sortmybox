@@ -2,7 +2,6 @@ package dropbox;
 
 import java.util.regex.Pattern;
 
-import play.Play;
 import rules.RuleUtils;
 
 public class Dropbox {

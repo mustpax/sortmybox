@@ -68,8 +68,7 @@ public class FileMoveTest extends BaseModelTest {
         FileMove mv2 = new FileMove(1L, "tom", "jerry", false);
         FileMove.save(Arrays.asList(mv1, mv2));
         Query q = new Query(FileMove.KIND).setAncestor(User.key(1L));
-        List moves = Lists.newArrayList(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable());
-        assertEquals(2, moves.size());
+        assertEquals(2, Iterables.size(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable()));
     }
     
     /**

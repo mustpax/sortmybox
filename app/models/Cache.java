@@ -1,19 +1,12 @@
 package models;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.persistence.Cacheable;
 
 import play.Logger;
-import play.modules.gae.GAECache;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.memcache.Expiration;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.common.collect.Maps;
 
 class Cache {
     private static final AtomicBoolean CACHE_FIXED = new AtomicBoolean(false);
@@ -43,10 +36,11 @@ class Cache {
         return INSTANCE;
     }
 
-    public boolean isCachable(Mapper mapper) {
+    public boolean isCachable(Mapper<?> mapper) {
         return mapper.getType().isAnnotationPresent(Cacheable.class);
     }
     
+    @SuppressWarnings("unchecked")
     public <T> T get(Key k) {
         return (T) play.cache.Cache.get(k.toString());
     }

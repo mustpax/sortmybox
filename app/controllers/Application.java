@@ -21,14 +21,12 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import common.api.ApiClient;
-import common.api.ApiClient.ListingType;
 import common.api.ApiClientFactory;
 
 import dropbox.Dropbox;
-import dropbox.client.InvalidTokenException;
 import dropbox.client.FileMoveCollisionException;
+import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
-import dropbox.gson.DbxMetadata;
 
 /**
  * @author mustpax

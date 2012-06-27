@@ -4,12 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import models.User;
-
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import play.Logger;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;

@@ -1,7 +1,10 @@
 package func;
 
 import static dropbox.client.DropboxClientFactory.testClient;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +20,6 @@ import rules.RuleUtils;
 import unit.models.BaseModelTest;
 import unit.models.UserTest;
 
-import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dropbox.Dropbox;
