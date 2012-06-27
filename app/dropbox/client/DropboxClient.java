@@ -30,13 +30,4 @@ public interface DropboxClient extends ApiClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @CheckForNull DbxMetadata getMetadata(String path) throws InvalidTokenException;
-
-    /**
-     * Create a directory at the specified location 
-     * @param path the full path of the directory to create
-     * @return metadata for the newly created directory
-     * 
-     * @throws InvalidTokenException if OAuth token for the current user is not valid
-     */
-    @Nullable DbxMetadata mkdir(String path);
 }

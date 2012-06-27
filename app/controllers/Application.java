@@ -22,10 +22,9 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import common.api.ApiClient;
 import common.api.ApiClient.ListingType;
+import common.api.ApiClientFactory;
 
 import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClientFactory;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.NotADirectoryException;
@@ -67,7 +66,7 @@ public class Application extends Controller {
     public static void dirs(String path) {
         checkAuthenticity();
         User u = Login.getUser();
-        DropboxClient client = DropboxClientFactory.create(u);
+        ApiClient client = ApiClientFactory.create(u);
         try {
 	        renderJSON(client.listDir(path, ApiClient.ListingType.DIRS));
         } catch (NotADirectoryException e) {
@@ -90,7 +89,7 @@ public class Application extends Controller {
         boolean createdCannedRules = false;
         boolean updatedSortingFolder = false;
         try {
-            DropboxClient client = DropboxClientFactory.create(user);
+            ApiClient client = ApiClientFactory.create(user);
             // re-branding requires us to change the sorting folder name
             if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
                 // TODO check if folder exists before moving
@@ -105,12 +104,11 @@ public class Application extends Controller {
             // now get the new sorting folder path for the user and keep going
             // forward
             String sortboxPath = user.sortingFolder;
-            DbxMetadata file = client.getMetadata(sortboxPath);
-            if (file == null) {
+            if (client.exists(sortboxPath)) {
                 // 1. create missing Sortbox folder
                 Logger.info("SortMyBox folder missing for user '%s' at path '%s'",
 	                        user, sortboxPath);
-                createdSortboxDir = client.mkdir(sortboxPath) != null;
+                createdSortboxDir = client.mkdir(sortboxPath);
                 if (createdSortboxDir) {
                     // 2. create canned rules
                     createdCannedRules = createCannedRules(user);

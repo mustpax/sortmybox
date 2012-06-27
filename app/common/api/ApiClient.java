@@ -3,6 +3,7 @@ package common.api;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
@@ -47,6 +48,17 @@ public interface ApiClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @Nonnull Set<String> listDir(String path, ApiClient.ListingType listingType) throws InvalidTokenException, NotADirectoryException;
+
+    /**
+     * Create a directory at the specified location 
+     * @param path the full path of the directory to create
+     * @return true if folder was created successfully, false otherwise
+     * 
+     * @throws InvalidTokenException if OAuth token for the current user is not valid
+     */
+    boolean mkdir(String path);
+
+    boolean exists(String path) throws InvalidTokenException;
 
 	public static enum ListingType {
 	    DIRS(true, false),

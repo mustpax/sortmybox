@@ -110,7 +110,7 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     @Override
-    public DbxMetadata mkdir(String path) {
+    public boolean mkdir(String path) {
         Preconditions.checkNotNull(path, "Path missing.");
         Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
 
@@ -122,14 +122,14 @@ class DropboxClientImpl implements DropboxClient {
         try {
 	        HttpResponse resp = ws.get();
 	        if (resp.success()) {
-	            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+	            return true;
 	        }
 
 	        Logger.error("Failed creating folder at '%s'. %s", path, getError(resp));
         } catch (RuntimeException e) {
 	        Logger.error(e, "Exception when trying to creating folder at '%s'", path);
         }
-        return null;
+        return false;
     }
     
     @Override
@@ -261,5 +261,10 @@ class DropboxClientImpl implements DropboxClient {
             throw new InvalidTokenException(getError(ret));
         }
         return ret;
+    }
+
+    @Override
+    public boolean exists(String path) throws InvalidTokenException {
+        return getMetadata(path) != null;
     }
 }

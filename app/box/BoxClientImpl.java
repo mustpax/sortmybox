@@ -30,4 +30,15 @@ public class BoxClientImpl implements BoxClient {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public boolean mkdir(String path) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean exists(String path) {
+        return false;
+    }
 }
