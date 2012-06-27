@@ -2,6 +2,12 @@ package box;
 
 import java.util.Set;
 
+import box.Box.URLs;
+
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
+import play.libs.WS.WSRequest;
+
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
@@ -40,5 +46,12 @@ public class BoxClientImpl implements BoxClient {
     @Override
     public boolean exists(String path) {
         return false;
+    }
+    
+    private WSRequest req(String path) {
+        path = path.startsWith("/") ? path : "/" + path;
+        return WS.url(URLs.BASE_V2 + path)
+                 .setHeader("Authorization",
+                            String.format("BoxAuth api_key=%s&auth_token=%s", Box.API_KEY, this.token));
     }
 }
