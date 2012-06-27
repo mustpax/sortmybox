@@ -11,7 +11,7 @@ import play.libs.XPath;
  */
 public class Box {
     public static final String API_KEY = Play.mode.isProd() ? Play.configuration.getProperty("box.apiKey") :
-															  Play.configuration.getProperty("box.apiKeyDev");
+                                                              Play.configuration.getProperty("box.apiKeyDev");
 
     public static String getTicket() {
         WSRequest ws = WS.url("https://www.box.com/api/1.0/rest")
@@ -46,6 +46,6 @@ public class Box {
         }
 
         throw new IllegalStateException("Failed fetching account info. Status: " + resp.getStatus() +
-						                " Error: " + resp.getString());
+                                        " Error: " + resp.getString());
     }
 }
