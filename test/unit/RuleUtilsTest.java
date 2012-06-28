@@ -52,4 +52,19 @@ public class RuleUtilsTest extends UnitTest {
         assertEquals(".foobar", RuleUtils.insertIntoName(".foo", "bar"));
         assertEquals(".foo", RuleUtils.insertIntoName(".foo", null));
     }
+
+    @Test
+    public void testNormalize() {
+        assertEquals("/a", RuleUtils.normalize("A"));
+        assertEquals("/", RuleUtils.normalize(""));
+        assertEquals("/a/bcd/efg", RuleUtils.normalize("//a///BcD//efG/////"));
+    }
+
+    @Test
+    public void testGetParent() {
+        assertEquals("/", RuleUtils.getParent("/a"));
+        assertEquals("/", RuleUtils.getParent("///a"));
+        assertEquals("a", RuleUtils.getParent("a///b"));
+        assertEquals("/foo bar", RuleUtils.getParent("/foo bar///baz//"));
+    }
 }

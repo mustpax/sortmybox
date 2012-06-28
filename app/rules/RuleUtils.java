@@ -1,17 +1,26 @@
 package rules;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
+
 import models.FileMove;
 import models.Rule;
 import models.User;
+
+import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 
 import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import dropbox.Dropbox;
@@ -207,6 +216,32 @@ public class RuleUtils {
 
     public static String basename(String path) {
         return path == null ? null : new File(path).getName();
+    }
+
+    public static class IsEmptyOrNull implements Predicate<String> {
+        @Override
+        public boolean apply(String str) {
+            return str == null || str.isEmpty();
+        }
+    }
+
+    /**
+     * Case fold (lower case) path and collapse adjacent /'s
+     *
+     * @return the normalized version of given path
+     */
+    public static String normalize(@CheckForNull String path) {
+        if (path == null) {
+            return null;
+        }
+
+        return "/" + StringUtils.join(Collections2.filter(Arrays.asList(path.toLowerCase().split("/+")),
+                                                          Predicates.not(new IsEmptyOrNull())),
+                                      "/");
+    }
+
+    public static String getParent(String path) {
+        return path == null ? null : new File(path).getParent();
     }
 
     private RuleUtils() {}
