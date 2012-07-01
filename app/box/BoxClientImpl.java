@@ -6,14 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
 import play.Logger;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 import rules.RuleUtils;
 import box.Box.URLs;
+import box.gson.BoxError;
 import box.gson.BoxItem;
+import box.gson.BoxName;
 
+import com.google.appengine.repackaged.com.google.common.collect.Sets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -28,19 +34,42 @@ import dropbox.client.NotADirectoryException;
 
 public class BoxClientImpl implements BoxClient {
     public final String token;
-    private final Map<String, String> pathToIdMap = new MapMaker()
-        .makeComputingMap(new Function<String, String>() {
+    private final Map<String, NullableId> pathToIdMap = new MapMaker()
+        .makeComputingMap(new Function<String, NullableId>() {
             @Override
-            public String apply(String path) {
-                if ("/".equals(path)) {
-                    return "0";
+            public NullableId apply(String path) {
+                if (path == null || "/".equals(path)) {
+                    return ROOT_ID;
                 }
 
-                String parentId = BoxClientImpl.this.pathToIdMap.get(RuleUtils.getParent(path));
-                return getIdOfChild(parentId, RuleUtils.basename(path));
+                String parentId = BoxClientImpl.this.pathToIdMap.get(RuleUtils.getParent(path)).id;
+                if (parentId == null) {
+                    return NULL_ID;
+                }
+
+                return new NullableId(getIdOfChild(parentId, RuleUtils.basename(path)));
             }
         });
     
+    private static final NullableId NULL_ID = new NullableId(null);
+    private static final NullableId ROOT_ID = new NullableId("0");
+    
+    private static class ItemNameExtractor implements Function<BoxItem, String> {
+        @Override
+        public String apply(BoxItem item) {
+            return item.name;
+        }
+    }
+
+    private static class NullableId {
+        private final String id;
+        
+        public NullableId(String id) {
+            this.id = id;
+        }
+
+    }
+
     BoxClientImpl(String token) {
         this.token = token;
     }
@@ -48,30 +77,53 @@ public class BoxClientImpl implements BoxClient {
     @Override
     public void move(String from, String to) throws FileMoveCollisionException, InvalidTokenException {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public Set<String> listDir(String path) throws InvalidTokenException, NotADirectoryException {
-        // TODO Auto-generated method stub
-        return null;
+        return listDir(path, ListingType.FILES);
     }
 
     @Override
     public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException, NotADirectoryException {
-        // TODO Auto-generated method stub
-        return null;
+        Set<String> ret = Sets.newHashSet();
+        // TODO use metadata available during the get-id API call for directory listing
+        String id = getId(path);
+
+        if (id != null) {
+            HttpResponse resp = req("/folders/" + id).get();
+            ret.addAll(Collections2.transform(getChildren(resp.getJson()), new ItemNameExtractor()));
+            return ret;
+        }
+
+        return ret;
     }
 
     @Override
     public boolean mkdir(String path) {
-        // TODO Auto-generated method stub
+        String parentId = getId(RuleUtils.getParent(path));
+        if (parentId ==  null) {
+            Logger.error("Cannot create folder because parent directory doesn't exist: %s", path);
+            return false;
+        }
+
+        HttpResponse resp = req("/folders/" + parentId)
+                .body(new Gson().toJson(new BoxName(RuleUtils.basename(path))))
+                .post();
+
+        if (resp.success()) {
+            BoxItem folder = new Gson().fromJson(resp.getJson(), BoxItem.class);
+            Logger.info("Successfully created folder at path %s Folder: %s", path, folder);
+            return true;
+        }
+
+        Logger.error("Failed creating directory '%s' Error: %s", path, getError(resp));
         return false;
     }
 
     @Override
     public boolean exists(String path) {
-        return false;
+        return getId(path) != null;
     }
 
     private static class ItemNameEquals implements Predicate<BoxItem> {
@@ -87,13 +139,17 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
-    public static String getIdOfChild(JsonElement json, String child) {
+    public static List<BoxItem> getChildren(JsonElement json) {
         Type t = new TypeToken<List<BoxItem>>(){}.getType();
-        List<BoxItem> items = new Gson().fromJson(json.getAsJsonObject()
-                                                      .getAsJsonObject("item_collection")
-                                                      .get("entries"),
-                                                  t);
-        
+        return new Gson().fromJson(json.getAsJsonObject()
+                                       .getAsJsonObject("item_collection")
+                                       .get("entries"),
+                                   t);
+    }
+
+    public static String getIdOfChild(JsonElement json, String child) {
+        List<BoxItem> items = getChildren(json);
+       
         Collection<BoxItem> matching = Collections2.filter(items, new ItemNameEquals(child));
         if (matching.isEmpty()) {
             Logger.warn("Box: could not find child in parent. Child: %s Response: %s", child, json);
@@ -110,38 +166,33 @@ public class BoxClientImpl implements BoxClient {
         
     }
     
-    private String getIdOfChild(String parentId, String child) {
+    private @CheckForNull String getIdOfChild(@Nonnull String parentId, String child) {
+        if (parentId == null) {
+            throw new NullPointerException("Parent id cannot be null");
+        }
+        
         HttpResponse resp = req("/folders/" + parentId).get();
         
         if (resp.success()) {
-            Type t = new TypeToken<List<BoxItem>>(){}.getType();
-            List<BoxItem> items = new Gson().fromJson(resp.getJson()
-                                                          .getAsJsonObject()
-                                                          .get("item_collection"),
-                                                      t);
-            
-            Collection<BoxItem> matching = Collections2.filter(items, new ItemNameEquals(child));
-            if (matching.isEmpty()) {
-                Logger.warn("Box: could not find child in parent. Parent id: %s Child: %s", parentId, child);
-                return null;
-            }
-
-            if (matching.size() == 1) {
-                return matching.iterator().next().id;
-            }
-
-            Logger.error("Box: more than one child returned from API under same parent. Parent id: %s Child: %s Matches: %s",
-                         parentId, child, matching);
-            return null;
+            return getIdOfChild(resp.getJson(), child);
         }
 
         Logger.error("Box: Failed fetching folder info. Parent id: %s Child: %s Error: ",
-                    parentId, child, resp.getString());
+                     parentId, child, getError(resp));
         return null;
+    }
+    
+    private static String getError(HttpResponse resp) {
+        assert ! resp.success() : "Cannot get error for successful response.";
+        try {
+            return new Gson().fromJson(resp.getJson(), BoxError.class).toString();
+        } catch (RuntimeException e) {
+            return resp.toString();
+        }
     }
 
     private String getId(String path) {
-        return pathToIdMap.get(RuleUtils.normalize(path));
+        return pathToIdMap.get(RuleUtils.normalize(path)).id;
     }
 
     private WSRequest req(String path) {

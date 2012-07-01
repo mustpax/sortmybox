@@ -17,9 +17,8 @@ public interface ApiClient {
     /**
      * Moves a file or folder to a new location.
      * 
-     * @param from A file or folder to move
-     * @param to The new destination
-     * @return The metadata for the moved file or folder, null if there's a failure
+     * @param from path to file or folder to move
+     * @param to fully qualified new path for file/folder (must include name of the file/folder itself)
      * 
      * @throws FileMoveCollisionException if file move failed since there is already another file with
      * the same name at the destination
@@ -52,11 +51,14 @@ public interface ApiClient {
      * Create a directory at the specified location 
      * @param path the full path of the directory to create
      * @return true if folder was created successfully, false otherwise
-     * 
-     * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     boolean mkdir(String path);
 
+    /**
+     * Check if a file or folder exists at the location.
+     * 
+     * @return true if file or folder exists at path, false otherwise.
+     */
     boolean exists(String path) throws InvalidTokenException;
 
 	public static enum ListingType {
