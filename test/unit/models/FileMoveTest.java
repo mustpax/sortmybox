@@ -12,13 +12,15 @@ import models.User.AccountType;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import tasks.FileMoveDeleter;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class FileMoveTest extends BaseModelTest {
@@ -47,6 +49,29 @@ public class FileMoveTest extends BaseModelTest {
         assertEquals("tom", mv.fromFile);
         assertEquals("jerry", mv.toDir);
         assertFalse(mv.hasCollision);
+    }
+
+    @Test
+    public void testDeleteBefore() {
+        List<FileMove> moves = Lists.newArrayList();
+        int count = 10;
+
+        Date now = new Date();
+        Date lastDate = null;
+
+        for (int i = 0; i< count; i++) {
+            Date when = new DateTime(now).plusDays(i).toDate();
+            lastDate = when;
+            FileMove m = new FileMove(key1(), "from" + i, "/dest/to" + i, (i % 2) == 0);
+            m.when = when;
+            moves.add(m);
+        }
+
+        FileMove.save(moves);
+        assertEquals(10, FileMove.findByOwner(key1(), count + 1).size());
+
+        FileMoveDeleter.deleteMovesBefore(key1(), lastDate);
+        assertEquals(1, FileMove.findByOwner(key1(), count + 1).size());
     }
 
     @Test
