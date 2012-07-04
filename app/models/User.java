@@ -179,7 +179,7 @@ public class User implements Serializable {
     }
 
     public boolean isAdmin() {
-        return ADMINS.contains(id);
+        return accountType == AccountType.DROPBOX && ADMINS.contains(id);
     }
 
     public void updateLastSyncDate() {
