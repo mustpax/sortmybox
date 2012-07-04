@@ -174,6 +174,10 @@ public class User implements Serializable {
         }
     }
 
+    public Key getKey() {
+        return User.key(this.accountType, this.id);
+    }
+
     public boolean isAdmin() {
         return ADMINS.contains(id);
     }
@@ -427,9 +431,8 @@ public class User implements Serializable {
 
         @Override
         public Key toKey(User model) {
-            return key(model.accountType, model.id);
+            return model.getKey();
         }
     }
 
 }
-

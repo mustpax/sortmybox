@@ -168,7 +168,7 @@ public class RuleUtils {
 	                                     file, r.dest, MAX_TRIES);
                         }
 
-                        fileMoves.add(new FileMove(user.id, base, r.dest, hasCollision, resolvedName));
+                        fileMoves.add(new FileMove(user.getKey(), base, r.dest, hasCollision, resolvedName));
                         break;
                     }
                 }

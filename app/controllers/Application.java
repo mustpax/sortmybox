@@ -57,7 +57,7 @@ public class Application extends Controller {
     public static void activity() {
         checkAuthenticity();
         User user = Login.getUser();
-        renderJSON(FileMove.findByOwner(user.id, MAX_FILE_MOVES),
+        renderJSON(FileMove.findByOwner(user.getKey(), MAX_FILE_MOVES),
                    new DateSinceSerializer());
     }
     
