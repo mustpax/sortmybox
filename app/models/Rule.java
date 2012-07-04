@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.primitives.Ints;
 import com.google.common.base.Objects;
@@ -51,7 +52,7 @@ public class Rule implements Serializable {
     };
 
     public Long id;
-    public Long owner;
+    public Key owner;
     public RuleType type;
     public String pattern;
     public String dest;
@@ -60,7 +61,7 @@ public class Rule implements Serializable {
     
     public Rule() {}
     
-    public Rule(RuleType type, String pattern, String dest, Integer rank, Long owner) {
+    public Rule(RuleType type, String pattern, String dest, Integer rank, Key owner) {
         this.type = type;
         this.pattern = pattern;
         this.dest = dest;
@@ -71,7 +72,7 @@ public class Rule implements Serializable {
     
     private Rule(Entity entity) {
         this.id = entity.getKey().getId();
-        this.owner = entity.getKey().getParent().getId();
+        this.owner = entity.getKey().getParent();
         this.type = RuleType.fromDbValue((String) entity.getProperty("type"));
         this.pattern = (String) entity.getProperty("pattern");
         this.dest = (String) entity.getProperty("dest");
@@ -85,15 +86,15 @@ public class Rule implements Serializable {
      * <p>
      * NOTE: the max number of rules is bound by {@link #MAX_RULES_TO_FETCH}
      */
-    public static List<Rule> findByUserId(long userId) {
+    public static List<Rule> findByUserId(Key owner) {
         @SuppressWarnings("unchecked")
-        List<Rule> rules = (List<Rule>) play.cache.Cache.get(cacheKey(userId));
+        List<Rule> rules = (List<Rule>) play.cache.Cache.get(cacheKey(owner));
 
         if (rules == null) {
-	        Query q = byOwner(userId);
+	        Query q = byOwner(owner);
 	        rules = Lists.newArrayList(fetch(q));
 	        Collections.sort(rules, RANK_COMPARATOR);
-	        play.cache.Cache.set(cacheKey(userId), rules);
+	        play.cache.Cache.set(cacheKey(owner), rules);
         }
 
         return rules;
@@ -130,13 +131,13 @@ public class Rule implements Serializable {
         return new Query(KIND);
     }
     
-    public static Query byOwner(long userId) {
-	    return all().setAncestor(User.key(userId));
+    public static Query byOwner(Key owner) {
+	    return all().setAncestor(owner);
     }
 
 
-    public static boolean ruleExists(Long userId) {
-        return fetch(byOwner(userId).setKeysOnly()).iterator().hasNext();
+    public static boolean ruleExists(Key owner) {
+        return fetch(byOwner(owner).setKeysOnly()).iterator().hasNext();
     }
     
     public boolean matches(String fileName) {
@@ -233,11 +234,11 @@ public class Rule implements Serializable {
                                                           MAX_RULES, ruleList.size()));
         }
 
-        play.cache.Cache.delete(cacheKey(user.id));
+        play.cache.Cache.delete(cacheKey(user.getKey()));
 
         List<Rule> toSave = Lists.newArrayList();
         boolean needToRun = true;
-        List<Key> oldKeys = Lists.newArrayList(fetchKeys(byOwner(user.id)));
+        List<Key> oldKeys = Lists.newArrayList(fetchKeys(byOwner(user.getKey())));
 
         if (ruleList.isEmpty()) {
             Logger.info("Deleting all rules since there are no new rules to insert.");
@@ -246,7 +247,7 @@ public class Rule implements Serializable {
         } else {
             int rank = 0;
             for (Rule rule : ruleList) {
-                rule.owner = user.id;
+                rule.owner = user.getKey();
                 List<RuleError> errors = rule.validate();
                 if (errors.isEmpty()) {
                     rule.rank = rank++;
@@ -274,16 +275,16 @@ public class Rule implements Serializable {
         return needToRun;
     }
     
-    public static Key key(long parent, long id) {
-        return User.key(parent).getChild(KIND, id);
+    public static Key key(Key parent, long id) {
+        return parent.getChild(KIND, id);
     }
     
     /**
      * We cache all rules for a user together.
      * So the cache key depends on the ownerId.
      */
-    public static String cacheKey(long ownerId) {
-        return User.key(ownerId) + KIND;
+    public static String cacheKey(Key owner) {
+        return KeyFactory.keyToString(owner) + KIND;
     }
 
     private static void saveAll(Iterable<Rule> rules) {
@@ -305,7 +306,7 @@ public class Rule implements Serializable {
 
         @Override
         public Entity toEntity(Rule r) {
-            Entity entity = DatastoreUtil.newEntity(User.key(r.owner), KIND, r.id);
+            Entity entity = DatastoreUtil.newEntity(r.owner, KIND, r.id);
             entity.setProperty("type", r.type.name());
             entity.setProperty("pattern", r.pattern);
             entity.setProperty("dest", r.dest);

@@ -50,7 +50,7 @@ public class Application extends Controller {
     public static void index() {
         User user = Login.getUser();
         InitResult initResult = initSortbox(user);
-        List<Rule> rules = Rule.findByUserId(user.id);
+        List<Rule> rules = Rule.findByUserId(user.getKey());
         render(user, rules, initResult);
     }
 
@@ -128,11 +128,11 @@ public class Application extends Controller {
      * @return true if canned rules are created
      */
     private static boolean createCannedRules(final User user) {
-        if (!Rule.ruleExists(user.id)) {
+        if (!Rule.ruleExists(user.getKey())) {
             List<Rule> rules = Lists.newArrayListWithCapacity(3);
-            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.id));
-            rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
-            rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
+            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.getKey()));
+            rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.getKey()));
+            rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.getKey()));
             Rule.replace(user, rules, null);
             return true;
         }

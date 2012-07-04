@@ -131,7 +131,7 @@ public class RuleUtils {
 
             user.updateLastSyncDate();
 
-            List<Rule> rules = Rule.findByUserId(user.id);
+            List<Rule> rules = Rule.findByUserId(user.getKey());
             Logger.info("Running rules for %s", user);
 
             for (String file : files) {

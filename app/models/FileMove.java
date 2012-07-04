@@ -129,7 +129,7 @@ public class FileMove implements Serializable {
             mv.hasCollision = (Boolean) entity.getProperty("hasCollision");
 
             // If hasCollision column is null we read from the "successful" column
-            // hasCollision is the inverse of successfull
+            // hasCollision is the inverse of success
             // If successful is null we assume success
             if (mv.hasCollision == null) {
 	            Boolean success = (Boolean) entity.getProperty("successful");

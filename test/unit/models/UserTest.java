@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.KeyFactory;
+
 import play.cache.Cache;
 import unit.TestUtil;
 import dropbox.Dropbox;
@@ -118,7 +120,7 @@ public class UserTest extends BaseModelTest {
 
         User user2 = newUser();
         // Force the Cache value to be different from datastore
-        Cache.set(User.key(ID).toString(), user2);
+        Cache.set(KeyFactory.keyToString(User.key(ID)), user2);
         assertFalse(User.findById(AccountType.DROPBOX, ID).equals(user));
         assertEquals(User.findById(AccountType.DROPBOX, ID), user2);
 
