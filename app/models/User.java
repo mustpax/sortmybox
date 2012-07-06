@@ -86,7 +86,7 @@ public class User implements Serializable {
         this.id = entity.getKey().getId();
         this.name = (String) entity.getProperty("name");
         this.nameLower = (String) entity.getProperty("nameLower");
-        if (this.nameLower == null) {
+        if (this.nameLower == null && this.name != null) {
             this.nameLower = this.name.toLowerCase();
         }
         this.email = (String) entity.getProperty("email");

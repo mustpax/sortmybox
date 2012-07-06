@@ -27,7 +27,7 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
     
     @Before
     public void setUp() throws Exception {
-        datastoreConfig = new LocalDatastoreServiceTestConfig();
+        datastoreConfig = new LocalDatastoreServiceTestConfig().setNoStorage(true);
         taskQueueConfig = new LocalTaskQueueTestConfig();
         helper = new LocalServiceTestHelper(datastoreConfig, taskQueueConfig) {
             @Override
@@ -50,6 +50,7 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
         helper.setEnvEmail("test@example.com");
         helper.setEnvIsAdmin(true);
         helper.setEnvIsLoggedIn(true);
+        helper.setEnvAppId("sortbox");
         helper.setUp();
     }
     

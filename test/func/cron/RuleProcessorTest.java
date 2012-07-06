@@ -64,11 +64,11 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     public void testEnd2End() throws Exception {
         // 1. Run the RuleProcessor job once.
         runRuleProcessor();
-        
+
         // 2. Verify the number of enqueued tasks.
         QueueStateInfo queueInfo = getQueueStateInfo();
         assertEquals(3, queueInfo.getCountTasks());
-        
+
         // 3. Manually processes the tasks
         for (TaskStateInfo taskInfo : queueInfo.getTaskInfo()) {
             Response response = executeTask(taskInfo);

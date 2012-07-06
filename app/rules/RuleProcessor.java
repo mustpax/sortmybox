@@ -35,24 +35,24 @@ public class RuleProcessor implements Job {
         
         int numMessages = 0;
         int count = 1;
-        Long startId = null;
-        Long lastId = null;
+        Key startKey = null;
+        Key lastKey = null;
 
         for (Key userKey: userKeys) {
-            if (startId == null) {
-                startId = userKey.getId();
+            if (startKey == null) {
+                startKey = userKey;
             }
 
-            lastId = userKey.getId();
+            lastKey = userKey;
             if (count % chunkSize == 0) {
-                ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
-                startId = null;
+                ChunkedRuleProcessor.submit(numMessages++, startKey, lastKey, chunkSize);
+                startKey = null;
             }
             count++;
         }
 
-        if (startId != null) {
-            ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
+        if (startKey != null) {
+            ChunkedRuleProcessor.submit(numMessages++, startKey, lastKey, chunkSize);
         }
 
         Logger.info("Enqueued chunkRuleProcessor messages. Chunk size: %d Num messages: %d",
