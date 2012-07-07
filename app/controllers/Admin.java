@@ -10,6 +10,7 @@ import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
+import models.User.AccountType;
 
 import org.joda.time.DateTime;
 import org.mortbay.log.Log;
@@ -168,7 +169,7 @@ public class Admin extends Controller {
         Key key = null;
         try {
             Long id = Long.valueOf(userId);
-            key = User.key(id);
+            key = User.key(AccountType.DROPBOX, id);
         } catch (NumberFormatException e) {
             key = KeyFactory.createKey(User.KIND, userId);
         }

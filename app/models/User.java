@@ -235,10 +235,6 @@ public class User implements Serializable {
         
         throw new IllegalStateException("Cannot create User key for AccountType: " + accountType);
     }
-    
-    public static Key key(long id) {
-        return key(AccountType.DROPBOX, id);
-    }
 
     public static Query all() {
         return new Query(KIND);
