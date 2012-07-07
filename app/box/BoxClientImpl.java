@@ -19,11 +19,11 @@ import box.gson.BoxError;
 import box.gson.BoxItem;
 import box.gson.BoxName;
 
-import com.google.appengine.repackaged.com.google.common.collect.Sets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.MapMaker;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -32,7 +32,29 @@ import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
 
+import static com.google.common.collect.Iterables.*;
+
 public class BoxClientImpl implements BoxClient {
+    public class FileOrFolderPredicate implements Predicate<BoxItem> {
+        private final ListingType type;
+        
+        public FileOrFolderPredicate(ListingType type) {
+            this.type = type;
+        }
+
+        @Override
+        public boolean apply(BoxItem item) {
+            switch (item.type) {
+            case file:
+                return this.type.includeFiles;
+            case folder:
+                return this.type.includeDirs;
+            }
+
+            throw new IllegalStateException("Unhandled BoxItem type: " + item.type);
+        }
+    }
+
     public final String token;
     private final Map<String, NullableId> pathToIdMap = new MapMaker()
         .makeComputingMap(new Function<String, NullableId>() {
@@ -93,7 +115,9 @@ public class BoxClientImpl implements BoxClient {
 
         if (id != null) {
             HttpResponse resp = req("/folders/" + id).get();
-            ret.addAll(Collections2.transform(getChildren(resp.getJson()), new ItemNameExtractor()));
+            addAll(ret, transform(filter(getChildren(resp.getJson()),
+                                         new FileOrFolderPredicate(listingType)),
+                                  new ItemNameExtractor()));
             return ret;
         }
 
