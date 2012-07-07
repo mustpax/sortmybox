@@ -89,7 +89,8 @@ public class Application extends Controller {
         try {
             ApiClient client = ApiClientFactory.create(user);
             // re-branding requires us to change the sorting folder name
-            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
+            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder) &&
+                client.exists(user.sortingFolder)) {
                 // TODO check if folder exists before moving
                 // now we need to move the Sortbox folder to SortMyBox
                 client.move(Dropbox.getOldSortboxPath(),
@@ -102,7 +103,7 @@ public class Application extends Controller {
             // now get the new sorting folder path for the user and keep going
             // forward
             String sortboxPath = user.sortingFolder;
-            if (client.exists(sortboxPath)) {
+            if (! client.exists(sortboxPath)) {
                 // 1. create missing Sortbox folder
                 Logger.info("SortMyBox folder missing for user '%s' at path '%s'",
 	                        user, sortboxPath);

@@ -77,6 +77,7 @@ public class BoxClientImpl implements BoxClient {
     @Override
     public void move(String from, String to) throws FileMoveCollisionException, InvalidTokenException {
         // TODO Auto-generated method stub
+        Logger.info("Move from %s to %s", from, to);
     }
 
     @Override
@@ -170,9 +171,8 @@ public class BoxClientImpl implements BoxClient {
         if (parentId == null) {
             throw new NullPointerException("Parent id cannot be null");
         }
-        
+
         HttpResponse resp = req("/folders/" + parentId).get();
-        
         if (resp.success()) {
             return getIdOfChild(resp.getJson(), child);
         }

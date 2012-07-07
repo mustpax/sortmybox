@@ -22,10 +22,10 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import common.api.ApiClient;
+import common.api.ApiClientFactory;
 
 import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
@@ -119,9 +119,8 @@ public class RuleUtils {
      */
     public static List<FileMove> runRules(User user) {
         List<FileMove> fileMoves = Lists.newArrayList();
-        DropboxClient client = DropboxClientFactory.create(user);
+        ApiClient client = ApiClientFactory.create(user);
         try {
-            //Rebranding from Sortbox to SortMyBox requires backwards compatibility
             Set<String> files = client.listDir(user.sortingFolder);	
 
             if (files.isEmpty()) {
