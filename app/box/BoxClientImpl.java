@@ -42,7 +42,7 @@ public class BoxClientImpl implements BoxClient {
                     return ROOT_ID;
                 }
 
-                String parentId = BoxClientImpl.this.pathToIdMap.get(RuleUtils.getParent(path)).id;
+                String parentId = BoxClientImpl.this.getId(RuleUtils.getParent(path));
                 if (parentId == null) {
                     return NULL_ID;
                 }
@@ -135,7 +135,7 @@ public class BoxClientImpl implements BoxClient {
 
         @Override
         public boolean apply(BoxItem item) {
-            return this.name.equals(item.name);
+            return this.name.equalsIgnoreCase(item.name);
         }
     }
 

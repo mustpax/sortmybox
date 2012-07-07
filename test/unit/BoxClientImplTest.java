@@ -40,5 +40,8 @@ public class BoxClientImplTest extends UnitTest {
         assertEquals("2305649799",
                      BoxClientImpl.getIdOfChild(getJson("BoxClientImplTest.folderResponse.json"),
                                                 "testing.html"));
+        assertEquals("2305649799",
+                     BoxClientImpl.getIdOfChild(getJson("BoxClientImplTest.folderResponse.json"),
+                                                "TESTING.html"));
     }
 }
