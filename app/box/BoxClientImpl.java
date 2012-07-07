@@ -77,9 +77,15 @@ public class BoxClientImpl implements BoxClient {
     private static final NullableId ROOT_ID = new NullableId("0");
     
     private static class ItemNameExtractor implements Function<BoxItem, String> {
+        private final String parent;
+        
+        public ItemNameExtractor(String parent) {
+            this.parent = parent;
+        }
+
         @Override
         public String apply(BoxItem item) {
-            return item.name;
+            return RuleUtils.normalize(parent + "/" + item.name, false);
         }
     }
 
@@ -117,7 +123,7 @@ public class BoxClientImpl implements BoxClient {
             HttpResponse resp = req("/folders/" + id).get();
             addAll(ret, transform(filter(getChildren(resp.getJson()),
                                          new FileOrFolderPredicate(listingType)),
-                                  new ItemNameExtractor()));
+                                  new ItemNameExtractor(path)));
             return ret;
         }
 

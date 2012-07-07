@@ -224,17 +224,28 @@ public class RuleUtils {
         }
     }
 
+    public static String normalize(@CheckForNull String path) {
+        return normalize(path, true);
+    }
+
     /**
-     * Case fold (lower case) path and collapse adjacent /'s
+     * Normalize file path by collapsing adjacent / and ensure it has a
+     * leading /. Optionally, fold case.
+     *
+     * @param foldCase if true, convert name to lowercase 
      *
      * @return the normalized version of given path
      */
-    public static String normalize(@CheckForNull String path) {
+    public static String normalize(@CheckForNull String path, boolean foldCase) {
         if (path == null) {
             return null;
         }
 
-        return "/" + StringUtils.join(Collections2.filter(Arrays.asList(path.toLowerCase().split("/+")),
+        if (foldCase) {
+            path = path.toLowerCase();
+        }
+
+        return "/" + StringUtils.join(Collections2.filter(Arrays.asList(path.split("/+")),
                                                           Predicates.not(new IsEmptyOrNull())),
                                       "/");
     }
