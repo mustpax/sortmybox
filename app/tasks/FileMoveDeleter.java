@@ -32,7 +32,7 @@ public class FileMoveDeleter implements Task {
             .param("owner", KeyFactory.keyToString(user.getKey()))
             .param(pEND_DATE, String.valueOf(endDate.getTime()));
         TaskHandle handle = queue.add(options);
-        Logger.info("Enqueued delete task. User id: %s End date: %s", user.id, endDate);
+        Logger.info("Enqueued delete task. User key: %s End date: %s", user.getKey(), endDate);
         return handle;
     }
 
