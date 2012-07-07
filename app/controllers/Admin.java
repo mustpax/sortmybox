@@ -144,7 +144,7 @@ public class Admin extends Controller {
         q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
         List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
 
-        renderJSON(ImmutableMap.of("daily", aggrStats, "aggr", dailyStats), new EpochMillisSerializer());
+        renderJSON(ImmutableMap.of("daily", dailyStats, "aggr", aggrStats), new EpochMillisSerializer());
     }
 
     public static void deleteUserPost(String userId) {
