@@ -219,7 +219,7 @@ public class Login extends Controller {
         session.put(SessionKeys.TYPE, AccountType.BOX.name());
         session.put(SessionKeys.UID, u.id);
         session.put(SessionKeys.IP, request.remoteAddress);
-        Accounts.settings();
+        redirectToOriginalURL();
     }
 
     public static void logout() {
