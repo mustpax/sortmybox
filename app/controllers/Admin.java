@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import models.Blacklist;
 import models.CascadingDelete;
 import models.DailyUsageStats;
 import models.DatastoreUtil;
@@ -36,9 +35,7 @@ import com.google.gson.JsonSerializer;
 
 @With(Login.class)
 public class Admin extends Controller {
-
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
-    private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
 
     public static void usageStats(boolean fake) {
         if (Play.mode.isDev() && fake) {
