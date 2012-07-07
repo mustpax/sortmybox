@@ -10,7 +10,6 @@ import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
-import models.User.AccountType;
 
 import org.joda.time.DateTime;
 import org.mortbay.log.Log;
@@ -27,6 +26,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -107,20 +107,15 @@ public class Admin extends Controller {
                 ranSearch = true;
 
                 // 1. look up by user id
-                // TODO support Box user lookup
-                User userById = null;
-                try {
-                    Long userId = Long.parseLong(normalized);
-                    // TODO - allow admin to specify account type
-                    userById = User.findById(AccountType.DROPBOX, userId);
-                    if (userById != null) {
-                        results.add(userById);
-                    }
-                } catch (NumberFormatException e) {
-                    // ignore. the query term is not a user id.
+                Key k = getUserKey(query);
+                User userById = DatastoreUtil.get(k, User.MAPPER);
+                if (userById != null) {
+                    Logger.info("Found user with key: %s Query: %s", k, query);
+                    results.add(userById);
                 }
 
                 // 2. look up by user name
+                Logger.info("Searching for user by name: %s", query);
                 Iterable<User> users =
                     User.query(
                         User.all()
@@ -129,12 +124,7 @@ public class Admin extends Controller {
 	                    SEARCH_MAX_FETCH_SIZE
 	                );
 
-                for (User u: users) {
-                    // dedup
-                    if (userById == null || userById.id != u.id) {
-                        results.add(u);
-                    }
-                }
+                Iterables.addAll(results, users);
             }
         }
 
@@ -152,13 +142,7 @@ public class Admin extends Controller {
         
         User user = Login.getUser();
 
-        Key key = null;
-        try {
-            Long id = Long.valueOf(userId);
-            key = User.key(id);
-        } catch (NumberFormatException e) {
-            key = KeyFactory.createKey(User.KIND, userId);
-        }
+        Key key = getUserKey(userId);
 
         // check the user is not currently logged in user
         if (user.getKey().equals(key)) {
@@ -178,6 +162,17 @@ public class Admin extends Controller {
 
         flash.success("Successfully deleted user: %s", userToDelete);
         deleteUser();
+    }
+
+    private static Key getUserKey(String userId) {
+        Key key = null;
+        try {
+            Long id = Long.valueOf(userId);
+            key = User.key(id);
+        } catch (NumberFormatException e) {
+            key = KeyFactory.createKey(User.KIND, userId);
+        }
+        return key;
     }
 
     @Before
