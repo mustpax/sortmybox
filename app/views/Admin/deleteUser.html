@@ -7,8 +7,7 @@
   <div class="span12" >
     <form class="well form-inline" action="@{deleteUserPost()}" method="POST">
       #{authenticityToken/}
-      <input type="text" class="input-medium" name="userIdString"
-          #{if userIdString}value="${userIdString}"#{/if}#{else}placeholder="Enter user id"#{/else}>
+      <input type="text" class="input-medium" name="userId" value="${userId}" placeholder="Enter user id">
       <button type="submit" class="btn">Delete</button>
     </form>
   </div>

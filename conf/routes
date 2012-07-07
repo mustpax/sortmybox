@@ -26,9 +26,6 @@ GET    /admin/error                             Admin.forceError
 GET    /admin/usageStats                        Admin.usageStats
 GET    /admin/stats                             Admin.stats
 GET    /admin/searchUser                        Admin.searchUser
-GET    /admin/blacklistedUsers                  Admin.blacklistedUsers
-POST   /admin/addToBlacklist                    Admin.addToBlacklist
-POST   /admin/removeFromBlacklist               Admin.removeFromBlacklist
 GET    /admin/deleteUser                        Admin.deleteUser
 POST   /admin/deleteUserPost                    Admin.deleteUserPost
 

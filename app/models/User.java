@@ -219,22 +219,6 @@ public class User implements Serializable {
         return DatastoreUtil.get(key(accountType, id), MAPPER);
     }
 
-    public static boolean isValidId(String userId) {
-        // check input is not null and not empty
-        if (userId == null || userId.isEmpty()) {
-            return false;
-        }
-    
-        // check input is a valid user id
-        try {
-            Long.parseLong(userId);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        
-        return true;
-    }
-
     public static Key key(AccountType accountType, long id) {
         // Handle null AccountTypes gracefully for tests.
         if (accountType == null && Play.runingInTestMode()) {

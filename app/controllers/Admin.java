@@ -22,10 +22,11 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -82,6 +83,7 @@ public class Admin extends Controller {
                 ranSearch = true;
 
                 // 1. look up by user id
+                // TODO support Box user lookup
                 User userById = null;
                 try {
                     Long userId = Long.parseLong(normalized);
@@ -116,49 +118,6 @@ public class Admin extends Controller {
         render(user, query, ranSearch, results);
     }
 
-    public static void blacklistedUsers() {
-        User user = Login.getUser();
-        
-        List<Blacklist> blacklist = Lists.newArrayList(Blacklist.query(Blacklist.all(), BLACKLIST_MAX_FETCH_SIZE));
-        render(user, blacklist);
-    }
-
-    public static void addToBlacklist(String userIdString) {
-        User user = Login.getUser();
-
-        if (!User.isValidId(userIdString)) {
-            flash.error("Invalid user id: " + userIdString);
-            blacklistedUsers();
-
-        } 
-        
-        long userId = Long.valueOf(userIdString);
-        if (userId == user.id) {
-            flash.error("Can't block self: " + userId);
-            blacklistedUsers();
-        }
-        
-        Blacklist blacklist = new Blacklist(userId);
-        blacklist.save();
-        
-        flash.success("Blocked user id: " + userIdString);
-        blacklistedUsers();
-    }
-
-    public static void removeFromBlacklist(String userIdString) {
-        Preconditions.checkArgument(User.isValidId(userIdString),
-                "Invalid user id: " + userIdString);
-        
-        long userId = Long.valueOf(userIdString);
-        Blacklist blacklist = Blacklist.findById(userId);
-        if (blacklist != null) {
-            blacklist.delete();
-        }
- 
-        flash.success("Unblocked user id: " + userIdString);
-        blacklistedUsers();
-    }
-
     public static void deleteUser() {
         User user = Login.getUser();
         render(user);
@@ -191,36 +150,36 @@ public class Admin extends Controller {
         renderJSON(ImmutableMap.of("daily", aggrStats, "aggr", dailyStats), new EpochMillisSerializer());
     }
 
-    public static void deleteUserPost(String userIdString) {
+    public static void deleteUserPost(String userId) {
         checkAuthenticity();
         
         User user = Login.getUser();
 
-        if (!User.isValidId(userIdString)) {
-            flash.error("Invalid user id: " + userIdString);
-            deleteUser();
+        Key key = null;
+        try {
+            Long id = Long.valueOf(userId);
+            key = User.key(id);
+        } catch (NumberFormatException e) {
+            key = KeyFactory.createKey(User.KIND, userId);
         }
-        
-        long userId = Long.valueOf(userIdString);
-        
+
         // check the user is not currently logged in user
-        if (user.id == userId) {
-            flash.error("Can't delete self: %s", userIdString);
+        if (user.getKey().equals(key)) {
+            flash.error("Can't delete self: %s", key);
             deleteUser();
         }
 
         // check the user exists
-        // TODO handle non-Dropbox users
-        User userToDelete = User.findById(AccountType.DROPBOX, userId);
+        User userToDelete = DatastoreUtil.get(key, User.MAPPER);
         if (userToDelete == null) {
-            flash.error("Non-existant user: User id: %s", userIdString);
+            flash.error("User not found. Key %s", key);
             deleteUser();
         }
         
         // delete the user
         CascadingDelete.delete(userToDelete);
 
-        flash.success("Successfully deleted user: %s", userIdString);
+        flash.success("Successfully deleted user: %s", userToDelete);
         deleteUser();
     }
 
