@@ -2,6 +2,7 @@ package rules;
 
 import models.User;
 import play.Logger;
+import play.Play;
 import tasks.Task;
 import tasks.TaskContext;
 import tasks.TaskUtils;
@@ -21,10 +22,9 @@ import com.google.appengine.api.taskqueue.TaskOptions;
  * @author syyang
  */
 public class ChunkedRuleProcessor implements Task {
-
     private static final String pCHUNK_ID = "Chunk";
-    private static final String pSTART_ID = "StartId";
-    private static final String pLAST_ID = "LastId";
+    public static final String pSTART_ID = "StartId";
+    public static final String pLAST_ID = "LastId";
     private static final String pCHUNK_SIZE = "ChunkSize";
 
     public static TaskHandle submit(int chunkId, Key startKey, Key lastKey, int chunkSize) {
@@ -42,6 +42,11 @@ public class ChunkedRuleProcessor implements Task {
 
     @Override
     public void execute(TaskContext context) throws Exception {
+        if (Play.runingInTestMode()) {
+            Logger.error("Not running rule because we're in test mode.");
+            return;
+        }
+
         int chunkId = Integer.valueOf(context.getParam(pCHUNK_ID));
         Key startKey = KeyFactory.stringToKey(context.getParam(pSTART_ID));
         Key lastKey = KeyFactory.stringToKey(context.getParam(pLAST_ID));
@@ -63,7 +68,7 @@ public class ChunkedRuleProcessor implements Task {
                     context.getTaskId(), chunkId, chunkSize, startKey, lastKey, numUsers, moves);
     }
 
-    private static Iterable<User> getUsersForKeyRange(Key startKey, Key lastKey) {
+    public static Iterable<User> getUsersForKeyRange(Key startKey, Key lastKey) {
         Query q = User.all()
 			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, startKey)
 			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, lastKey)
