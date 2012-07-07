@@ -37,6 +37,33 @@ import com.google.gson.JsonSerializer;
 public class Admin extends Controller {
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
 
+    public static void forceError() {
+        throw new IllegalArgumentException("Just pretending to fail.");
+    }
+
+    /**
+     * Serialize {@link Date} objects via {@link Date#getTime()} (milliseconds since epoch).
+     */
+    private static class EpochMillisSerializer implements JsonSerializer<Date> {
+        @Override
+        public JsonElement serialize(Date d, Type t,
+                JsonSerializationContext ctx) {
+            return new JsonPrimitive(d.getTime());
+        }
+    }
+
+    public static void stats() {
+        checkAuthenticity();
+
+        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
+
+        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
+
+        renderJSON(ImmutableMap.of("daily", dailyStats, "aggr", aggrStats), new EpochMillisSerializer());
+    }
+
     public static void usageStats(boolean fake) {
         if (Play.mode.isDev() && fake) {
             long users = 0L;
@@ -118,33 +145,6 @@ public class Admin extends Controller {
     public static void deleteUser() {
         User user = Login.getUser();
         render(user);
-    }
-
-    public static void forceError() {
-        throw new IllegalArgumentException("Just pretending to fail.");
-    }
-
-    /**
-     * Serialize {@link Date} objects via {@link Date#getTime()} (milliseconds since epoch).
-     */
-    private static class EpochMillisSerializer implements JsonSerializer<Date> {
-        @Override
-        public JsonElement serialize(Date d, Type t,
-                JsonSerializationContext ctx) {
-            return new JsonPrimitive(d.getTime());
-        }
-    }
-
-    public static void stats() {
-        checkAuthenticity();
-
-        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
-
-        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
-
-        renderJSON(ImmutableMap.of("daily", dailyStats, "aggr", aggrStats), new EpochMillisSerializer());
     }
 
     public static void deleteUserPost(String userId) {
