@@ -1,0 +1,46 @@
+#{extends 'Admin/header.html' /}
+#{set title:'Debug API'/}
+#{set debugApi:'active'/}
+
+<div class="row">
+    <div class="span12" >
+        #{ifErrors}
+            <h2>There were errors</h2>
+            #{errors}
+               <li>${error}</li>
+            #{/errors}
+        #{/ifErrors}
+        #{else}
+            #{if apiResp}
+                Response:
+                <pre>${apiResp}</pre>
+            #{/if}
+        #{/else}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12" >
+        #{form @debugApi(), method:'GET', class:'well form-horizontal'}
+            <fieldset>
+            #{authenticityToken/}
+            <div class="control-group">
+                #{select 'method', value:method }
+                    #{option 'GET'}Get#{/option}
+                    #{option 'POST'}Post#{/option}
+                #{/select}
+                <input name="userId" type="text" class="input-medium" id="userId" placeholder="Enter user id" value="${userId}">
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="textarea">URL</label>
+                <div class="controls">
+                    <textarea name="url" rows="2" cols="100" class="input-xlarge">${url}</textarea>
+                </div>
+            </div>
+            <div class="control-group">
+                <input type="submit" class="btn" value="Submit">
+            </div>
+            </fieldset>
+        #{/form}
+    </div>
+</div>

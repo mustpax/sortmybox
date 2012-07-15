@@ -6,10 +6,12 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.io.Files;
 
 import play.Play;
 import play.libs.OAuth.ServiceInfo;
+import play.libs.WS.HttpResponse;
 
 import dropbox.gson.DbxMetadata;
 import dropbox.gson.DbxAccount;
@@ -72,6 +74,14 @@ public interface DropboxClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @Nullable DbxMetadata mkdir(String path);
+
+    /**
+     * Make signed API request return the resulting HttpResponse
+     * @param method HTTP method for the request
+     * @param url full request URL with associated parameters
+     * @return HTTP response
+     */
+    @Nonnull HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException;
 
     public static enum ListingType {
         DIRS(true, false),

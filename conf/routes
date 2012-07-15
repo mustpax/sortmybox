@@ -31,6 +31,7 @@ POST   /admin/addToBlacklist                    Admin.addToBlacklist
 POST   /admin/removeFromBlacklist               Admin.removeFromBlacklist
 GET    /admin/deleteUser                        Admin.deleteUser
 POST   /admin/deleteUserPost                    Admin.deleteUserPost
+GET    /admin/debugApi                          Admin.debugApi
 
 # Rules
 POST    /rules                                  Rules.update

@@ -17,6 +17,7 @@ import org.mortbay.log.Log;
 
 import play.Logger;
 import play.Play;
+import play.libs.WS.HttpResponse;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -24,13 +25,18 @@ import play.mvc.With;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+
+import dropbox.client.DropboxClientFactory;
+import dropbox.client.InvalidTokenException;
 
 @With(Login.class)
 public class Admin extends Controller {
@@ -221,6 +227,29 @@ public class Admin extends Controller {
         deleteUser();
     }
 
+    public static void debugApi(Long userId, String url, HTTPMethod method) {
+        validation.url(url);
+        String apiResp = null;
+
+        if ((userId != null) &&
+            (! validation.hasErrors())) {
+            checkAuthenticity();
+            User u = User.findById(userId);
+            if (u == null) {
+                validation.addError("user", "Cannot find user.");
+            } else {
+                try {
+                    HttpResponse resp = DropboxClientFactory.create(u).debug(method, url);
+                    apiResp = resp.getString();
+                } catch (InvalidTokenException e) {
+                    Throwables.propagate(e);
+                }
+            }
+        }
+
+        render(userId, url, method, apiResp);
+    }
+
     @Before
     static void checkAccess() {
         User user = Login.getUser();
@@ -229,5 +258,4 @@ public class Admin extends Controller {
             forbidden("Must be admin.");
         }
     }
-
 }

@@ -10,6 +10,7 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 
+import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -168,6 +169,23 @@ class DropboxClientImpl implements DropboxClient {
         return null;
     }
     
+
+    @Override
+    public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException {
+        WSRequest req = WS.url(url)
+                          .oauth(DropboxOAuthServiceInfoFactory.create(),
+                                 this.token,
+                                 this.secret);
+        switch (method) {
+        case GET:
+            return get(req);
+        case POST:
+            return post(req);
+        default:
+            throw new UnsupportedOperationException("Unsupported HTTP method " + method);
+        }
+    }
+
     private static String getError(HttpResponse resp) {
         String error;
         try {
