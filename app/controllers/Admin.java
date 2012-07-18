@@ -81,15 +81,15 @@ public class Admin extends Controller {
                 long dUsers = Math.abs(new Random().nextInt()) % 100;
                 long dRules = Math.abs(new Random().nextInt()) % 300;
                 long dFileMoves = Math.abs(new Random().nextInt()) % 10000;
+                long dUniqueFileMoveUsers = Math.abs(new Random().nextInt()) % 300;
 
                 users += dUsers;
                 rules += dRules;
                 fileMoves += dFileMoves;
 
-
                 UsageStats us = new UsageStats(users, rules, fileMoves);
 
-                DailyUsageStats dus = new DailyUsageStats(dUsers, dRules, dFileMoves);
+                DailyUsageStats dus = new DailyUsageStats(dUsers, dRules, dFileMoves, dUniqueFileMoveUsers);
 
                 Date cur = new DateTime().plusDays(i).toDate();
                 us.created = cur;

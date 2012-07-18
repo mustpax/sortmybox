@@ -25,17 +25,25 @@ public class DailyUsageStats implements Serializable {
     public Long users;
     public Long rules;
     public Long fileMoves;
+    public Long uniqueFileMoveUsers;
     public Date created;
-
-    public DailyUsageStats(Long users, Long rules, Long fileMoves) {
-        this(users, rules, fileMoves, new Date());
+    
+    /**
+     * @param users
+     * @param rules
+     * @param fileMoves
+     * @param uniqueFileMoveUsers
+     */
+    public DailyUsageStats(Long users, Long rules, Long fileMoves, Long uniqueFileMoveUsers) {
+        this(users, rules, fileMoves, uniqueFileMoveUsers, new Date());
     }
 
     // exposed for tests
-    public DailyUsageStats(Long users, Long rules, Long fileMoves, Date created) {
+    public DailyUsageStats(Long users, Long rules, Long fileMoves, Long uniqueFileMoveUsers, Date created) {
         this.users = users;
         this.rules = rules;
         this.fileMoves = fileMoves;
+        this.uniqueFileMoveUsers = uniqueFileMoveUsers;
         this.created = created;
     }
 
@@ -44,6 +52,7 @@ public class DailyUsageStats implements Serializable {
         this.users = (Long) entity.getProperty("users");
         this.rules = (Long) entity.getProperty("rules");
         this.fileMoves = (Long) entity.getProperty("fileMoves");
+        this.uniqueFileMoveUsers = (Long) entity.getProperty("uniqueFileMoveUsers");
         this.created = (Date) entity.getProperty("created");
     }
 
@@ -66,6 +75,7 @@ public class DailyUsageStats implements Serializable {
             .add("users", users)
             .add("rules", rules)
             .add("fileMoves", fileMoves)
+            .add("uniqueFileMoveUsers", uniqueFileMoveUsers)
             .add("created", created)
             .toString();
     }
@@ -77,6 +87,7 @@ public class DailyUsageStats implements Serializable {
             ret.setProperty("users", model.users);
             ret.setProperty("rules", model.rules);
             ret.setProperty("fileMoves", model.fileMoves);
+            ret.setProperty("uniqueFileMoveUsers", model.uniqueFileMoveUsers);
             ret.setProperty("created", model.created);
             return ret;
         }
