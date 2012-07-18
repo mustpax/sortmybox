@@ -24,6 +24,7 @@ import box.gson.BoxItem;
 import box.gson.BoxName;
 import box.gson.BoxParent;
 
+import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -183,6 +184,18 @@ public class BoxClientImpl implements BoxClient {
     @Override
     public boolean exists(String path) {
         return getId(path) != null;
+    }
+
+    /**
+     * Make signed API request return the resulting HttpResponse
+     * @param method HTTP method for the request
+     * @param url full request URL with associated parameters
+     * @return HTTP response
+     */
+    @Override
+    @Nonnull
+    public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException{
+        return null;
     }
 
     private static class ItemNameEquals implements Predicate<BoxItem> {

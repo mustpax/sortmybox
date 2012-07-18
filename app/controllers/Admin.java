@@ -37,8 +37,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import common.api.ApiClientFactory;
 
-import dropbox.client.DropboxClientFactory;
 import dropbox.client.InvalidTokenException;
 
 @With(Login.class)
@@ -172,19 +172,19 @@ public class Admin extends Controller {
         deleteUser();
     }
 
-    public static void debugApi(Long userId, String url, HTTPMethod method) {
+    public static void debugApi(AccountType type, Long userId, String url, HTTPMethod method) {
         validation.url(url);
         String apiResp = null;
 
         if ((userId != null) &&
             (! Validation.hasErrors())) {
             checkAuthenticity();
-            User u = User.findById(AccountType.DROPBOX, userId);
+            User u = User.findById(type, userId);
             if (u == null) {
                 Validation.addError("user", "Cannot find user.");
             } else {
                 try {
-                    HttpResponse resp = DropboxClientFactory.create(u).debug(method, url);
+                    HttpResponse resp = ApiClientFactory.create(u).debug(method, url);
                     apiResp = resp.getString();
                 } catch (InvalidTokenException e) {
                     Throwables.propagate(e);
@@ -192,7 +192,7 @@ public class Admin extends Controller {
             }
         }
 
-        render(userId, url, method, apiResp);
+        render(userId, url, method, apiResp, type);
     }
 
     private static Key getUserKey(String userId) {

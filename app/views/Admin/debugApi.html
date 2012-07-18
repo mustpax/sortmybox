@@ -25,12 +25,34 @@
             <fieldset>
             #{authenticityToken/}
             <div class="control-group">
-                #{select 'method', value:method }
-                    #{option 'GET'}Get#{/option}
-                    #{option 'POST'}Post#{/option}
-                #{/select}
-                <input name="userId" type="text" class="input-medium" id="userId" placeholder="Enter user id" value="${userId}">
+                <label class="control-label" for="select">Account Type</label>
+
+                <div class="controls">
+                    #{select 'type', value:type }
+                        #{option 'DROPBOX'}Dropbox#{/option}
+                        #{option 'BOX'}Box#{/option}
+                    #{/select}
+                </div>
             </div>
+
+            <div class="control-group">
+                <label class="control-label" for="text">User Id</label>
+                <div class="controls">
+                    <input name="userId" type="text" class="input-medium" id="userId" value="${userId}">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="select">HTTP Method</label>
+
+                <div class="controls">
+                    #{select 'method', value:method }
+                        #{option 'GET'}Get#{/option}
+                        #{option 'POST'}Post#{/option}
+                    #{/select}
+                </div>
+            </div>
+
             <div class="control-group">
                 <label class="control-label" for="textarea">URL</label>
                 <div class="controls">

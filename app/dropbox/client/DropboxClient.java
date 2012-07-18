@@ -3,9 +3,6 @@ package dropbox.client;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
-import play.libs.WS.HttpResponse;
-
-import com.google.appengine.api.urlfetch.HTTPMethod;
 import common.api.ApiClient;
 
 import dropbox.gson.DbxAccount;
@@ -26,12 +23,4 @@ public interface DropboxClient extends ApiClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @CheckForNull DbxMetadata getMetadata(String path) throws InvalidTokenException;
-
-    /**
-     * Make signed API request return the resulting HttpResponse
-     * @param method HTTP method for the request
-     * @param url full request URL with associated parameters
-     * @return HTTP response
-     */
-    @Nonnull HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException;
 }

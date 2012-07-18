@@ -4,6 +4,10 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import play.libs.WS.HttpResponse;
+
+import com.google.appengine.api.urlfetch.HTTPMethod;
+
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
@@ -60,6 +64,14 @@ public interface ApiClient {
      * @return true if file or folder exists at path, false otherwise.
      */
     boolean exists(String path) throws InvalidTokenException;
+
+    /**
+     * Make signed API request return the resulting HttpResponse
+     * @param method HTTP method for the request
+     * @param url full request URL with associated parameters
+     * @return HTTP response
+     */
+    @Nonnull HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException;
 
 	public static enum ListingType {
 	    DIRS(true, false),
