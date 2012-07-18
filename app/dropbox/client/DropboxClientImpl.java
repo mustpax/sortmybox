@@ -171,7 +171,9 @@ class DropboxClientImpl implements DropboxClient {
 
     @Override
     public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException {
-        WSRequest req = WS.url(url)
+        Preconditions.checkArgument(url.startsWith("/"), "url must start with /");
+
+        WSRequest req = WS.url(Dropbox.API_URL + url)
                           .oauth(DropboxOAuthServiceInfoFactory.create(),
                                  this.token,
                                  this.secret);

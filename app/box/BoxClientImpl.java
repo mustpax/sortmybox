@@ -195,7 +195,17 @@ public class BoxClientImpl implements BoxClient {
     @Override
     @Nonnull
     public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException{
-        return null;
+        Preconditions.checkArgument(url.startsWith("/"), "url must start with /");
+        
+        WSRequest req = req(url);
+        switch (method) {
+        case GET:
+            return req.get();
+        case POST:
+            return req.post();
+        default:
+            throw new IllegalArgumentException("Unhandled HTTP method");
+        }
     }
 
     private static class ItemNameEquals implements Predicate<BoxItem> {

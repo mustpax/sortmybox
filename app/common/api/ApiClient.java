@@ -68,7 +68,8 @@ public interface ApiClient {
     /**
      * Make signed API request return the resulting HttpResponse
      * @param method HTTP method for the request
-     * @param url full request URL with associated parameters
+     * @param url request URL with the API root host omitted and the leading slash
+     *            included (like /1/metadata)
      * @return HTTP response
      */
     @Nonnull HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException;
