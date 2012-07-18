@@ -23,7 +23,7 @@ public class CascadingDelete {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         // Double limit to ensure we get every single rule
         FetchOptions fo = FetchOptions.Builder.withLimit(Rule.MAX_RULES * 2);
-        ds.delete(DatastoreUtil.queryKeys(Rule.byOwner(user.id), fo, Rule.MAPPER));
+        ds.delete(DatastoreUtil.queryKeys(Rule.byOwner(user.getKey()), fo, Rule.MAPPER));
         Logger.info("Deleted rules for user: %s", user);
 
         // 2. delete user

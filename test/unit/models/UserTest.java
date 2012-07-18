@@ -2,24 +2,18 @@ package unit.models;
 
 import java.util.Date;
 
-import javax.print.attribute.standard.MediaSize.NA;
-
 import models.User;
+import models.User.AccountType;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import play.cache.Cache;
-
-import com.google.appengine.api.memcache.ErrorHandler;
-import com.google.appengine.api.memcache.InvalidValueException;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceException;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.common.base.Throwables;
-
 import unit.TestUtil;
+
+import com.google.appengine.api.datastore.KeyFactory;
+
 import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
 
@@ -39,7 +33,7 @@ public class UserTest extends BaseModelTest {
     @Before
     @After
     public void clean() throws Exception {
-        User user = User.findById(ID);
+        User user = User.findById(AccountType.DROPBOX, ID);
         if (user != null) {
             TestUtil.deleteUser(user);
         }
@@ -63,7 +57,7 @@ public class UserTest extends BaseModelTest {
      */
     @Test
     public void testEncryptUnencrypted() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
 
         assertEquals(TOKEN, user.getToken());
         user.setTokenRaw(TOKEN);
@@ -76,28 +70,28 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testSave() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
-        assertEquals(User.findById(ID), user);
+        assertEquals(User.findById(AccountType.DROPBOX, ID), user);
         
         DbxAccount acc = new DbxAccount();
         acc.name = NAME;
         acc.uid = ID;
         user.sync(acc, TOKEN, SECRET);
-        assertEquals(User.findById(ID), user);
+        assertEquals(User.findById(AccountType.DROPBOX, ID), user);
 
         user.setToken(TOKEN + "X");
         user.save();
-        assertEquals(User.findById(ID), user);
+        assertEquals(User.findById(AccountType.DROPBOX, ID), user);
     }
 
     @Test
     public void testDelete() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
-        assertNotNull(User.findById(ID));
+        assertNotNull(User.findById(AccountType.DROPBOX, ID));
         user.delete();
-        assertNull(User.findById(ID));
+        assertNull(User.findById(AccountType.DROPBOX, ID));
     }
 
     @Test
@@ -122,18 +116,18 @@ public class UserTest extends BaseModelTest {
 
     @Test
     public void testCache() {
-        User user = newUser(ID, TOKEN, EMAIL, SECRET, NAME);
+        User user = newUser();
         user.save();
 
-        User user2 = newUser(ID, TOKEN, EMAIL, SECRET, "new");
+        User user2 = newUser();
         // Force the Cache value to be different from datastore
-        Cache.set(User.key(ID).toString(), user2);
-        assertFalse(User.findById(ID).equals(user));
-        assertEquals(User.findById(ID), user2);
+        Cache.set(KeyFactory.keyToString(User.key(AccountType.DROPBOX, ID)), user2);
+        assertFalse(User.findById(AccountType.DROPBOX, ID).equals(user));
+        assertEquals(User.findById(AccountType.DROPBOX, ID), user2);
 
         user.save();
-        assertFalse(User.findById(ID).equals(user2));
-        assertEquals(User.findById(ID), user);
+        assertFalse(User.findById(AccountType.DROPBOX, ID).equals(user2));
+        assertEquals(User.findById(AccountType.DROPBOX, ID), user);
     }
     
     @Test
@@ -143,17 +137,64 @@ public class UserTest extends BaseModelTest {
     	user.sortingFolder = null;
         user.save();
         //now lets get the user from the DB
-        User newUser = User.findById(ID);
+        User newUser = User.findById(AccountType.DROPBOX, ID);
         //verify that the sortingFolder is set to the old value - /Sortbox
         assertEquals("Did not find expected sortingFolder for old users!",Dropbox.getOldSortboxPath(),newUser.sortingFolder);
     }
-    
+
+    @Test
+    public void testAccountType() {
+    	// Default should be Dropbox for new users
+    	User user = newUser();
+        user.save();
+        user = User.findById(AccountType.DROPBOX, ID);
+        assertSame(User.AccountType.DROPBOX, user.accountType);
+        user.delete();
+
+    	// Dropbox should be default when accountType is null
+        assertAccountType(AccountType.DROPBOX, null);
+        assertAccountType(AccountType.BOX, AccountType.BOX);
+        assertAccountType(AccountType.DROPBOX, AccountType.DROPBOX);
+    }
+
+    private void assertAccountType(AccountType expected, AccountType set) {
+    	User user = newUser();
+        user.accountType = set;
+        user.save();
+
+        user = User.findById(expected, ID);
+        assertSame(expected, user.accountType);
+
+        user.delete();
+    }
+
+    /**
+     * Verify that Box and Dropbox users are stored in isolation
+     */
+    @Test
+    public void testBoxUser() {
+        User dropbox = newUser();
+        dropbox.setName("dropbox");
+        dropbox.save();
+        dropbox = User.findById(AccountType.DROPBOX, ID);
+
+        User box = newUser();
+        box.setName("box");
+        box.accountType = AccountType.BOX;
+        box.save();
+        box = User.findById(AccountType.BOX, ID);
+
+        assertFalse(box.getName().equals(dropbox.getName()));
+        assertFalse(box.equals(dropbox));
+        assertNotSame(box.accountType, dropbox.accountType);
+    }
+
     public static User newUser() {
         return newUser(ID, TOKEN, EMAIL, SECRET, NAME);
     }
 
     public static User newUser(Long id, String token, String email, String secret, String name) {
-        User user = new User();
+        User user = new User(AccountType.DROPBOX);
         user.id = id;
         user.setToken(token);
         user.email = email;

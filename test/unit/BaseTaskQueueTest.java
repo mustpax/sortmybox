@@ -2,22 +2,16 @@ package unit;
 
 
 import java.io.File;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 
 import play.test.FunctionalTest;
-import play.test.UnitTest;
 
-import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
-import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.tools.development.LocalServerEnvironment;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
-
-import junit.framework.TestCase;
 
 /**
  * Base test for testing task queue. Ripped off from:
@@ -33,7 +27,7 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
     
     @Before
     public void setUp() throws Exception {
-        datastoreConfig = new LocalDatastoreServiceTestConfig();
+        datastoreConfig = new LocalDatastoreServiceTestConfig().setNoStorage(true);
         taskQueueConfig = new LocalTaskQueueTestConfig();
         helper = new LocalServiceTestHelper(datastoreConfig, taskQueueConfig) {
             @Override
@@ -56,6 +50,7 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
         helper.setEnvEmail("test@example.com");
         helper.setEnvIsAdmin(true);
         helper.setEnvIsLoggedIn(true);
+        helper.setEnvAppId("sortbox");
         helper.setUp();
     }
     

@@ -16,6 +16,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import common.api.ApiClient;
 
 import dropbox.Dropbox;
 import dropbox.DropboxOAuthServiceInfoFactory;
@@ -83,11 +84,11 @@ class DropboxClientImpl implements DropboxClient {
 
     @Override
     public Set<String> listDir(String path) throws InvalidTokenException, NotADirectoryException {
-        return listDir(path, ListingType.FILES);
+        return listDir(path, ApiClient.ListingType.FILES);
     }
 
     @Override
-    public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException, NotADirectoryException {
+    public Set<String> listDir(String path, ApiClient.ListingType listingType) throws InvalidTokenException, NotADirectoryException {
         Set<String> files = Sets.newHashSet();
         DbxMetadata metadata = getMetadata(path);
 
@@ -110,7 +111,7 @@ class DropboxClientImpl implements DropboxClient {
     }
     
     @Override
-    public DbxMetadata mkdir(String path) {
+    public boolean mkdir(String path) {
         Preconditions.checkNotNull(path, "Path missing.");
         Preconditions.checkArgument(path.charAt(0) == '/', "Path should start with /.");
 
@@ -122,18 +123,18 @@ class DropboxClientImpl implements DropboxClient {
         try {
 	        HttpResponse resp = ws.get();
 	        if (resp.success()) {
-	            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+	            return true;
 	        }
 
 	        Logger.error("Failed creating folder at '%s'. %s", path, getError(resp));
         } catch (RuntimeException e) {
 	        Logger.error(e, "Exception when trying to creating folder at '%s'", path);
         }
-        return null;
+        return false;
     }
     
     @Override
-    public DbxMetadata move(String from, String to) throws FileMoveCollisionException,
+    public void move(String from, String to) throws FileMoveCollisionException,
                                                            InvalidTokenException {
         Preconditions.checkArgument(from != null && to != null,
                 "To and from paths cannot be null.");
@@ -153,7 +154,7 @@ class DropboxClientImpl implements DropboxClient {
 
 	        if (resp.success()) {
 	            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
-	            return new Gson().fromJson(resp.getJson(), DbxMetadata.class);
+	            return;
 	        }
 
 	        String err = getError(resp);
@@ -165,8 +166,6 @@ class DropboxClientImpl implements DropboxClient {
         } catch (RuntimeException e) {
             Logger.error(e, "Exception when trying to move from '%s' to '%s'", from, to);
         }
-
-        return null;
     }
     
 
@@ -280,5 +279,10 @@ class DropboxClientImpl implements DropboxClient {
             throw new InvalidTokenException(getError(ret));
         }
         return ret;
+    }
+
+    @Override
+    public boolean exists(String path) throws InvalidTokenException {
+        return getMetadata(path) != null;
     }
 }

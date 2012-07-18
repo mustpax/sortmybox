@@ -2,7 +2,6 @@ package common.request;
 
 import play.mvc.Http;
 import play.mvc.Http.Header;
-import play.mvc.Http.Request;
 
 /**
  * Utilities for interacting with {@link Http.Request.Header}.

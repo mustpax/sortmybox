@@ -5,30 +5,33 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import models.Blacklist;
 import models.CascadingDelete;
 import models.DailyUsageStats;
 import models.DatastoreUtil;
 import models.UsageStats;
 import models.User;
+import models.User.AccountType;
 
 import org.joda.time.DateTime;
 import org.mortbay.log.Log;
 
 import play.Logger;
 import play.Play;
+import play.data.validation.Validation;
 import play.libs.WS.HttpResponse;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.urlfetch.HTTPMethod;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -40,9 +43,34 @@ import dropbox.client.InvalidTokenException;
 
 @With(Login.class)
 public class Admin extends Controller {
-
     private static final int SEARCH_MAX_FETCH_SIZE = 20;
-    private static final int BLACKLIST_MAX_FETCH_SIZE = 100;
+
+    public static void forceError() {
+        throw new IllegalArgumentException("Just pretending to fail.");
+    }
+
+    /**
+     * Serialize {@link Date} objects via {@link Date#getTime()} (milliseconds since epoch).
+     */
+    private static class EpochMillisSerializer implements JsonSerializer<Date> {
+        @Override
+        public JsonElement serialize(Date d, Type t,
+                JsonSerializationContext ctx) {
+            return new JsonPrimitive(d.getTime());
+        }
+    }
+
+    public static void stats() {
+        checkAuthenticity();
+
+        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
+
+        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
+        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
+
+        renderJSON(ImmutableMap.of("daily", dailyStats, "aggr", aggrStats), new EpochMillisSerializer());
+    }
 
     public static void usageStats(boolean fake) {
         if (Play.mode.isDev() && fake) {
@@ -87,18 +115,15 @@ public class Admin extends Controller {
                 ranSearch = true;
 
                 // 1. look up by user id
-                User userById = null;
-                try {
-                    Long userId = Long.parseLong(normalized);
-                    userById = User.findById(userId);
-                    if (userById != null) {
-                        results.add(userById);
-                    }
-                } catch (NumberFormatException e) {
-                    // ignore. the query term is not a user id.
+                Key k = getUserKey(query);
+                User userById = DatastoreUtil.get(k, User.MAPPER);
+                if (userById != null) {
+                    Logger.info("Found user with key: %s Query: %s", k, query);
+                    results.add(userById);
                 }
 
                 // 2. look up by user name
+                Logger.info("Searching for user by name: %s", query);
                 Iterable<User> users =
                     User.query(
                         User.all()
@@ -107,12 +132,7 @@ public class Admin extends Controller {
 	                    SEARCH_MAX_FETCH_SIZE
 	                );
 
-                for (User u: users) {
-                    // dedup
-                    if (userById == null || userById.id != u.id) {
-                        results.add(u);
-                    }
-                }
+                Iterables.addAll(results, users);
             }
         }
 
@@ -120,110 +140,35 @@ public class Admin extends Controller {
         render(user, query, ranSearch, results);
     }
 
-    public static void blacklistedUsers() {
-        User user = Login.getUser();
-        
-        List<Blacklist> blacklist = Lists.newArrayList(Blacklist.query(Blacklist.all(), BLACKLIST_MAX_FETCH_SIZE));
-        render(user, blacklist);
-    }
-
-    public static void addToBlacklist(String userIdString) {
-        User user = Login.getUser();
-
-        if (!User.isValidId(userIdString)) {
-            flash.error("Invalid user id: " + userIdString);
-            blacklistedUsers();
-
-        } 
-        
-        long userId = Long.valueOf(userIdString);
-        if (userId == user.id) {
-            flash.error("Can't block self: " + userId);
-            blacklistedUsers();
-        }
-        
-        Blacklist blacklist = new Blacklist(userId);
-        blacklist.save();
-        
-        flash.success("Blocked user id: " + userIdString);
-        blacklistedUsers();
-    }
-
-    public static void removeFromBlacklist(String userIdString) {
-        Preconditions.checkArgument(User.isValidId(userIdString),
-                "Invalid user id: " + userIdString);
-        
-        long userId = Long.valueOf(userIdString);
-        Blacklist blacklist = Blacklist.findById(userId);
-        if (blacklist != null) {
-            blacklist.delete();
-        }
- 
-        flash.success("Unblocked user id: " + userIdString);
-        blacklistedUsers();
-    }
-
     public static void deleteUser() {
         User user = Login.getUser();
         render(user);
     }
 
-    public static void forceError() {
-        throw new IllegalArgumentException("Just pretending to fail.");
-    }
-
-    /**
-     * Serialize {@link Date} objects via {@link Date#getTime()} (milliseconds since epoch).
-     */
-    private static class EpochMillisSerializer implements JsonSerializer<Date> {
-        @Override
-        public JsonElement serialize(Date d, Type t,
-                JsonSerializationContext ctx) {
-            return new JsonPrimitive(d.getTime());
-        }
-    }
-
-    public static void stats() {
-        checkAuthenticity();
-
-        Query q = UsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<UsageStats> aggrStats = DatastoreUtil.asList(q, UsageStats.MAPPER);
-
-        q = DailyUsageStats.all().addSort("created", SortDirection.ASCENDING);
-        List<DailyUsageStats> dailyStats = DatastoreUtil.asList(q, DailyUsageStats.MAPPER);
-
-        renderJSON(ImmutableMap.of("daily", aggrStats, "aggr", dailyStats), new EpochMillisSerializer());
-    }
-
-    public static void deleteUserPost(String userIdString) {
+    public static void deleteUserPost(String userId) {
         checkAuthenticity();
         
         User user = Login.getUser();
 
-        if (!User.isValidId(userIdString)) {
-            flash.error("Invalid user id: " + userIdString);
-            deleteUser();
-        }
-        
-        long userId = Long.valueOf(userIdString);
-        
+        Key key = getUserKey(userId);
+
         // check the user is not currently logged in user
-        if (user.id == userId) {
-            flash.error("Can't delete self: %s", userIdString);
+        if (user.getKey().equals(key)) {
+            flash.error("Can't delete self: %s", key);
             deleteUser();
         }
 
         // check the user exists
-        User userToDelete = User.findById(userId);
+        User userToDelete = DatastoreUtil.get(key, User.MAPPER);
         if (userToDelete == null) {
-            flash.error("Non-existant user: User id: %s", userIdString);
+            flash.error("User not found. Key %s", key);
             deleteUser();
         }
         
         // delete the user
         CascadingDelete.delete(userToDelete);
 
-        flash.success("Successfully deleted user: %s", userIdString);
+        flash.success("Successfully deleted user: %s", userToDelete);
         deleteUser();
     }
 
@@ -232,11 +177,11 @@ public class Admin extends Controller {
         String apiResp = null;
 
         if ((userId != null) &&
-            (! validation.hasErrors())) {
+            (! Validation.hasErrors())) {
             checkAuthenticity();
-            User u = User.findById(userId);
+            User u = User.findById(AccountType.DROPBOX, userId);
             if (u == null) {
-                validation.addError("user", "Cannot find user.");
+                Validation.addError("user", "Cannot find user.");
             } else {
                 try {
                     HttpResponse resp = DropboxClientFactory.create(u).debug(method, url);
@@ -248,6 +193,17 @@ public class Admin extends Controller {
         }
 
         render(userId, url, method, apiResp);
+    }
+
+    private static Key getUserKey(String userId) {
+        Key key = null;
+        try {
+            Long id = Long.valueOf(userId);
+            key = User.key(AccountType.DROPBOX, id);
+        } catch (NumberFormatException e) {
+            key = KeyFactory.createKey(User.KIND, userId);
+        }
+        return key;
     }
 
     @Before

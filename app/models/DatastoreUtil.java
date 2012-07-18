@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -17,9 +16,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.QueryResultList;
 import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -89,6 +86,22 @@ public class DatastoreUtil {
     }
 
     public static Entity newEntity(String kind, Long id) {
+        if (id == null) {
+            return new Entity(kind);
+        } else {
+            return new Entity(KeyFactory.createKey(kind, id));
+        }
+    }
+
+    public static Entity newEntity(Key parent, String kind, String id) {
+        if (id == null) {
+            return new Entity(kind, parent);
+        } else {
+            return new Entity(parent.getChild(kind, id));
+        }
+    }
+
+    public static Entity newEntity(String kind, String id) {
         if (id == null) {
             return new Entity(kind);
         } else {

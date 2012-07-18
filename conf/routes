@@ -26,9 +26,6 @@ GET    /admin/error                             Admin.forceError
 GET    /admin/usageStats                        Admin.usageStats
 GET    /admin/stats                             Admin.stats
 GET    /admin/searchUser                        Admin.searchUser
-GET    /admin/blacklistedUsers                  Admin.blacklistedUsers
-POST   /admin/addToBlacklist                    Admin.addToBlacklist
-POST   /admin/removeFromBlacklist               Admin.removeFromBlacklist
 GET    /admin/deleteUser                        Admin.deleteUser
 POST   /admin/deleteUserPost                    Admin.deleteUserPost
 GET    /admin/debugApi                          Admin.debugApi
@@ -49,7 +46,9 @@ GET     /auth-cb                                Login.authCallback
 GET     /                                       Login.login
 GET     /alt                                    Login.alt
 GET     /logout                                 Login.logout
-GET     /offline                                Login.offline
+GET     /box/login                              Login.boxLogin
+GET     /box/auth                               Login.boxAuth
+GET     /box/auth-cb                            Login.boxAuthCallback
 
 # Redirect for favicon.ico
 GET     /robots.txt                             staticFile:public/robots.txt

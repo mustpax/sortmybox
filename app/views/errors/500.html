@@ -1,4 +1,6 @@
-#{extends 'main.html' /} 
+#{if play.mode.name() != 'DEV'}
+    #{extends 'main.html' /}
+#{/if}
 #{set title:'Application Error' /}
 
 <div class="center">

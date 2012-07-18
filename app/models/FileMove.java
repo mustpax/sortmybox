@@ -9,9 +9,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.base.Objects;
 
@@ -28,7 +26,8 @@ public class FileMove implements Serializable {
     public String fromFile;
     public String toDir;
     public Date when;
-    public Long owner;
+    public Key owner;
+
     /**
      * True iff there was a filename collision when trying to move the file.
      */
@@ -43,7 +42,7 @@ public class FileMove implements Serializable {
 
     public FileMove() {}
 
-    public FileMove(Long owner, String from, String toDir, boolean hasCollision, String resolvedName) {
+    public FileMove(Key owner, String from, String toDir, boolean hasCollision, String resolvedName) {
         this.toDir = toDir;
         this.fromFile = from;
         this.when = new Date();
@@ -52,7 +51,7 @@ public class FileMove implements Serializable {
         this.resolvedName = resolvedName;
     }
 
-    public FileMove(Long owner, String from, String dest, boolean hasCollision) {
+    public FileMove(Key owner, String from, String dest, boolean hasCollision) {
 	    this(owner, from, dest, hasCollision, null);
     }
     
@@ -84,8 +83,8 @@ public class FileMove implements Serializable {
         return eq.isEquals();
     }
 
-    public static List<FileMove> findByOwner(Long owner, int maxRows) {
-        Query query = all().setAncestor(User.key(owner))
+    public static List<FileMove> findByOwner(Key owner, int maxRows) {
+        Query query = all().setAncestor(owner)
 	                       .addSort("when", SortDirection.DESCENDING);
         return DatastoreUtil.asList(query,
 			                        FetchOptions.Builder.withLimit(maxRows),
@@ -100,8 +99,8 @@ public class FileMove implements Serializable {
         return new Query(KIND);
     }
     
-    public static Key key(long owner, long id) {
-        return User.key(owner).getChild(KIND, id);
+    public static Key key(Key owner, long id) {
+        return owner.getChild(KIND, id);
     }
 
     private static class FileMoveMapper implements Mapper<FileMove> {
@@ -109,7 +108,7 @@ public class FileMove implements Serializable {
 
         @Override
         public Entity toEntity(FileMove mv) {
-            Entity entity = DatastoreUtil.newEntity(User.key(mv.owner), KIND, mv.id);
+            Entity entity = DatastoreUtil.newEntity(mv.owner, KIND, mv.id);
             entity.setUnindexedProperty("fromFile", mv.fromFile);
             entity.setUnindexedProperty("toDir", mv.toDir);
             entity.setUnindexedProperty("resolvedName", mv.resolvedName);
@@ -122,7 +121,7 @@ public class FileMove implements Serializable {
         public FileMove toModel(Entity entity) {
             FileMove mv = new FileMove();
             mv.id = entity.getKey().getId();
-            mv.owner = entity.getKey().getParent().getId();
+            mv.owner = entity.getKey().getParent();
             mv.fromFile = (String) entity.getProperty("fromFile");
             mv.toDir = (String) entity.getProperty("toDir");
             mv.resolvedName = (String) entity.getProperty("resolvedName");
@@ -130,7 +129,7 @@ public class FileMove implements Serializable {
             mv.hasCollision = (Boolean) entity.getProperty("hasCollision");
 
             // If hasCollision column is null we read from the "successful" column
-            // hasCollision is the inverse of successfull
+            // hasCollision is the inverse of success
             // If successful is null we assume success
             if (mv.hasCollision == null) {
 	            Boolean success = (Boolean) entity.getProperty("successful");

@@ -4,12 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import models.User;
-
-import org.junit.BeforeClass;
+import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.junit.Test;
 
-import play.Logger;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -18,11 +15,14 @@ import rules.RuleProcessor;
 import unit.BaseTaskQueueTest;
 import unit.TestUtil;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo.HeaderWrapper;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo.TaskStateInfo;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 
@@ -33,8 +33,9 @@ import com.google.common.collect.Maps;
  */
 public class RuleProcessorTest extends BaseTaskQueueTest {
 
+    private static final int USERS = 31;
     private static final String QUEUE_NAME = ChunkedRuleProcessor.class.getSimpleName();
-    private static final int CHUNK_SIZE = 2;
+    private static final int CHUNK_SIZE = 3;
 
     private LocalTaskQueue taskQueue;
 
@@ -46,9 +47,9 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     
         // create 4 users
         int id = 100;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < USERS; i++) {
             TestUtil.createUser(id);
-            id += 100;
+            id += 5;
         }
     }
     
@@ -68,16 +69,34 @@ public class RuleProcessorTest extends BaseTaskQueueTest {
     public void testEnd2End() throws Exception {
         // 1. Run the RuleProcessor job once.
         runRuleProcessor();
-        
+
         // 2. Verify the number of enqueued tasks.
         QueueStateInfo queueInfo = getQueueStateInfo();
-        assertEquals(3, queueInfo.getCountTasks());
-        
+        int chunks = USERS / CHUNK_SIZE;
+        if ((USERS % CHUNK_SIZE) > 0) {
+            chunks++;
+        }
+        assertEquals(chunks, queueInfo.getCountTasks());
+
         // 3. Manually processes the tasks
-        for (TaskStateInfo taskInfo : queueInfo.getTaskInfo()) {
+        List<TaskStateInfo> states = queueInfo.getTaskInfo();
+        for (int i = 0; i < states.size(); i++) {
+            TaskStateInfo taskInfo = states.get(i);
             Response response = executeTask(taskInfo);
             assertStatus(200, response);
-            // TODO(syyang): verify the rules are actually applied
+            Map<String, List<String>> params = new QueryStringDecoder("http://dummy/a?" + taskInfo.getBody())
+                .getParameters();
+            Key first = KeyFactory.stringToKey(params.get(ChunkedRuleProcessor.pSTART_ID)
+                                                     .get(0));
+            Key last = KeyFactory.stringToKey(params.get(ChunkedRuleProcessor.pLAST_ID)
+                                                     .get(0));
+
+            int size = Iterables.size(ChunkedRuleProcessor.getUsersForKeyRange(first, last));
+            // Last chunk should contain leftover items, every other chunk should be full size.
+            int expected = ((i + 1) == states.size()) ? (USERS % CHUNK_SIZE) :
+                                                        CHUNK_SIZE;
+            assertEquals(String.format("Bad size. First key: %s Last key: %s", first, last),
+                         expected, size);
         }
     }
     

@@ -11,6 +11,8 @@ import play.Play;
 import play.mvc.Http.Header;
 import play.mvc.Mailer;
 
+import com.google.appengine.api.datastore.Key;
+
 /**
  * Send emails.
  *
@@ -76,7 +78,7 @@ public class Mails extends Mailer {
      * @param e exception to log
      * @param headers request headers for this request
      */
-    public static void logError(Long id, Throwable e, Collection<Header> headers) {
+    public static void logError(Key id, Throwable e, Collection<Header> headers) {
         Logger.error(e, "Sending Gack to %s", ERROR_EMAIL);
         Date date = new Date();
         setFrom(FROM_EMAIL);

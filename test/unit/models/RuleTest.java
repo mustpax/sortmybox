@@ -5,20 +5,14 @@ import java.util.List;
 import models.Rule;
 import models.User;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import play.cache.Cache;
-import play.test.UnitTest;
 import rules.RuleType;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
  
 public class RuleTest extends BaseModelTest {
-
     @Test
     public void testNameContains() {
         Rule r = new Rule();
@@ -132,35 +126,35 @@ public class RuleTest extends BaseModelTest {
     public void testReplace() {
         User u = UserTest.newUser();
         List<Rule> rules = Lists.newArrayList();
-        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.id));
-        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.id));
-        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.id));
+        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.getKey()));
+        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.getKey()));
+        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.getKey()));
         Rule.replace(u, rules, null);
-        List<Rule> actual = Rule.findByUserId(u.id);
+        List<Rule> actual = Rule.findByUserId(u.getKey());
         assertEquals(actual, rules);
         
         rules.remove(rules.size() - 1);
-        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.id));
+        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.getKey()));
         Rule.replace(u, rules, null);
-        actual = Rule.findByUserId(u.id);
+        actual = Rule.findByUserId(u.getKey());
         assertEquals(actual, rules);
     }
-    
+
     @Test
     public void testCache() {
         User u = UserTest.newUser();
         List<Rule> rules = Lists.newArrayList();
-        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.id));
-        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.id));
-        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.id));
+        rules.add(new Rule(RuleType.EXT_EQ, "pdf", "/pdf", 0, u.getKey()));
+        rules.add(new Rule(RuleType.GLOB, "a*", "/a", 1, u.getKey()));
+        rules.add(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 2, u.getKey()));
         Rule.replace(u, rules, null);
-        List<Rule> actual = Rule.findByUserId(u.id);
+        List<Rule> actual = Rule.findByUserId(u.getKey());
         assertEquals(actual, rules);
         
         rules.remove(rules.size() - 1);
-        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.id));
-        Cache.set(Rule.cacheKey(u.id), rules);
-        actual = Rule.findByUserId(u.id);
+        rules.set(1, new Rule(RuleType.GLOB, "b*", "/b", 3, u.getKey()));
+        Cache.set(Rule.cacheKey(u.getKey()), rules);
+        actual = Rule.findByUserId(u.getKey());
         assertEquals(actual, rules);
     }
 }

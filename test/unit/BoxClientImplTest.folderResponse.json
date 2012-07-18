@@ -1,0 +1,56 @@
+{
+    "type":"folder",
+    "id":"291539343",
+    "sequence_id":"0",
+    "name":"My great folder",
+    "created_at":"2012-05-25T14:51:19-07:00",
+    "modified_at":"2012-06-08T10:56:17-07:00",
+    "description":"this is a pretty good folder",
+    "size":2301,
+    "created_by":
+    {
+        "type":"user",
+        "id":"13344957",
+        "name":"Sean Rose",
+        "login":"sean@emailprovider.com"
+    },
+    "modified_by":
+    {
+        "type":"user",
+        "id":"13344957",
+        "name":"Sean Rose",
+        "login":"sean@emailprovider.com"
+    },
+    "owned_by":
+    {
+        "type":"user",
+        "id":"13344957",
+        "name":"Sean Rose",
+        "login":"sean@emailprovider.com"
+    },
+    "parent":
+    {
+        "type":"folder",
+        "id":"0",
+        "sequence_id":null,
+        "name":"All Files"
+    },
+    "item_collection":
+    {
+        "total_count":2,
+        "entries":[
+            {
+                "type":"file",
+                "id":"2305649799",
+                "sequence_id":"1",
+                "name":"testing.html"
+            },
+            {
+                "type":"folder",
+                "id":"2305623799",
+                "sequence_id":"1",
+                "name":"a child folder"
+            }
+        ]
+    }
+}

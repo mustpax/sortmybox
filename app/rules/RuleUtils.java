@@ -1,22 +1,31 @@
 package rules;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
+
 import models.FileMove;
 import models.Rule;
 import models.User;
+
+import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 
 import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import common.api.ApiClient;
+import common.api.ApiClientFactory;
 
 import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClientFactory;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
@@ -110,9 +119,8 @@ public class RuleUtils {
      */
     public static List<FileMove> runRules(User user) {
         List<FileMove> fileMoves = Lists.newArrayList();
-        DropboxClient client = DropboxClientFactory.create(user);
+        ApiClient client = ApiClientFactory.create(user);
         try {
-            //Rebranding from Sortbox to SortMyBox requires backwards compatibility
             Set<String> files = client.listDir(user.sortingFolder);	
 
             if (files.isEmpty()) {
@@ -122,15 +130,15 @@ public class RuleUtils {
 
             user.updateLastSyncDate();
 
-            List<Rule> rules = Rule.findByUserId(user.id);
-            Logger.info("Running rules for %s", user);
+            List<Rule> rules = Rule.findByUserId(user.getKey());
+            Logger.info("Running rules for %s with files %s", user, files);
 
             for (String file : files) {
                 String base = basename(file);
                 for (Rule r : rules) {
                     if (r.matches(base)) {
                         Logger.info("Moving file '%s' to '%s'. Rule id: %s",
-                                file, r.dest, r.id);
+                                    file, r.dest, r.id);
                         boolean hasCollision = false;
                         String resolvedName = null;
                         for (int tries = 0; tries < MAX_TRIES; tries++) {
@@ -159,7 +167,7 @@ public class RuleUtils {
 	                                     file, r.dest, MAX_TRIES);
                         }
 
-                        fileMoves.add(new FileMove(user.id, base, r.dest, hasCollision, resolvedName));
+                        fileMoves.add(new FileMove(user.getKey(), base, r.dest, hasCollision, resolvedName));
                         break;
                     }
                 }
@@ -207,6 +215,43 @@ public class RuleUtils {
 
     public static String basename(String path) {
         return path == null ? null : new File(path).getName();
+    }
+
+    public static class IsEmptyOrNull implements Predicate<String> {
+        @Override
+        public boolean apply(String str) {
+            return str == null || str.isEmpty();
+        }
+    }
+
+    public static String normalize(@CheckForNull String path) {
+        return normalize(path, true);
+    }
+
+    /**
+     * Normalize file path by collapsing adjacent / and ensure it has a
+     * leading /. Optionally, fold case.
+     *
+     * @param foldCase if true, convert name to lowercase 
+     *
+     * @return the normalized version of given path
+     */
+    public static String normalize(@CheckForNull String path, boolean foldCase) {
+        if (path == null) {
+            return null;
+        }
+
+        if (foldCase) {
+            path = path.toLowerCase();
+        }
+
+        return "/" + StringUtils.join(Collections2.filter(Arrays.asList(path.split("/+")),
+                                                          Predicates.not(new IsEmptyOrNull())),
+                                      "/");
+    }
+
+    public static String getParent(String path) {
+        return path == null ? null : new File(path).getParent();
     }
 
     private RuleUtils() {}

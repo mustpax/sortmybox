@@ -1,6 +1,6 @@
 package unit.tasks;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -8,13 +8,11 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Maps;
-
 import play.mvc.Http;
 import play.mvc.Http.Header;
-import tasks.Task;
 import tasks.TaskContext;
 
+import com.google.common.collect.Maps;
 import common.request.Headers;
 
 /**

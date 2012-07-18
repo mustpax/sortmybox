@@ -1,19 +1,16 @@
 package unit.common.request;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import com.google.appengine.repackaged.com.google.common.collect.Maps;
-
-import common.request.Headers;
-
 
 import play.mvc.Http;
 import play.test.UnitTest;
+
+import com.google.appengine.repackaged.com.google.common.collect.Maps;
+import common.request.Headers;
 
 /**
  * Unit test for {@link Headers}.

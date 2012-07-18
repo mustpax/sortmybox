@@ -1,15 +1,12 @@
 package unit.common.reflection;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import play.test.UnitTest;
-
-import common.reflection.ReflectionUtils;
-
 import tasks.Task;
 import tasks.TaskContext;
+
+import common.reflection.ReflectionUtils;
 
 /**
  * Unit tests for {@link ReflectionUtils} 

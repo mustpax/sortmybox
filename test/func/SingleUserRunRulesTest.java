@@ -1,7 +1,10 @@
 package func;
 
 import static dropbox.client.DropboxClientFactory.testClient;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +20,6 @@ import rules.RuleUtils;
 import unit.models.BaseModelTest;
 import unit.models.UserTest;
 
-import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dropbox.Dropbox;
@@ -59,13 +61,12 @@ public class SingleUserRunRulesTest extends BaseModelTest {
     public void testConflict() throws Exception {
         addToSortbox("foo");
         setRules(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 0, null));
-        when(testClient.move(Dropbox.getSortboxPath() + "/foo", "/foo/foo"))
-	        .thenThrow(new FileMoveCollisionException(null));
-        when(testClient.move(Dropbox.getSortboxPath() + "/foo", "/foo/foo conflict"))
-	        .thenThrow(new FileMoveCollisionException(null));
+        doThrow(new FileMoveCollisionException(null))
+	        .when(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo");
+        doThrow(new FileMoveCollisionException(null))
+	        .when(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo conflict");
         
         RuleUtils.runRules(u);
-
         verify(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo conflict 2");
     }
 

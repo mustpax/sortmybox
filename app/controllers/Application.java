@@ -20,15 +20,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import common.api.ApiClient;
+import common.api.ApiClientFactory;
 
 import dropbox.Dropbox;
-import dropbox.client.DropboxClient;
-import dropbox.client.DropboxClient.ListingType;
-import dropbox.client.DropboxClientFactory;
-import dropbox.client.InvalidTokenException;
 import dropbox.client.FileMoveCollisionException;
+import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
-import dropbox.gson.DbxMetadata;
 
 /**
  * @author mustpax
@@ -52,23 +50,23 @@ public class Application extends Controller {
     public static void index() {
         User user = Login.getUser();
         InitResult initResult = initSortbox(user);
-        List<Rule> rules = Rule.findByUserId(user.id);
+        List<Rule> rules = Rule.findByUserId(user.getKey());
         render(user, rules, initResult);
     }
 
     public static void activity() {
         checkAuthenticity();
         User user = Login.getUser();
-        renderJSON(FileMove.findByOwner(user.id, MAX_FILE_MOVES),
+        renderJSON(FileMove.findByOwner(user.getKey(), MAX_FILE_MOVES),
                    new DateSinceSerializer());
     }
     
     public static void dirs(String path) {
         checkAuthenticity();
         User u = Login.getUser();
-        DropboxClient client = DropboxClientFactory.create(u);
+        ApiClient client = ApiClientFactory.create(u);
         try {
-	        renderJSON(client.listDir(path, ListingType.DIRS));
+	        renderJSON(client.listDir(path, ApiClient.ListingType.DIRS));
         } catch (NotADirectoryException e) {
             Logger.error(e, "User attempt to list a directory which is infact a file: %s", u);
             renderJSON(Collections.emptyList());
@@ -89,9 +87,10 @@ public class Application extends Controller {
         boolean createdCannedRules = false;
         boolean updatedSortingFolder = false;
         try {
-            DropboxClient client = DropboxClientFactory.create(user);
+            ApiClient client = ApiClientFactory.create(user);
             // re-branding requires us to change the sorting folder name
-            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
+            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder) &&
+                client.exists(user.sortingFolder)) {
                 // TODO check if folder exists before moving
                 // now we need to move the Sortbox folder to SortMyBox
                 client.move(Dropbox.getOldSortboxPath(),
@@ -104,12 +103,11 @@ public class Application extends Controller {
             // now get the new sorting folder path for the user and keep going
             // forward
             String sortboxPath = user.sortingFolder;
-            DbxMetadata file = client.getMetadata(sortboxPath);
-            if (file == null) {
+            if (! client.exists(sortboxPath)) {
                 // 1. create missing Sortbox folder
                 Logger.info("SortMyBox folder missing for user '%s' at path '%s'",
 	                        user, sortboxPath);
-                createdSortboxDir = client.mkdir(sortboxPath) != null;
+                createdSortboxDir = client.mkdir(sortboxPath);
                 if (createdSortboxDir) {
                     // 2. create canned rules
                     createdCannedRules = createCannedRules(user);
@@ -131,11 +129,11 @@ public class Application extends Controller {
      * @return true if canned rules are created
      */
     private static boolean createCannedRules(final User user) {
-        if (!Rule.ruleExists(user.id)) {
+        if (!Rule.ruleExists(user.getKey())) {
             List<Rule> rules = Lists.newArrayListWithCapacity(3);
-            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.id));
-            rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.id));
-            rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.id));
+            rules.add(new Rule(RuleType.EXT_EQ, "jpg, png, gif", "/Photos", 0, user.getKey()));
+            rules.add(new Rule(RuleType.NAME_CONTAINS, "Essay", "/Documents", 1, user.getKey()));
+            rules.add(new Rule(RuleType.GLOB, "Prince*.mp3", "/Music/Prince", 2, user.getKey()));
             Rule.replace(user, rules, null);
             return true;
         }

@@ -8,7 +8,7 @@ test: all
 	play test
 
 run: all
-	play run
+	play run -ea
 
 js: $(alljs)
 

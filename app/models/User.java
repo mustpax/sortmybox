@@ -1,7 +1,6 @@
 package models;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
@@ -14,16 +13,13 @@ import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
+import box.BoxAccount;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceConfig;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
 
@@ -32,6 +28,18 @@ import dropbox.gson.DbxAccount;
 
 @Cacheable
 public class User implements Serializable {
+    public static enum AccountType {
+        DROPBOX,
+        BOX;
+        
+	    public static AccountType fromDbValue(String dbValue) {
+	        for (AccountType type : AccountType.values()) {
+	            if (type.name().equals(dbValue)) return type;
+	        }
+
+	        return null;
+	    }
+    }
 	
     private static final long serialVersionUID = 45L;
     
@@ -54,18 +62,22 @@ public class User implements Serializable {
     public Date lastSync;
     public Date lastLogin;
 
+    public AccountType accountType;
+    
     private String token;
     private String secret;
     
-    public User() {
+    
+    public User(AccountType at) {
         this.modified = this.created = this.lastLogin = new Date();
         this.periodicSort = true;
         this.fileMoves = 0;
+        this.accountType = at;
         this.sortingFolder = Dropbox.getSortboxPath();
     }
 
     public User(DbxAccount account, String token, String secret) {
-        this();
+        this(AccountType.DROPBOX);
         this.id = account.uid;
         sync(account, token, secret);
     }
@@ -74,6 +86,9 @@ public class User implements Serializable {
         this.id = entity.getKey().getId();
         this.name = (String) entity.getProperty("name");
         this.nameLower = (String) entity.getProperty("nameLower");
+        if (this.nameLower == null && this.name != null) {
+            this.nameLower = this.name.toLowerCase();
+        }
         this.email = (String) entity.getProperty("email");
         this.periodicSort = (Boolean) entity.getProperty("periodicSort");
         this.created = (Date) entity.getProperty("created");
@@ -88,6 +103,11 @@ public class User implements Serializable {
 		if (this.sortingFolder == null) {
 			this.sortingFolder = Dropbox.getOldSortboxPath();
 		}
+
+        this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
+        if (this.accountType == null) {
+            this.accountType = AccountType.DROPBOX;
+        }
     }
 
     private static Set<Long> getAdmins() {
@@ -154,8 +174,12 @@ public class User implements Serializable {
         }
     }
 
+    public Key getKey() {
+        return User.key(this.accountType, this.id);
+    }
+
     public boolean isAdmin() {
-        return ADMINS.contains(id);
+        return accountType == AccountType.DROPBOX && ADMINS.contains(id);
     }
 
     public void updateLastSyncDate() {
@@ -185,33 +209,31 @@ public class User implements Serializable {
     public void delete() {
         DatastoreUtil.delete(this, MAPPER);
     }
-    
+
     /**
+     * @param accountType account type of the user
      * @param id the user id
      * @return fully loaded user for the given id, null if not found.
      */
-    public static User findById(long id) {
-        return DatastoreUtil.get(key(id), MAPPER);
+    public static User findById(AccountType accountType, long id) {
+        return DatastoreUtil.get(key(accountType, id), MAPPER);
     }
 
-    public static boolean isValidId(String userId) {
-        // check input is not null and not empty
-        if (userId == null || userId.isEmpty()) {
-            return false;
+    public static Key key(AccountType accountType, long id) {
+        // Handle null AccountTypes gracefully for tests.
+        if (accountType == null && Play.runingInTestMode()) {
+            accountType = AccountType.DROPBOX;
         }
-    
-        // check input is a valid user id
-        try {
-            Long.parseLong(userId);
-        } catch (NumberFormatException e) {
-            return false;
+
+        switch (accountType) {
+        case BOX:
+            String strId = AccountType.BOX.name() + ":" + id;
+            return KeyFactory.createKey(KIND, strId);
+        case DROPBOX:
+            return KeyFactory.createKey(KIND, id);
         }
         
-        return true;
-    }
-
-    public static Key key(long id) {
-        return KeyFactory.createKey(KIND, id);
+        throw new IllegalStateException("Cannot create User key for AccountType: " + accountType);
     }
 
     public static Query all() {
@@ -239,35 +261,50 @@ public class User implements Serializable {
         return DatastoreUtil.queryKeys(q, FetchOptions.Builder.withDefaults(), MAPPER);
     }
 
+    /**
+     * Upsert a Box user into the datastore.
+     */
+    public static User upsert(BoxAccount account) {
+        if (account == null) {
+            return null;
+        }
+
+        User user = findById(AccountType.BOX, account.id);
+        if (user == null) {
+            user = new User(AccountType.BOX);
+            user.id = account.id;
+            Logger.info("Box user not found in datastore, creating new one: %s", user);
+        }
+
+        user.setToken(account.token);
+        user.email = account.email;
+        // TODO handle null name
+        user.name = account.email;
+        user.lastLogin = new Date();
+        user.save();
+        
+        return user;
+    }
+
     public static User upsert(DbxAccount account, String token, String secret) {
         if (account == null || !account.notNull()) {
             return null;
         }
     
-        User user = findById(account.uid);
+        User user = findById(AccountType.DROPBOX, account.uid);
         if (user == null) {
             user = new User(account, token, secret);
             Logger.info("Dropbox user not found in datastore, creating new one: %s", user);
-            user.save();
         } else {
             if (! user.equals(account, token, secret)) {
                 Logger.info("User has new Dropbox oauth credentials: %s", user);
                 user.sync(account, token, secret);
             }
-    
-            if (user.nameLower == null) {
-                user.nameLower = user.name.toLowerCase();
-            }
-    
-            if (user.fileMoves == null) {
-                user.fileMoves = 0;
-            }
             
             user.lastLogin = new Date();
-    
-            user.save();
         }
-    
+
+        user.save();
         return user;
     }
 
@@ -286,6 +323,7 @@ public class User implements Serializable {
             .append(this.lastSync)
             .append(this.lastLogin)
             .append(this.sortingFolder)
+            .append(this.accountType)
             .hashCode();
     }
 
@@ -309,6 +347,7 @@ public class User implements Serializable {
             .append(this.lastSync, other.lastSync)
             .append(this.lastLogin, other.lastLogin)
             .append(this.sortingFolder, other.sortingFolder)
+            .append(this.accountType, other.accountType)
             .isEquals();
     }
     
@@ -324,6 +363,7 @@ public class User implements Serializable {
     public String toString() {
         return Objects.toStringHelper(User.class)
             .add("id", id)
+            .add("accountType", accountType)
             .add("name", name)
             .add("nameLower", nameLower)
             .add("email", email)
@@ -339,7 +379,8 @@ public class User implements Serializable {
     private static class UserMapper implements Mapper<User> {
         @Override
         public Entity toEntity(User model) {
-            Entity entity = DatastoreUtil.newEntity(KIND, model.id);
+            Entity entity = new Entity(toKey(model));
+
             entity.setProperty("name", model.name);
             entity.setProperty("nameLower", model.nameLower);
             entity.setProperty("email", model.email);
@@ -352,6 +393,9 @@ public class User implements Serializable {
             entity.setProperty("fileMoves", model.fileMoves);
             entity.setProperty("lastLogin", model.lastLogin);
             entity.setProperty("sortingFolder", model.sortingFolder);
+            if (model.accountType != null) {
+                entity.setProperty("accountType", model.accountType.name());
+            }
             return entity;
         }
 
@@ -367,8 +411,8 @@ public class User implements Serializable {
 
         @Override
         public Key toKey(User model) {
-            return key(model.id);
+            return model.getKey();
         }
     }
-}
 
+}

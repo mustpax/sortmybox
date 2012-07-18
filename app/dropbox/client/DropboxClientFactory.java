@@ -1,11 +1,10 @@
 package dropbox.client;
 
+import models.User;
+import models.User.AccountType;
 import play.Play;
 
 import com.google.common.base.Preconditions;
-
-import models.User;
-import controllers.Login;
 
 /**
  * Factory for creating a {@link DropboxClient} implementation.
@@ -22,6 +21,7 @@ public class DropboxClientFactory {
         }
 
         Preconditions.checkNotNull(user, "User can't be null");
+        assert AccountType.DROPBOX == user.accountType : "User must be a Dropbox user";
         return create(user.getToken(), user.getSecret());
     }
     

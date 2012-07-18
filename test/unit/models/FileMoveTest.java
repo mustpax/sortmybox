@@ -7,37 +7,71 @@ import java.util.List;
 
 import models.FileMove;
 import models.User;
+import models.User.AccountType;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import tasks.FileMoveDeleter;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class FileMoveTest extends BaseModelTest {
+    private static Key key1() {
+        return User.key(AccountType.DROPBOX, 1L);
+    }
+
+    private static Key key2() {
+        return User.key(AccountType.DROPBOX, 2L);
+    }
 
     @Test
     public void testDml() throws Exception {
-        FileMove mv1 = new FileMove(1L, "foo", "bar", true);
-        FileMove mv2 = new FileMove(2L, "tom", "jerry", false);
+        FileMove mv1 = new FileMove(key1(), "foo", "bar", true);
+        FileMove mv2 = new FileMove(key2(), "tom", "jerry", false);
         FileMove.save(Arrays.asList(mv1, mv2));
         
-        List<FileMove> fileMoves = FileMove.findByOwner(1L, 2);
+        List<FileMove> fileMoves = FileMove.findByOwner(key1(), 2);
         FileMove mv = Iterables.getFirst(fileMoves, null);
         assertEquals("foo", mv.fromFile);
         assertEquals("bar", mv.toDir);
         assertTrue(mv.hasCollision);
 
-        fileMoves = FileMove.findByOwner(2L, 2);
+        fileMoves = FileMove.findByOwner(key2(), 2);
         mv = Iterables.getFirst(fileMoves, null);
         assertEquals("tom", mv.fromFile);
         assertEquals("jerry", mv.toDir);
         assertFalse(mv.hasCollision);
+    }
+
+    @Test
+    public void testDeleteBefore() {
+        List<FileMove> moves = Lists.newArrayList();
+        int count = 10;
+
+        Date now = new Date();
+        Date lastDate = null;
+
+        for (int i = 0; i< count; i++) {
+            Date when = new DateTime(now).plusDays(i).toDate();
+            lastDate = when;
+            FileMove m = new FileMove(key1(), "from" + i, "/dest/to" + i, (i % 2) == 0);
+            m.when = when;
+            moves.add(m);
+        }
+
+        FileMove.save(moves);
+        assertEquals(10, FileMove.findByOwner(key1(), count + 1).size());
+
+        FileMoveDeleter.deleteMovesBefore(key1(), lastDate);
+        assertEquals(1, FileMove.findByOwner(key1(), count + 1).size());
     }
 
     @Test
@@ -48,7 +82,7 @@ public class FileMoveTest extends BaseModelTest {
         // Create moves in increasing chronological order
         for (int i = 0; i< count; i++) {
             Date when = DateTime.now().plusDays(i).toDate();
-            FileMove m = new FileMove(1L, "from" + i, "/dest/to" + i, (i % 2) == 0);
+            FileMove m = new FileMove(key1(), "from" + i, "/dest/to" + i, (i % 2) == 0);
             m.when = when;
             moves.add(m);
         }
@@ -56,7 +90,7 @@ public class FileMoveTest extends BaseModelTest {
 
         // Datastore fetch should flip the ordering to reverse chrono order
         Collections.reverse(moves);
-        assertEquals(moves, FileMove.findByOwner(1L, count));
+        assertEquals(moves, FileMove.findByOwner(key1(), count));
     }
     
     /**
@@ -64,12 +98,11 @@ public class FileMoveTest extends BaseModelTest {
      */
     @Test
     public void testGetByParent() {
-        FileMove mv1 = new FileMove(1L, "foo", "bar", true);
-        FileMove mv2 = new FileMove(1L, "tom", "jerry", false);
+        FileMove mv1 = new FileMove(key1(), "foo", "bar", true);
+        FileMove mv2 = new FileMove(key1(), "tom", "jerry", false);
         FileMove.save(Arrays.asList(mv1, mv2));
-        Query q = new Query(FileMove.KIND).setAncestor(User.key(1L));
-        List moves = Lists.newArrayList(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable());
-        assertEquals(2, moves.size());
+        Query q = new Query(FileMove.KIND).setAncestor(key1());
+        assertEquals(2, Iterables.size(DatastoreServiceFactory.getDatastoreService().prepare(q).asIterable()));
     }
     
     /**
@@ -78,28 +111,28 @@ public class FileMoveTest extends BaseModelTest {
      */
     @Test
     public void testSuccess() {
-        FileMove mv = new FileMove(1L, "foo", "bar", true);
+        FileMove mv = new FileMove(key1(), "foo", "bar", true);
         mv.id = 1L;
         FileMove.save(Arrays.asList(mv));
         
         // ignore successful if hasCollision is set
         setSuccess(mv, true, true);
-        mv = FileMove.findByOwner(1L, 1).get(0);
+        mv = FileMove.findByOwner(key1(), 1).get(0);
         assertTrue(mv.hasCollision);
 
         // read successful if hasCollision is null
         setSuccess(mv, null, false);
-        mv = FileMove.findByOwner(1L, 1).get(0);
+        mv = FileMove.findByOwner(key1(), 1).get(0);
         assertTrue(mv.hasCollision);
         
         // read successful if hasCollision is null
         setSuccess(mv, null, true);
-        mv = FileMove.findByOwner(1L, 1).get(0);
+        mv = FileMove.findByOwner(key1(), 1).get(0);
         assertFalse(mv.hasCollision);
         
         // default to false if both are null
         setSuccess(mv, null, null);
-        mv = FileMove.findByOwner(1L, 1).get(0);
+        mv = FileMove.findByOwner(key1(), 1).get(0);
         assertFalse(mv.hasCollision);
     }
     

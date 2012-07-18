@@ -1,19 +1,13 @@
 package models;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.persistence.Cacheable;
 
 import play.Logger;
-import play.modules.gae.GAECache;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.memcache.Expiration;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.common.collect.Maps;
+import com.google.appengine.api.datastore.KeyFactory;
 
 class Cache {
     private static final AtomicBoolean CACHE_FIXED = new AtomicBoolean(false);
@@ -43,16 +37,17 @@ class Cache {
         return INSTANCE;
     }
 
-    public boolean isCachable(Mapper mapper) {
+    public boolean isCachable(Mapper<?> mapper) {
         return mapper.getType().isAnnotationPresent(Cacheable.class);
     }
     
+    @SuppressWarnings("unchecked")
     public <T> T get(Key k) {
-        return (T) play.cache.Cache.get(k.toString());
+        return (T) play.cache.Cache.get(KeyFactory.keyToString(k));
     }
 
     public <T> void put(T model, Mapper<T> mapper) {
-        play.cache.Cache.set(mapper.toKey(model).toString(), model, "1h");
+        play.cache.Cache.set(KeyFactory.keyToString(mapper.toKey(model)), model, "1h");
     }
     
     public <T> void deleteAll(Iterable<T> models, Mapper<T> mapper) {
@@ -62,6 +57,6 @@ class Cache {
     }
     
     public <T> void delete(T model, Mapper<T> mapper) {
-        play.cache.Cache.delete(mapper.toKey(model).toString());
+        play.cache.Cache.delete(KeyFactory.keyToString(mapper.toKey(model)));
     }
 }
