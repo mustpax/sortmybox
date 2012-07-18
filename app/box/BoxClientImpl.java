@@ -1,5 +1,9 @@
 package box;
 
+import static com.google.common.collect.Iterables.addAll;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
+
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
@@ -18,8 +22,10 @@ import box.Box.URLs;
 import box.gson.BoxError;
 import box.gson.BoxItem;
 import box.gson.BoxName;
+import box.gson.BoxParent;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.MapMaker;
@@ -31,8 +37,6 @@ import com.google.gson.reflect.TypeToken;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
-
-import static com.google.common.collect.Iterables.*;
 
 public class BoxClientImpl implements BoxClient {
     public class FileOrFolderPredicate implements Predicate<BoxItem> {
@@ -104,8 +108,31 @@ public class BoxClientImpl implements BoxClient {
 
     @Override
     public void move(String from, String to) throws FileMoveCollisionException, InvalidTokenException {
-        // TODO Auto-generated method stub
         Logger.info("Move from %s to %s", from, to);
+        Preconditions.checkNotNull(from);
+        Preconditions.checkNotNull(to);
+        String fromId = getId(from);
+        String toId = getId(RuleUtils.getParent(to));
+        if (fromId == null ||
+            toId   == null) {
+            Logger.error("Failed to move file from %s to %s. Cannot resolve from file id.",
+                         from, to);
+            return;
+        }
+
+        Logger.info("Attempting to move file from: %s(%s) To: %s(%s)", from, fromId, RuleUtils.getParent(to), toId);
+        HttpResponse resp = req("/files/" + fromId)
+                .body(new Gson().toJson(new BoxParent(toId)))
+                .put();
+
+        if (resp.success()) {
+            BoxItem file = new Gson().fromJson(resp.getJson(), BoxItem.class);
+            Logger.info("Successfully moved file from %s to %s. File: %s",
+                        from, to, file);
+            return;
+        }
+
+        Logger.error("Failed moving from %s to %s Error: %s", from, to, getError(resp));
     }
 
     @Override
@@ -132,6 +159,7 @@ public class BoxClientImpl implements BoxClient {
 
     @Override
     public boolean mkdir(String path) {
+        Preconditions.checkNotNull(path, "Missing path.");
         String parentId = getId(RuleUtils.getParent(path));
         if (parentId ==  null) {
             Logger.error("Cannot create folder because parent directory doesn't exist: %s", path);

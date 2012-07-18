@@ -131,14 +131,14 @@ public class RuleUtils {
             user.updateLastSyncDate();
 
             List<Rule> rules = Rule.findByUserId(user.getKey());
-            Logger.info("Running rules for %s", user);
+            Logger.info("Running rules for %s with files %s", user, files);
 
             for (String file : files) {
                 String base = basename(file);
                 for (Rule r : rules) {
                     if (r.matches(base)) {
                         Logger.info("Moving file '%s' to '%s'. Rule id: %s",
-                                file, r.dest, r.id);
+                                    file, r.dest, r.id);
                         boolean hasCollision = false;
                         String resolvedName = null;
                         for (int tries = 0; tries < MAX_TRIES; tries++) {

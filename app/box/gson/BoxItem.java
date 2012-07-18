@@ -13,6 +13,7 @@ public class BoxItem implements Serializable {
     public String name;
     public String id;
     public Type type;
+    public String path;
     
     @Override
     public String toString() {
@@ -20,6 +21,7 @@ public class BoxItem implements Serializable {
                       .add("name", name)
                       .add("id", id)
                       .add("type", type)
+                      .add("path", path)
                       .toString();
     }
 }

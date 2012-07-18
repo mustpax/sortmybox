@@ -1,9 +1,10 @@
 package box.gson;
 
 public class BoxParent {
-    public String parent;
+    public BoxItem parent;
 
     public BoxParent(String parent) {
-        this.parent = parent;
+        this.parent = new BoxItem();
+        this.parent.id = parent;
     }
 }
