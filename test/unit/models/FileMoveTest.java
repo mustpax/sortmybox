@@ -24,7 +24,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class FileMoveTest extends BaseModelTest {
-    private static Key key1() {
+	//TODO: KM refactor this stuff in later
+	private static Key key1() {
         return User.key(AccountType.DROPBOX, 1L);
     }
 
