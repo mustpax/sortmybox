@@ -40,7 +40,7 @@ import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
 
 public class BoxClientImpl implements BoxClient {
-    public class FileOrFolderPredicate implements Predicate<BoxItem> {
+    public static class FileOrFolderPredicate implements Predicate<BoxItem> {
         private final ListingType type;
         
         public FileOrFolderPredicate(ListingType type) {
