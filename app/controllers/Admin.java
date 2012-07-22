@@ -81,7 +81,7 @@ public class Admin extends Controller {
                 long dUsers = Math.abs(new Random().nextInt()) % 100;
                 long dRules = Math.abs(new Random().nextInt()) % 300;
                 long dFileMoves = Math.abs(new Random().nextInt()) % 10000;
-                long dUniqueFileMoveUsers = Math.abs(new Random().nextInt()) % 300;
+                long dUniqueFileMoveUsers = Math.abs(new Random().nextInt()) % 3000;
 
                 users += dUsers;
                 rules += dRules;

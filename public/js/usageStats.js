@@ -7,7 +7,8 @@
         { name: 'created', label: 'Date', type: 'date' },
         { name: 'users', label: 'Users', type: 'number' },
         { name: 'rules', label: 'Rules', type: 'number' },
-        { name: 'fileMoves', label: 'File moves', type: 'number' }
+        { name: 'fileMoves', label: 'File moves', type: 'number' },
+        { name: 'uniqueFileMoveUsers', label: 'Unique File Move Users', type: 'number' }
     ];
 
     var colIndex = {};
@@ -57,6 +58,7 @@
             _.each(_.rest(cols), function(col) { 
                 var elem = $('.chart.' + scope + '.' + col.name).get(0);
                 console.log(scope, col, elem);
+                if(col.name==='uniqueFileMoveUsers' && scope==='aggr') return;
                 new google.visualization.LineChart(elem)
                     .draw(tablify(data[scope], col.name), { 'title': scope + ' usage stats: ' + col.label,
                                                           'width': 1000,
