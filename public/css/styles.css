@@ -164,6 +164,10 @@ select[size] {
     margin-right: 30px;
 }
 
+.login img {
+	margin-right: 5px;
+} 
+
 .learn {
     margin-right: 40px;
 }
