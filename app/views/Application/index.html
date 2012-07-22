@@ -35,7 +35,10 @@
 <div class="row">
   <div class="span12">
     <div class="page-header">
-      <h1>Sorting rules
+      <h1>#{if user.accountType == models.User.AccountType.BOX } Box<small>&trade;</small> Sorting Rules #{/if}
+        #{else}
+        Dropbox<small>&trade;</small> Sorting rules
+        #{/else}
         <small>Rules are applied to your SortMyBox folder every 15 minutes.</small>
       </h1>
     </div>
