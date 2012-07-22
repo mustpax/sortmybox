@@ -2,7 +2,7 @@ package box.gson;
 
 import java.io.Serializable;
 
-import com.google.appengine.repackaged.com.google.common.base.Objects;
+import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
 
 public class BoxItem implements Serializable {
@@ -26,6 +26,7 @@ public class BoxItem implements Serializable {
                       .add("id", id)
                       .add("type", type)
                       .add("path", path)
+                      .add("children", children)
                       .toString();
     }
 }
