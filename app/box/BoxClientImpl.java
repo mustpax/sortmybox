@@ -21,7 +21,7 @@ import box.Box.URLs;
 import box.gson.BoxError;
 import box.gson.BoxItem;
 import box.gson.BoxName;
-import box.gson.BoxParent;
+import box.gson.BoxMoveReq;
 
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Function;
@@ -125,7 +125,7 @@ public class BoxClientImpl implements BoxClient {
 
         Logger.info("Attempting to move file from: %s(%s) To: %s(%s)", from, fromId, RuleUtils.getParent(to), toId);
         HttpResponse resp = req("/files/" + fromId)
-                .body(new Gson().toJson(new BoxParent(toId)))
+                .body(new Gson().toJson(new BoxMoveReq(toId, RuleUtils.basename(to))))
                 .put();
 
         if (resp.success()) {
@@ -136,6 +136,10 @@ public class BoxClientImpl implements BoxClient {
         }
 
         Logger.error("Failed moving from %s to %s Error: %s", from, to, getError(resp));
+        // 400 indicates file name collision
+        if (Integer.valueOf(400).equals(resp.getStatus())) {
+            throw new FileMoveCollisionException(String.format("From: %s To: %s", from, to));
+        }
     }
 
     @Override
