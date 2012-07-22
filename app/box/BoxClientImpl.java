@@ -31,7 +31,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
@@ -60,26 +59,31 @@ public class BoxClientImpl implements BoxClient {
 
     public final String token;
 
-    private final Map<String, NullableId> pathToIdMap = new MapMaker()
-        .makeComputingMap(new Function<String, NullableId>() {
+    private final Map<String, NullableItem> pathToItemMap = new MapMaker()
+        .makeComputingMap(new Function<String, NullableItem>() {
             @Override
-            public NullableId apply(String path) {
+            public NullableItem apply(String path) {
                 if (path == null || "/".equals(path)) {
-                    return ROOT_ID;
+                    return new NullableItem(getMetadata("0", BoxItem.Type.folder));
                 }
 
-                String parentId = BoxClientImpl.this.getId(RuleUtils.getParent(path));
-                if (parentId == null) {
-                    return NULL_ID;
+                BoxItem parent = getItem(RuleUtils.getParent(path));
+                if (parent == null) {
+                    return NULL_ITEM;
                 }
 
-                return new NullableId(getIdOfChild(parentId, RuleUtils.basename(path)));
+                // Child metadata is loaded as a mini item, we do a new fetch to get the full listing
+                BoxItem miniChild = getChild(parent, RuleUtils.basename(path));
+                if (miniChild == null || miniChild.id == null) {
+                    return NULL_ITEM;
+                }
+
+                return new NullableItem(getMetadata(miniChild.id, miniChild.type));
             }
         });
-    
-    private static final NullableId NULL_ID = new NullableId(null);
-    private static final NullableId ROOT_ID = new NullableId("0");
-    
+
+    private static final NullableItem NULL_ITEM = new NullableItem(null);
+
     private static class ItemNameExtractor implements Function<BoxItem, String> {
         private final String parent;
         
@@ -93,13 +97,12 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
-    private static class NullableId {
-        private final String id;
+    private static class NullableItem {
+        private final BoxItem item;
         
-        public NullableId(String id) {
-            this.id = id;
+        public NullableItem(BoxItem item) {
+            this.item = item;
         }
-
     }
 
     BoxClientImpl(String token) {
@@ -143,17 +146,16 @@ public class BoxClientImpl implements BoxClient {
     @Override
     public Set<String> listDir(String path, ListingType listingType) throws InvalidTokenException, NotADirectoryException {
         Set<String> ret = Sets.newHashSet();
-        // TODO use metadata available during the get-id API call for directory listing
-        String id = getId(path);
+        BoxItem item = getItem(path);
 
-        if (id != null) {
-            HttpResponse resp = req("/folders/" + id).get();
-            addAll(ret, transform(filter(getChildren(resp.getJson()),
+        if (item != null && item.children != null && item.children.entries != null) {
+            addAll(ret, transform(filter(item.children.entries,
                                          new FileOrFolderPredicate(listingType)),
                                   new ItemNameExtractor(path)));
             return ret;
         }
 
+        Logger.warn("listDir: Cannot find well formed metadata entry for %s", path);
         return ret;
     }
 
@@ -182,7 +184,7 @@ public class BoxClientImpl implements BoxClient {
 
     @Override
     public boolean exists(String path) {
-        return getId(path) != null;
+        return getItem(path) != null;
     }
 
     /**
@@ -220,44 +222,54 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
-    public static List<BoxItem> getChildren(JsonElement json) {
-        return new Gson().fromJson(json, BoxItem.class).children.entries;
-    }
+    public static @CheckForNull BoxItem getChild(BoxItem parent, String child) {
+        if (parent == null || parent.children == null || parent.children.entries == null) {
+            return null;
+        }
 
-    public static String getIdOfChild(JsonElement json, String child) {
-        List<BoxItem> items = getChildren(json);
-       
+        List<BoxItem> items = parent.children.entries;
+
         Collection<BoxItem> matching = Collections2.filter(items, new ItemNameEquals(child));
         if (matching.isEmpty()) {
-            Logger.warn("Box: could not find child in parent. Child: %s Response: %s", child, json);
+            Logger.warn("Box: could not find child in parent. Child: %s Parent: %s", child, parent);
             return null;
         }
 
         if (matching.size() == 1) {
-            return matching.iterator().next().id;
+            return matching.iterator().next();
         }
 
-        Logger.error("Box: more than one child returned from API under same parent. Child: %s Matches: %s Response %s",
-                     child, matching, json);
+        Logger.error("Box: more than one child returned from API under same parent. Child: %s Matches: %s Parent: %s",
+                     child, matching, parent);
         return null;
-        
     }
-    
-    private @CheckForNull String getIdOfChild(@Nonnull String parentId, String child) {
-        if (parentId == null) {
+
+    private @CheckForNull BoxItem getMetadata(@Nonnull String id, BoxItem.Type type) {
+        if (id == null) {
             throw new NullPointerException("Parent id cannot be null");
         }
 
-        HttpResponse resp = req("/folders/" + parentId).get();
-        if (resp.success()) {
-            return getIdOfChild(resp.getJson(), child);
+        String url = null;
+        switch (type) {
+        case file:
+            url = "/files/";
+            break;
+        case folder:
+            url = "/folders/";
+            break;
         }
 
-        Logger.error("Box: Failed fetching folder info. Parent id: %s Child: %s Error: ",
-                     parentId, child, getError(resp));
+        Logger.info("getMetadata: id: %s type: %s", id, type);
+        HttpResponse resp = req(url + id).get();
+        if (resp.success()) {
+            return new Gson().fromJson(resp.getJson(), BoxItem.class);
+        }
+
+        Logger.error("Box: Failed fetching folder info. Id: %s Error: %s",
+                     id, getError(resp));
         return null;
     }
-    
+
     private static String getError(HttpResponse resp) {
         assert ! resp.success() : "Cannot get error for successful response.";
         try {
@@ -267,8 +279,13 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
+    private BoxItem getItem(String path) {
+        return pathToItemMap.get(RuleUtils.normalize(path)).item;
+    }
+
     private String getId(String path) {
-        return pathToIdMap.get(RuleUtils.normalize(path)).id;
+        BoxItem item = getItem(path);
+        return item == null ? null : item.id;
     }
 
     private WSRequest req(String path) {
