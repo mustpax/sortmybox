@@ -3,6 +3,7 @@ package box.gson;
 import java.io.Serializable;
 
 import com.google.appengine.repackaged.com.google.common.base.Objects;
+import com.google.gson.annotations.SerializedName;
 
 public class BoxItem implements Serializable {
     public static enum Type {
@@ -14,7 +15,10 @@ public class BoxItem implements Serializable {
     public String id;
     public Type type;
     public String path;
-    
+
+    @SerializedName("item_collection")
+    public BoxItemCollection children;
+
     @Override
     public String toString() {
         return Objects.toStringHelper(getClass())

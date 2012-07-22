@@ -4,7 +4,6 @@ import static com.google.common.collect.Iterables.addAll;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
@@ -61,6 +59,7 @@ public class BoxClientImpl implements BoxClient {
     }
 
     public final String token;
+
     private final Map<String, NullableId> pathToIdMap = new MapMaker()
         .makeComputingMap(new Function<String, NullableId>() {
             @Override
@@ -222,11 +221,7 @@ public class BoxClientImpl implements BoxClient {
     }
 
     public static List<BoxItem> getChildren(JsonElement json) {
-        Type t = new TypeToken<List<BoxItem>>(){}.getType();
-        return new Gson().fromJson(json.getAsJsonObject()
-                                       .getAsJsonObject("item_collection")
-                                       .get("entries"),
-                                   t);
+        return new Gson().fromJson(json, BoxItem.class).children.entries;
     }
 
     public static String getIdOfChild(JsonElement json, String child) {
