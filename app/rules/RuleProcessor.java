@@ -39,23 +39,24 @@ public class RuleProcessor implements Job {
         Long lastId = null;
 
         for (Key userKey: userKeys) {
+            if (userKey.getId() == 0L) {
+                continue;
+            }
+
             if (startId == null) {
                 startId = userKey.getId();
             }
 
-            if (startId == 0L) {
-                continue;
-            }
-
             lastId = userKey.getId();
-            if (count % chunkSize == 0) {
+
+            if (count % chunkSize == 0 && startId != null && lastId != null) {
                 ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
                 startId = null;
             }
             count++;
         }
 
-        if (startId != null) {
+        if (startId != null && lastId != null) {
             ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
         }
 
