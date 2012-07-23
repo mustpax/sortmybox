@@ -39,7 +39,7 @@ public class RuleProcessor implements Job {
         Long lastId = null;
 
         for (Key userKey: userKeys) {
-            if (userKey.getId() == 0L) {
+            if (Long.valueOf(0L).equals(userKey.getId())) {
                 continue;
             }
 

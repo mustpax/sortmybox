@@ -49,6 +49,11 @@ public class ChunkedRuleProcessor implements Task {
         int moves = 0;
         int numUsers = 0;
         for (User user: users) {
+            if (Long.valueOf(0L).equals(user.id)) {
+                Logger.warn("ChunkedRuleProcessor.execute: Skipping apparent box user %s",  user);
+                continue;
+            }
+
             moves += RuleUtils.runRules(user).size();
             numUsers++;
             if (numUsers > chunkSize) {
@@ -64,8 +69,11 @@ public class ChunkedRuleProcessor implements Task {
     private static Iterable<User> getUsersForKeyRange(long startId, long lastId) {
         Query q = User.all()
 			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(startId))
-			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, User.key(lastId))
 			          .addFilter("periodicSort", FilterOperator.EQUAL, true);
+        if (lastId > 0) {
+            Logger.warn("ChunkedRuleProcessor.getUsersForKeyRange: last id is 0. Skipping end constraint. Start id: %d", startId);
+            q.addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, User.key(lastId));
+        }
         return User.query(q);
     }
 }
