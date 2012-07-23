@@ -43,6 +43,10 @@ public class RuleProcessor implements Job {
                 startId = userKey.getId();
             }
 
+            if (startId == 0L) {
+                continue;
+            }
+
             lastId = userKey.getId();
             if (count % chunkSize == 0) {
                 ChunkedRuleProcessor.submit(numMessages++, startId, lastId, chunkSize);
