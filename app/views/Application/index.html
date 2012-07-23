@@ -1,4 +1,10 @@
 #{extends 'main.html' /}
+%{
+    if (user.accountType == models.User.AccountType.BOX)  
+        accountType = "Box";
+    else
+        accountType = "Dropbox";
+}%
 
 #{if initResult.createdSortboxDir }
 <div class="row">
@@ -6,7 +12,7 @@
 		<div class="alert alert-info alert-created hide">
 			<a class="close" data-dismiss="alert">×</a>
 		    <h4 class="alert-heading">SortMyBox created!</h4>
-			We created a folder called <strong>SortMyBox</strong> for you in your Dropbox.
+			We created a folder called <strong>SortMyBox</strong> for you in your ${accountType}!
             Save files here to get them sorted based on your rules.<br>
             #{if initResult.createdCannedRules}
 	            We also created some rules for you to get you started.
@@ -35,10 +41,7 @@
 <div class="row">
   <div class="span12">
     <div class="page-header">
-      <h1>#{if user.accountType == models.User.AccountType.BOX } Box<small>&trade;</small> Sorting Rules #{/if}
-        #{else}
-        Dropbox<small>&trade;</small> Sorting rules
-        #{/else}
+      <h1>${accountType}<small>&trade;</small> Sorting Rules 
         <small>Rules are applied to your SortMyBox folder every 15 minutes.</small>
       </h1>
     </div>

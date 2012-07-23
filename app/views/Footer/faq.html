@@ -5,13 +5,14 @@
 <div class="page-header">
 	<h1>Frequently Asked Questions
 	   <a class="btn btn-primary login pull-right" href="@{Login.auth()}">Login with Dropbox</a>
+	   <a class="btn btn-primary login pull-right" href="@{Login.boxAuth()}">Login with Box</a>
 	</h1>
 </div>
 <div class="well faq">
 
 	<h3>What is SortMyBox?</h3>
 	
-	<p>SortMyBox is a magic folder inside your Dropbox folder.
+	<p>SortMyBox is a magic folder inside your cloud storage folder.
        Save new files there and we will move them based on rules you create.
        Like e-mail filters, for your Dropbox.</p>
 	
@@ -26,13 +27,13 @@
 	
 	<h3>How do I begin?</h3>
 	
-	<p><a href="@{Login.login()}">Login using your Dropbox account</a> and 
+	<p>Login using your <a href="@{Login.login()}">Dropbox</a> or <a href="@{Login.boxAuth()}">Box</a> account and 
        we will create a SortMyBox folder and some sample rules for you.
        Save your files in this folder and you're good to go.</p>
 	
-	<h3>Why do I have to provide access for my Dropbox account?</h3>
+	<h3>Why do I have to provide access for my Dropbox/Box account?</h3>
 	
-	<p>SortMyBox needs permission to move files around in your Dropbox. SortMyBox will never use your Dropbox access for any other purposes.</p>
+	<p>SortMyBox needs permission to move files around and put them in the appropriate folders. SortMyBox will never use your access for any other purposes.</p>
 	
 	<h3>What sorting options do I have?</h3>
 		
@@ -75,6 +76,6 @@
 	
 	<h3>Anything else?</h3>
 	
-	<p>Yes, please help us spread the word and share SortMyBox with other Dropbox users! </p>
+	<p>Yes, please help us spread the word and share SortMyBox with other Dropbox & Box users! </p>
       
 </div>
