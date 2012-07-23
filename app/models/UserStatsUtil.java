@@ -6,6 +6,7 @@ import java.util.HashSet;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -27,7 +28,7 @@ public static int countUniqueFileMoveUsers(String dateProperty, Date from, Date 
     	PreparedQuery pq = ds.prepare(query);
     	
     	// We use an iterator for loop to count all entities
-    	HashSet hs = new HashSet();
+    	HashSet<Key> hs = new HashSet<Key>();
         for (Entity e: pq.asIterable()) {
             hs.add(e.getParent());
         }

@@ -2,19 +2,13 @@ package func;
 
 import java.util.Arrays;
 import java.util.Date;
-
 import models.FileMove;
 import models.User;
 import models.UserStatsUtil;
 import models.User.AccountType;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
-
 import com.google.appengine.api.datastore.Key;
-
-import cron.DailyUsageStatsGatherer;
-
 import unit.models.BaseModelTest;
 
 /**

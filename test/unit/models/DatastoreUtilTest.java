@@ -2,11 +2,8 @@ package unit.models;
 
 import java.util.Arrays;
 import java.util.Date;
-
 import models.DailyUsageStats;
 import models.DatastoreUtil;
-import models.UserStatsUtil;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
 
