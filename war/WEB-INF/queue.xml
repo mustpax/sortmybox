@@ -8,7 +8,7 @@
         <bucket-size>40</bucket-size>
         <max-concurrent-requests>10</max-concurrent-requests>
         <retry-parameters>
-            <task-retry-limit>5</task-retry-limit>
+            <task-retry-limit>1</task-retry-limit>
             <min-backoff-seconds>10</min-backoff-seconds>
             <max-backoff-seconds>200</max-backoff-seconds>
             <max-doublings>2</max-doublings>
