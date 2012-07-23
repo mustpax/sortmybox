@@ -25,6 +25,7 @@ import dropbox.gson.DbxAccount;
 public class UserTest extends BaseModelTest {
 
     private static final long ID = 67676767L;
+    private static final long ID2 = 60065L;
     private static final String TOKEN = "abcd";
     private static final String SECRET = "defg";
     private static final String EMAIL = "foo@bar";
@@ -179,11 +180,14 @@ public class UserTest extends BaseModelTest {
         dropbox = User.findById(AccountType.DROPBOX, ID);
 
         User box = newUser();
+        box.id = ID2;
         box.setName("box");
         box.accountType = AccountType.BOX;
         box.save();
-        box = User.findById(AccountType.BOX, ID);
+        box = User.findById(AccountType.BOX, ID2);
 
+        assertEquals(ID, (long) dropbox.id);
+        assertEquals(ID2, (long) box.id);
         assertFalse(box.getName().equals(dropbox.getName()));
         assertFalse(box.equals(dropbox));
         assertNotSame(box.accountType, dropbox.accountType);

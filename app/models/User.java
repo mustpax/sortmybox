@@ -28,6 +28,8 @@ import dropbox.gson.DbxAccount;
 
 @Cacheable
 public class User implements Serializable {
+    private static final String KEY_DELIM = ":";
+
     public static enum AccountType {
         DROPBOX,
         BOX;
@@ -83,7 +85,6 @@ public class User implements Serializable {
     }
     
     public User(Entity entity) {
-        this.id = entity.getKey().getId();
         this.name = (String) entity.getProperty("name");
         this.nameLower = (String) entity.getProperty("nameLower");
         if (this.nameLower == null && this.name != null) {
@@ -107,6 +108,15 @@ public class User implements Serializable {
         this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
         if (this.accountType == null) {
             this.accountType = AccountType.DROPBOX;
+        }
+
+        switch (this.accountType) {
+        case DROPBOX:
+            this.id = entity.getKey().getId();
+            break;
+        case BOX:
+            this.id = Long.valueOf(entity.getKey().getName().split(KEY_DELIM)[1]);
+            break;
         }
     }
 
@@ -227,12 +237,12 @@ public class User implements Serializable {
 
         switch (accountType) {
         case BOX:
-            String strId = AccountType.BOX.name() + ":" + id;
+            String strId = AccountType.BOX.name() + KEY_DELIM + id;
             return KeyFactory.createKey(KIND, strId);
         case DROPBOX:
             return KeyFactory.createKey(KIND, id);
         }
-        
+
         throw new IllegalStateException("Cannot create User key for AccountType: " + accountType);
     }
 
