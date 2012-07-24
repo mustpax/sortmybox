@@ -6,8 +6,8 @@ import static com.google.common.collect.Iterables.transform;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -20,15 +20,17 @@ import rules.RuleUtils;
 import box.Box.URLs;
 import box.gson.BoxError;
 import box.gson.BoxItem;
-import box.gson.BoxName;
 import box.gson.BoxMoveReq;
+import box.gson.BoxName;
 
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
@@ -61,28 +63,29 @@ public class BoxClientImpl implements BoxClient {
 
     public final String token;
 
-    private final Map<String, NullableItem> pathToItemMap = new MapMaker()
-        .makeComputingMap(new Function<String, NullableItem>() {
-            @Override
-            public NullableItem apply(String path) {
-                if (path == null || "/".equals(path)) {
-                    return new NullableItem(getMetadata("0", BoxItem.FOLDER));
-                }
+    private Cache<String, NullableItem> itemCache = CacheBuilder
+            .newBuilder()
+            .build(CacheLoader.from(new Function<String, NullableItem>() {
+                @Override
+                public NullableItem apply(String path) {
+                    if (path == null || "/".equals(path)) {
+                        return new NullableItem(getMetadata("0", BoxItem.FOLDER));
+                    }
 
-                BoxItem parent = getItem(RuleUtils.getParent(path));
-                if (parent == null) {
-                    return NULL_ITEM;
-                }
+                    BoxItem parent = getItem(RuleUtils.getParent(path));
+                    if (parent == null) {
+                        return NULL_ITEM;
+                    }
 
-                // Child metadata is loaded as a mini item, we do a new fetch to get the full listing
-                BoxItem miniChild = getChild(parent, RuleUtils.basename(path));
-                if (miniChild == null || miniChild.id == null) {
-                    return NULL_ITEM;
-                }
+                    // Child metadata is loaded as a mini item, we do a new fetch to get the full listing
+                    BoxItem miniChild = getChild(parent, RuleUtils.basename(path));
+                    if (miniChild == null || miniChild.id == null) {
+                        return NULL_ITEM;
+                    }
 
-                return new NullableItem(getMetadata(miniChild.id, miniChild.type));
-            }
-        });
+                    return new NullableItem(getMetadata(miniChild.id, miniChild.type));
+                }
+            }));
 
     private static final NullableItem NULL_ITEM = new NullableItem(null);
 
@@ -100,7 +103,7 @@ public class BoxClientImpl implements BoxClient {
     }
 
     private static class NullableItem {
-        private final BoxItem item;
+        public final BoxItem item;
         
         public NullableItem(BoxItem item) {
             this.item = item;
@@ -117,21 +120,38 @@ public class BoxClientImpl implements BoxClient {
         Preconditions.checkNotNull(from);
         Preconditions.checkNotNull(to);
         String fromId = getId(from);
-        String toId = getId(RuleUtils.getParent(to));
-        if (fromId == null ||
-            toId   == null) {
+        if (fromId == null) {
             Logger.error("Failed to move file from %s to %s. Cannot resolve from file id.",
                          from, to);
             return;
         }
 
-        Logger.info("Attempting to move file from: %s(%s) To: %s(%s)", from, fromId, RuleUtils.getParent(to), toId);
+        String parent = RuleUtils.getParent(to);
+        BoxItem toItem = getItem(parent);
+        if (toItem == null) {
+            Logger.warn("BoxClient.move: Parent folder missing: %s", parent);
+            toItem = mkdirItem(parent);
+
+            if (toItem == null) {
+                Logger.error("Cannot move file, failed creating parent.");
+                return;
+            }
+        }
+
+        if (! toItem.isFolder()) {
+            Logger.error("Cannot move, parent item is not a folder. Parent: %s Item: %s", parent, toItem);
+            return;
+        }
+
+        Logger.info("Attempting to move file from: %s(%s) To: %s(%s)", from, fromId, RuleUtils.getParent(to), toItem);
         HttpResponse resp = req("/files/" + fromId)
-                .body(new Gson().toJson(new BoxMoveReq(toId, RuleUtils.basename(to))))
+                .body(new Gson().toJson(new BoxMoveReq(toItem.id, RuleUtils.basename(to))))
                 .put();
 
         if (resp.success()) {
             BoxItem file = new Gson().fromJson(resp.getJson(), BoxItem.class);
+            invalidate(from);
+            invalidate(to);
             Logger.info("Successfully moved file from %s to %s. File: %s",
                         from, to, file);
             return;
@@ -167,25 +187,43 @@ public class BoxClientImpl implements BoxClient {
 
     @Override
     public boolean mkdir(String path) {
+        return mkdirItem(path) != null;
+    }
+
+    private BoxItem mkdirItem(String path) {
         Preconditions.checkNotNull(path, "Missing path.");
-        String parentId = getId(RuleUtils.getParent(path));
-        if (parentId ==  null) {
-            Logger.error("Cannot create folder because parent directory doesn't exist: %s", path);
-            return false;
+        Logger.info("BoxClient.mkdir: path %s", path);
+        String parent = RuleUtils.getParent(path);
+        BoxItem parentItem = getItem(parent);
+
+        if (parentItem ==  null) {
+            Logger.warn("Parent folder doesn't exist, creating. Path: %s Parent: %s", path, parent);
+            parentItem = mkdirItem(parent);
+
+            if (parentItem == null) {
+                Logger.error("Could not create parent directory: %s", parent);
+                return null;
+            }
         }
 
-        HttpResponse resp = req("/folders/" + parentId)
+        if (! parentItem.isFolder()) {
+            Logger.error("Cannot create directory because parent is not a directory. Parent path: %s Item: %s", parent, parentItem);
+            return null;
+        }
+
+        HttpResponse resp = req("/folders/" + parentItem.id)
                 .body(new Gson().toJson(new BoxName(RuleUtils.basename(path))))
                 .post();
 
         if (resp.success()) {
             BoxItem folder = new Gson().fromJson(resp.getJson(), BoxItem.class);
+            invalidate(path);
             Logger.info("Successfully created folder at path %s Folder: %s", path, folder);
-            return true;
+            return folder;
         }
 
         Logger.error("Failed creating directory '%s' Error: %s", path, getError(resp));
-        return false;
+        return null;
     }
 
     @Override
@@ -282,8 +320,17 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
+    private void invalidate(String path) {
+        itemCache.invalidate(RuleUtils.normalize(path));
+    }
+
     private BoxItem getItem(String path) {
-        return pathToItemMap.get(RuleUtils.normalize(path)).item;
+        try {
+            return itemCache.get(RuleUtils.normalize(path)).item;
+        } catch (ExecutionException e) {
+            Logger.error(e, "Cannot load %s", path);
+            return null;
+        }
     }
 
     private String getId(String path) {
