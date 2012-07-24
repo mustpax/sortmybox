@@ -6,18 +6,24 @@ import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
 
 public class BoxItem implements Serializable {
-    public static enum Type {
-        file,
-        folder
-    }
+    public static final String FILE = "file";
+    public static final String FOLDER = "folder";
 
     public String name;
     public String id;
-    public Type type;
+    public String type;
     public String path;
 
     @SerializedName("item_collection")
     public BoxItemCollection children;
+
+    public boolean isFolder() {
+        return FOLDER.equals(type);
+    }
+
+    public boolean isFile() {
+        return FILE.equals(type);
+    }
 
     @Override
     public String toString() {

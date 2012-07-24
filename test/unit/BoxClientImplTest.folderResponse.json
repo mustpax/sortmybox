@@ -40,7 +40,7 @@
         "total_count":2,
         "entries":[
             {
-                "type":"file",
+                "type":"other",
                 "id":"2305649799",
                 "sequence_id":"1",
                 "name":"testing.html"

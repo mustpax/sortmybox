@@ -46,14 +46,16 @@ public class BoxClientImpl implements BoxClient {
 
         @Override
         public boolean apply(BoxItem item) {
-            switch (item.type) {
-            case file:
+            if (item.isFile()) {
                 return this.type.includeFiles;
-            case folder:
+            }
+
+            if (item.isFolder()) {
                 return this.type.includeDirs;
             }
 
-            throw new IllegalStateException("Unhandled BoxItem type: " + item.type);
+            Logger.warn("FileFolderPredicate: Unknown box item type: %s", item);
+            return false;
         }
     }
 
@@ -64,7 +66,7 @@ public class BoxClientImpl implements BoxClient {
             @Override
             public NullableItem apply(String path) {
                 if (path == null || "/".equals(path)) {
-                    return new NullableItem(getMetadata("0", BoxItem.Type.folder));
+                    return new NullableItem(getMetadata("0", BoxItem.FOLDER));
                 }
 
                 BoxItem parent = getItem(RuleUtils.getParent(path));
@@ -248,19 +250,16 @@ public class BoxClientImpl implements BoxClient {
         return null;
     }
 
-    private @CheckForNull BoxItem getMetadata(@Nonnull String id, BoxItem.Type type) {
+    private @CheckForNull BoxItem getMetadata(@Nonnull String id, String type) {
         if (id == null) {
             throw new NullPointerException("Parent id cannot be null");
         }
 
-        String url = null;
-        switch (type) {
-        case file:
-            url = "/files/";
-            break;
-        case folder:
+        String url;
+        if (BoxItem.FOLDER.equals(type)) {
             url = "/folders/";
-            break;
+        } else {
+            url = "/files/";
         }
 
         Logger.info("getMetadata: id: %s type: %s", id, type);
