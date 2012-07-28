@@ -161,16 +161,14 @@ select[size] {
 }
 
 .login {
-    margin-right: 30px;
+    margin-right: 15px;
+    margin-left: 15px;
+    width: 195px;
 }
 
 .login img {
 	margin-right: 5px;
 } 
-
-.learn {
-    margin-right: 40px;
-}
 
 .relative {
     position: relative;
