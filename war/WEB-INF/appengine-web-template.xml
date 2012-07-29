@@ -1,5 +1,5 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-    <application>sortmybox</application>
+    <application>sortmybox-hrd</application>
     <version>11-0-{suffix}</version>
     <threadsafe>true</threadsafe>
     <system-properties>
