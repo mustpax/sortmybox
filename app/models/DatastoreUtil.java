@@ -7,6 +7,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.capabilities.CapabilitiesService;
+import com.google.appengine.api.capabilities.CapabilitiesServiceFactory;
+import com.google.appengine.api.capabilities.Capability;
+import com.google.appengine.api.capabilities.CapabilityStatus;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -193,5 +197,13 @@ public class DatastoreUtil {
             Cache.get().delete(model, mapper);
         }
         ds.delete(mapper.toKey(model));
+    }
+
+    /**
+     * @return true if datastore is available for writes.
+     */
+    public static boolean isWritable() {
+        CapabilitiesService service = CapabilitiesServiceFactory.getCapabilitiesService();
+        return service.getStatus(Capability.DATASTORE_WRITE).getStatus() != CapabilityStatus.DISABLED;
     }
 }

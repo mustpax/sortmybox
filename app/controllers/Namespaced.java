@@ -1,10 +1,12 @@
 package controllers;
 
+import models.DatastoreUtil;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
 
 import com.google.appengine.api.NamespaceManager;
+import com.sun.tools.apt.Main;
 
 /**
  * Update namespace for requests.
@@ -21,6 +23,10 @@ public class Namespaced extends Controller {
                 NamespaceManager.set(namespace);
             }
         }
+
+        if (! DatastoreUtil.isWritable()) {
+            response.status = 503;
+            render("Namespaced/maint.html");
+        }
     }
-    
 }
