@@ -26,7 +26,15 @@ import cron.Job;
  */
 @With({ ErrorReporter.class, Namespaced.class })
 public class CronManager extends Controller {
+    private static final boolean RUN_CRON = false;
+
     public static void process(String jobPath) {
+        if (! RUN_CRON) {
+            Logger.warn("Not running cron job. Cron disabled. Path: %s", jobPath);
+            response.status = 503;
+            return;
+        }
+
         Job job = null;
         try {
             String className = getJobClassName(jobPath);
