@@ -21,7 +21,7 @@ static: all
 deps: .lastdepsrun
 
 .lastdepsrun: conf/dependencies.yml
-	play deps --sync
+	play deps
 	play ec
 	date > .lastdepsrun
 
