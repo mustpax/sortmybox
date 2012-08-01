@@ -10,6 +10,11 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.WebAuthSession;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -34,8 +39,13 @@ class DropboxClientImpl implements DropboxClient {
     private static final int HTTP_UNAUTHORIZED = 401;
     private final String token;
     private final String secret;
+    private final DropboxAPI<WebAuthSession> api;
     
     DropboxClientImpl(String token, String secret) {
+        WebAuthSession was = new WebAuthSession(new AppKeyPair(Dropbox.CONSUMER_KEY, Dropbox.CONSUMER_SECRET),
+                                                AccessType.DROPBOX,
+                                                new AccessTokenPair(token, secret));
+        this.api = new DropboxAPI<WebAuthSession>(was);
         this.token = Preconditions.checkNotNull(token, "Token can't be null.");
         this.secret = Preconditions.checkNotNull(secret, "Secret can't be null");
     }
