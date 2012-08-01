@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import common.api.ApiClient;
 
 import dropbox.Dropbox;
-import dropbox.DropboxOAuthServiceInfoFactory;
 import dropbox.DropboxURLs;
 import dropbox.gson.DbxAccount;
 import dropbox.gson.DbxMetadata;
@@ -174,7 +173,7 @@ class DropboxClientImpl implements DropboxClient {
         Preconditions.checkArgument(url.startsWith("/"), "url must start with /");
 
         WSRequest req = WS.url(Dropbox.API_URL + url)
-                          .oauth(DropboxOAuthServiceInfoFactory.create(),
+                          .oauth(Dropbox.OAUTH,
                                  this.token,
                                  this.secret);
         switch (method) {
@@ -240,7 +239,7 @@ class DropboxClientImpl implements DropboxClient {
                     any = true;
                 }
             }
-            ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
+            ServiceInfo serviceInfo = Dropbox.OAUTH;
             return WS.url(fullUrl.toString()).oauth(serviceInfo, token, secret);
         }
         

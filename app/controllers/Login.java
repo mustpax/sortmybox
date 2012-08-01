@@ -18,7 +18,7 @@ import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
 import common.request.Headers;
 
-import dropbox.DropboxOAuthServiceInfoFactory;
+import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
 import dropbox.gson.DbxAccount;
@@ -109,7 +109,7 @@ public class Login extends Controller {
     public static void authCallback() throws Exception {
         String token = session.get(SessionKeys.TOKEN);
         String secret = session.get(SessionKeys.SECRET);
-        ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
+        ServiceInfo serviceInfo = Dropbox.OAUTH;
         OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
         if (oauthResponse.error == null) {
             Logger.info("Succesfully authenticated with Dropbox.");
@@ -128,7 +128,7 @@ public class Login extends Controller {
 
     public static void auth() throws Exception {
         flash.keep(REDIRECT_URL);
-        ServiceInfo serviceInfo = DropboxOAuthServiceInfoFactory.create();
+        ServiceInfo serviceInfo = Dropbox.OAUTH;
         OAuth oauth = OAuth.service(serviceInfo);
         OAuth.Response oauthResponse = oauth.retrieveRequestToken();
         if (oauthResponse.error == null) {
