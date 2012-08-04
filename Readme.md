@@ -1,5 +1,7 @@
 # [SortMyBox][sortbox]
 
+![Test status](https://secure.travis-ci.org/mustpax/sortmybox.png?branch=master)
+
 Like e-mail filters, for your Dropbox.
 
 SortMyBox is a magic folder in your Dropbox that moves files saved to it to
