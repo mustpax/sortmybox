@@ -5,7 +5,7 @@ destlib = lib/dropbox-java-sdk-1.3.1.jar lib/httpclient-4.0.3.jar lib/httpcore-4
 playgae = submodules/play-gae/lib/play-gae.jar
 play = submodules/play/framework/play-local.jar
 
-all: deps js conf/secret.conf ${playgae} ${play} ${destlib}
+all: deps js conf/secret.conf ${play} ${playgae} ${destlib}
 	build/prep-webxml.py
 
 test: all
@@ -25,7 +25,7 @@ $(destlib): $(extlib)
 static: all
 	build/sync-bucket.sh
 
-deps: .lastdepsrun
+deps: ${play} .lastdepsrun
 
 .lastdepsrun: conf/dependencies.yml
 	play deps
@@ -36,10 +36,10 @@ conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
 ${playgae}:
-	ant -f submodules/play/framework/build.xml -Dversion=local
+	ant -f submodules/play-gae/build.xml -Dplay.path=${PLAY_PATH}
 
 ${play}:
-	ant -f submodules/play-gae/build.xml -Dplay.path=${PLAY_PATH}
+	ant -f submodules/play/framework/build.xml -Dversion=local
 
 stage: all static
 	build/checkbranch.sh staging
@@ -58,12 +58,12 @@ lint:
 	jshint public/
 
 clean:
-	play clean
-	rm $(alljs)
-	rm ${playgae}
-	rm ${play}
-	rm .lastdepsrun
-	rm lib/*
+	-play clean
+	-rm $(alljs)
+	-rm ${playgae}
+	-rm ${play}
+	-rm .lastdepsrun
+	-rm lib/*
 
 auto-test: conf/secret.conf ${play} ${playgae}
 	play auto-test --deps
