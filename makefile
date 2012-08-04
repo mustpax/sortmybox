@@ -35,10 +35,12 @@ deps: ${play} .lastdepsrun
 conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
-${playgae}:
+${playgae}: 
+	git submodule update --init
 	ant -f submodules/play-gae/build.xml -Dplay.path=${PLAY_PATH}
 
 ${play}:
+	git submodule update --init
 	ant -f submodules/play/framework/build.xml -Dversion=local
 
 stage: all static
