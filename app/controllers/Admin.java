@@ -173,7 +173,8 @@ public class Admin extends Controller {
     }
 
     public static void debugApi(AccountType type, Long userId, String url, HTTPMethod method) {
-        validation.url(url);
+        validation.required(url);
+        validation.required(userId);
         String apiResp = null;
 
         if ((userId != null) &&
