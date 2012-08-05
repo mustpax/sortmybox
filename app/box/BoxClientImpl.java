@@ -102,7 +102,7 @@ public class BoxClientImpl implements BoxClient {
         }
     }
 
-    private static class NullableItem {
+    public static class NullableItem {
         public final BoxItem item;
         
         public NullableItem(BoxItem item) {
