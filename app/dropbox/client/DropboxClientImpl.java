@@ -10,13 +10,6 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session.AccessType;
-import com.dropbox.client2.session.WebAuthSession;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -38,16 +31,11 @@ import dropbox.gson.DbxMetadata;
  */
 class DropboxClientImpl implements DropboxClient {
     
-    private static final Integer HTTP_UNAUTHORIZED = Integer.valueOf(401);
+    private static final int HTTP_UNAUTHORIZED = 401;
     private final String token;
     private final String secret;
-    private final DropboxAPI<WebAuthSession> api;
     
     DropboxClientImpl(String token, String secret) {
-        WebAuthSession was = new WebAuthSession(new AppKeyPair(Dropbox.CONSUMER_KEY, Dropbox.CONSUMER_SECRET),
-                                                AccessType.DROPBOX,
-                                                new AccessTokenPair(token, secret));
-        this.api = new DropboxAPI<WebAuthSession>(was);
         this.token = Preconditions.checkNotNull(token, "Token can't be null.");
         this.secret = Preconditions.checkNotNull(secret, "Secret can't be null");
     }
@@ -146,25 +134,36 @@ class DropboxClientImpl implements DropboxClient {
     
     @Override
     public void move(String from, String to) throws FileMoveCollisionException,
-                                                    InvalidTokenException {
+                                                           InvalidTokenException {
         Preconditions.checkArgument(from != null && to != null,
                 "To and from paths cannot be null.");
         Preconditions.checkArgument((from.charAt(0) == '/') && (to.charAt(0) == '/'),
                 "To and from paths should start with /");
         Preconditions.checkArgument(Dropbox.isValidFilename(to),
                 "To path contains bad characters: '" + to + "' Bad chars: \\ : ? * < > \"");
-
+        
+        WSRequest ws = new WSRequestFactory(DropboxURLs.MOVE, token, secret)
+            .addPair("root", "dropbox")
+            .addPair("from_path", from)
+            .addPair("to_path", to)
+            .create();
+        
         try {
-            api.move(from, to);
-        } catch (DropboxServerException e) {
-            if (HTTP_UNAUTHORIZED.equals(e.error)) {
-                throw new InvalidTokenException(e.reason);
-            } else if (Integer.valueOf(403).equals(e.error)) {
-                throw new FileMoveCollisionException(e.reason);
-            }
-            Logger.error(e, "Unexpected error when trying to move from '%s' to '%s'", from, to);
-        } catch (DropboxException e) {
-            Logger.error(e, "Unexpected error when trying to move from '%s' to '%s'", from, to);
+	        HttpResponse resp = post(ws);
+
+	        if (resp.success()) {
+	            Logger.info("Successfully moved files. From: '%s' To: '%s'", from, to);
+	            return;
+	        }
+
+	        String err = getError(resp);
+	        if (Integer.valueOf(403).equals(resp.getStatus())) {
+		        Logger.warn("File collision when trying to move from '%s' to '%s'. %s", from, to, err);
+	            throw new FileMoveCollisionException(err);
+	        }
+	        Logger.error("Failed to move files. " + err);
+        } catch (RuntimeException e) {
+            Logger.error(e, "Exception when trying to move from '%s' to '%s'", from, to);
         }
     }
     
@@ -269,7 +268,7 @@ class DropboxClientImpl implements DropboxClient {
     
     private static HttpResponse get(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.get();
-        if (HTTP_UNAUTHORIZED.equals(ret.getStatus())) {
+        if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
             throw new InvalidTokenException(getError(ret));
         }
         return ret;
@@ -277,7 +276,7 @@ class DropboxClientImpl implements DropboxClient {
 
     private static HttpResponse post(WSRequest req) throws InvalidTokenException {
         HttpResponse ret = req.post();
-        if (HTTP_UNAUTHORIZED.equals(ret.getStatus())) {
+        if (Integer.valueOf(HTTP_UNAUTHORIZED).equals(ret.getStatus())) {
             throw new InvalidTokenException(getError(ret));
         }
         return ret;
