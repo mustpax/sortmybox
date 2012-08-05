@@ -1,6 +1,6 @@
 [submodule "submodules/play-gae"]
 	path = submodules/play-gae
-	url = git://github.com/mustpax/play-gae.git
+	url = git@github.com:mustpax/play.git
 [submodule "submodules/play"]
 	path = submodules/play
 	url = git@github.com:mustpax/play.git
