@@ -192,7 +192,7 @@ class DropboxClientImpl implements DropboxClient {
 	        error = resp.getJson().getAsJsonObject().get("error").getAsString();
         } catch (UnsupportedOperationException e) {
             Logger.error(e, "Cannot parse error response from Dropbox. Resp: %s", resp.getStatus());
-            error = "[cannot read error message]";
+            error = "[cannot read error message] " + resp.getString();
         }
         return String.format("Status: %s Message: %s", sanitizeStatus(resp.getStatus()), error);
     }
