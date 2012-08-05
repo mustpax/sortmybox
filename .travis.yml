@@ -1,9 +1,7 @@
 language: java
-env:
-  - PLAY_VERSION=1.2.4
+jdk:
+  - openjdk6
 install:
-  - wget http://download.playframework.org/releases/play-${PLAY_VERSION}.zip
-  - unzip -q play-${PLAY_VERSION}.zip 
-  - export PLAY_PATH=`pwd`/play-${PLAY_VERSION}
+  - export PLAY_PATH=`pwd`/submodules/play
   - export PATH=${PATH}:${PLAY_PATH}
 script: make auto-test
