@@ -58,7 +58,9 @@
             _.each(_.rest(cols), function(col) { 
                 var elem = $('.chart.' + scope + '.' + col.name).get(0);
                 console.log(scope, col, elem);
-                if(col.name==='uniqueFileMoveUsers' && scope==='aggr') return;
+                if(col.name === 'uniqueFileMoveUsers' && scope === 'aggr') {
+                    return;
+                }
                 new google.visualization.LineChart(elem)
                     .draw(tablify(data[scope], col.name), { 'title': scope + ' usage stats: ' + col.label,
                                                           'width': 1000,
