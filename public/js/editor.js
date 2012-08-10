@@ -127,8 +127,8 @@
             $(this).typeahead({
                 matcher: function(item) {
                     // match the part of the query following the last comma 
-                    var query = this.query.substring(this.query.lastIndexOf(',') + 1, this.query.legnth);
-                    return ~item.toLowerCase().indexOf($.trim(query).toLowerCase());
+                    var query = this.query.substring(this.query.lastIndexOf(',') + 1);
+                    return item.toLowerCase().indexOf($.trim(query).toLowerCase()) === 0;
                 },
                 updater: function(item) {
                     var idx = this.query.lastIndexOf(',');
@@ -145,8 +145,10 @@
             typeahead = $(this).data('typeahead');
         }
 
-        var ruleType = $(this).parents('tr').first()
-            .find('select[name="type"] option:selected').val();
+        var ruleType = $(this).parents('tr')
+                              .first()
+                              .find('select[name="type"] option:selected')
+                              .val();
         if (ruleType === 'EXT_EQ') {
             typeahead.source = sortbox.ext;
         } else {
