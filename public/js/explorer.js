@@ -73,7 +73,7 @@
         
         function select() {
             return sortbox.template('exp-select', { path: basename(path),
-                                                     dataPath: path });
+                                                    dataPath: path });
         }
 
         function upLink() {
@@ -94,6 +94,12 @@
         if (isLoading) {
             exp.append(loading());
         } else {
+            dirs = _.sortBy(dirs,
+                            function(d) {
+                                return _.last(_.filter(d.split('/'),
+                                                       function(x) { return !!x; }))
+                                        .toLowerCase();
+                            });
             exp.append(sortbox.template('exp-folders', { dirs: dirs,
                                                          basename : basename }));
         }
