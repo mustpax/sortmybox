@@ -73,7 +73,7 @@ public class BoxClientImpl implements BoxClient {
                     }
 
                     BoxItem parent = getItem(RuleUtils.getParent(path));
-                    if (parent == null) {
+                    if (parent == null || parent.id == null) {
                         return NULL_ITEM;
                     }
 
@@ -150,7 +150,9 @@ public class BoxClientImpl implements BoxClient {
 
         if (resp.success()) {
             BoxItem file = new Gson().fromJson(resp.getJson(), BoxItem.class);
+            invalidate(RuleUtils.getParent(from));
             invalidate(from);
+            invalidate(RuleUtils.getParent(to));
             invalidate(to);
             Logger.info("Successfully moved file from %s to %s. File: %s",
                         from, to, file);
