@@ -133,7 +133,7 @@
                 updater: function(item) {
                     var idx = this.query.lastIndexOf(',');
                     var ret = $.trim(item).toLowerCase();
-                    if (!~idx) {
+                    if (idx < 0) {
                         // item is the only query term
                         return ret;
                     } else {
