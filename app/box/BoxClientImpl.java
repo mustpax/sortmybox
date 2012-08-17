@@ -313,8 +313,15 @@ public class BoxClientImpl implements BoxClient {
             return new Gson().fromJson(resp.getJson(), BoxItem.class);
         }
 
-        Logger.error("Box: Failed fetching folder info. Id: %s Error: %s",
-                     id, getError(resp));
+        String err = getError(resp);
+        if (Integer.valueOf(401).equals(resp.getStatus())) {
+            Logger.error("Box: Failed to fetch metadata because auth token has been revoked. Id: %s Error: %s",
+                         id, err);
+            throw new InvalidTokenException("Box auth token has been revoked.");
+        } 
+
+        Logger.error("Box: Failed to fetch metadata. Id: %s Error: %s",
+                     id, err);
         return null;
     }
 
