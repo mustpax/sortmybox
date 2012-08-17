@@ -56,7 +56,7 @@ public interface ApiClient {
      * @param path the full path of the directory to create
      * @return true if folder was created successfully, false otherwise
      */
-    boolean mkdir(String path);
+    boolean mkdir(String path) throws InvalidTokenException;
 
     /**
      * Check if a file or folder exists at the location.

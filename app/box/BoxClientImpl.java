@@ -68,26 +68,31 @@ public class BoxClientImpl implements BoxClient {
             .build(CacheLoader.from(new Function<String, NullableItem>() {
                 @Override
                 public NullableItem apply(String path) {
-                    if (path == null || "/".equals(path)) {
-                        return new NullableItem(getMetadata("0", BoxItem.FOLDER));
-                    }
+                    try {
+                        if (path == null || "/".equals(path)) {
+                            return new NullableItem(getMetadata("0", BoxItem.FOLDER));
+                        }
 
-                    BoxItem parent = getItem(RuleUtils.getParent(path));
-                    if (parent == null || parent.id == null) {
-                        return NULL_ITEM;
-                    }
+                        BoxItem parent = getItem(RuleUtils.getParent(path));
+                        if (parent == null || parent.id == null) {
+                            return NULL_ITEM;
+                        }
 
-                    // Child metadata is loaded as a mini item, we do a new fetch to get the full listing
-                    BoxItem miniChild = getChild(parent, RuleUtils.basename(path));
-                    if (miniChild == null || miniChild.id == null) {
-                        return NULL_ITEM;
-                    }
+                        // Child metadata is loaded as a mini item, we do a new fetch to get the full listing
+                        BoxItem miniChild = getChild(parent, RuleUtils.basename(path));
+                        if (miniChild == null || miniChild.id == null) {
+                            return NULL_ITEM;
+                        }
 
-                    return new NullableItem(getMetadata(miniChild.id, miniChild.type));
+                        return new NullableItem(getMetadata(miniChild.id, miniChild.type));
+                    } catch (InvalidTokenException e) {
+                        return INVALID_TOKEN_ITEM;
+                    }
                 }
             }));
 
     private static final NullableItem NULL_ITEM = new NullableItem(null);
+    private static final NullableItem INVALID_TOKEN_ITEM = new NullableItem(null);
 
     private static class ItemNameExtractor implements Function<BoxItem, String> {
         private final String parent;
@@ -188,11 +193,11 @@ public class BoxClientImpl implements BoxClient {
     }
 
     @Override
-    public boolean mkdir(String path) {
+    public boolean mkdir(String path) throws InvalidTokenException {
         return mkdirItem(path) != null;
     }
 
-    private BoxItem mkdirItem(String path) {
+    private BoxItem mkdirItem(String path) throws InvalidTokenException {
         Preconditions.checkNotNull(path, "Missing path.");
         Logger.info("BoxClient.mkdir: path %s", path);
         String parent = RuleUtils.getParent(path);
@@ -229,7 +234,7 @@ public class BoxClientImpl implements BoxClient {
     }
 
     @Override
-    public boolean exists(String path) {
+    public boolean exists(String path) throws InvalidTokenException {
         return getItem(path) != null;
     }
 
@@ -241,7 +246,7 @@ public class BoxClientImpl implements BoxClient {
      */
     @Override
     @Nonnull
-    public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException{
+    public HttpResponse debug(HTTPMethod method, String url) throws InvalidTokenException {
         Preconditions.checkArgument(url.startsWith("/"), "url must start with /");
         
         WSRequest req = req(url);
@@ -290,7 +295,7 @@ public class BoxClientImpl implements BoxClient {
         return null;
     }
 
-    private @CheckForNull BoxItem getMetadata(@Nonnull String id, String type) {
+    private @CheckForNull BoxItem getMetadata(@Nonnull String id, String type) throws InvalidTokenException {
         if (id == null) {
             throw new NullPointerException("Parent id cannot be null");
         }
@@ -326,16 +331,20 @@ public class BoxClientImpl implements BoxClient {
         itemCache.invalidate(RuleUtils.normalize(path));
     }
 
-    private BoxItem getItem(String path) {
+    private BoxItem getItem(String path) throws InvalidTokenException {
         try {
-            return itemCache.get(RuleUtils.normalize(path)).item;
+            NullableItem ni = itemCache.get(RuleUtils.normalize(path));
+            if (ni == INVALID_TOKEN_ITEM) {
+                throw new InvalidTokenException("Box auth token has been revoked.");
+            }
+            return ni.item;
         } catch (ExecutionException e) {
             Logger.error(e, "Cannot load %s", path);
             return null;
         }
     }
 
-    private String getId(String path) {
+    private String getId(String path) throws InvalidTokenException {
         BoxItem item = getItem(path);
         return item == null ? null : item.id;
     }
