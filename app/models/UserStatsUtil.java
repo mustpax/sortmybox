@@ -18,10 +18,9 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  */
 public class UserStatsUtil {
 	
-public static int countUniqueFileMoveUsers(String dateProperty, Date from, Date to, Query q) {
+public static int countUniqueFileMoveUsers(String dateProperty, Date from, Query q) {
     	
     	Query query = q.addFilter(dateProperty, FilterOperator.GREATER_THAN_OR_EQUAL, from)
-    					.addFilter(dateProperty, FilterOperator.LESS_THAN_OR_EQUAL, to)
     					.setKeysOnly();
     	
     	DatastoreService ds = DatastoreServiceFactory.getDatastoreService();

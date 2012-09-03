@@ -29,7 +29,7 @@ public class DailyUsageStatsGatherer implements Job {
         long usersDelta = DatastoreUtil.count("created", from, to, User.all());
         long rulesDelta = DatastoreUtil.count("created", from, to, Rule.all());
         long fileMovesDelta = DatastoreUtil.count("when", from, to, FileMove.all());
-        long uniqueFileMoveUsersDelta = UserStatsUtil.countUniqueFileMoveUsers("when", from, to, FileMove.all());
+        long uniqueFileMoveUsersDelta = UserStatsUtil.countUniqueFileMoveUsers("when", from, FileMove.all());
         
         DailyUsageStats delta = new DailyUsageStats(usersDelta, rulesDelta, fileMovesDelta, uniqueFileMoveUsersDelta);
         delta.save();
