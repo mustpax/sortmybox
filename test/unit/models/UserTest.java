@@ -140,7 +140,9 @@ public class UserTest extends BaseModelTest {
         //now lets get the user from the DB
         User newUser = User.findById(AccountType.DROPBOX, ID);
         //verify that the sortingFolder is set to the old value - /Sortbox
-        assertEquals("Did not find expected sortingFolder for old users!",Dropbox.getOldSortboxPath(),newUser.sortingFolder);
+        assertEquals("Did not find expected sortingFolder for old users!",
+                     Dropbox.getOldSortboxPath(),
+                     newUser.sortingFolder);
     }
 
     @Test

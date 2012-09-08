@@ -78,29 +78,11 @@ public class Application extends Controller {
         }
     }
     
-    /**
-     * @param user the logged in user
-     * @return InitResult the result of initialization
-     */
     private static InitResult initSortbox(User user) {
         boolean createdSortboxDir = false;
         boolean createdCannedRules = false;
-        boolean updatedSortingFolder = false;
         try {
             ApiClient client = ApiClientFactory.create(user);
-            // re-branding requires us to change the sorting folder name
-            if (Dropbox.getOldSortboxPath().equals(user.sortingFolder)) {
-                if (client.exists(user.sortingFolder)) {
-                    Logger.info("User with old Sortbox folder path logged in, moving old folder to new location");
-                    client.move(Dropbox.getOldSortboxPath(),
-                                Dropbox.getSortboxPath());
-                }
-
-                Logger.info("User with old Sortbox folder path logged in, updating sortingFolder in datastore");
-                user.sortingFolder = Dropbox.getSortboxPath();
-                user.save();
-                updatedSortingFolder = true;
-            }
 
             // now get the new sorting folder path for the user and keep going forward
             String sortboxPath = user.sortingFolder;
@@ -117,10 +99,8 @@ public class Application extends Controller {
         } catch (InvalidTokenException e) {
             Logger.error(e, "Invalid OAuth token for user %s", user);
             Login.logout();
-        } catch (FileMoveCollisionException e) {
-            Logger.warn("SortMyBox folder already exists for user '%s'", user);
 		}
-        return new InitResult(createdSortboxDir, createdCannedRules, updatedSortingFolder);
+        return new InitResult(createdSortboxDir, createdCannedRules);
     }
 
     /**
@@ -149,12 +129,9 @@ public class Application extends Controller {
         /** whether the app populated canned rules */
         final public boolean createdCannedRules;
         
-        final public boolean updatedSortingFolder;
-        
-        InitResult(boolean createdSortboxDir, boolean createdCannedRules,boolean updatedSortingFolder) {
+        InitResult(boolean createdSortboxDir, boolean createdCannedRules) {
             this.createdSortboxDir = createdSortboxDir;
             this.createdCannedRules = createdCannedRules;
-            this.updatedSortingFolder = updatedSortingFolder;
         }
     }
 }
