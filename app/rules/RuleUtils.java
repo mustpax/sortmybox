@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 
 import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
@@ -217,6 +218,17 @@ public class RuleUtils {
         return path == null ? null : new File(path).getName();
     }
 
+    public static String normalize(@CheckForNull String path) {
+        return normalize(path, true);
+    }
+
+    public static class StringTrimmer implements Function<String, String> {
+        @Override
+        public String apply(String input) {
+            return input == null ? null : input.trim();
+        }
+    }
+
     public static class IsEmptyOrNull implements Predicate<String> {
         @Override
         public boolean apply(String str) {
@@ -224,13 +236,12 @@ public class RuleUtils {
         }
     }
 
-    public static String normalize(@CheckForNull String path) {
-        return normalize(path, true);
-    }
-
     /**
-     * Normalize file path by collapsing adjacent / and ensure it has a
-     * leading /. Optionally, fold case.
+     * Normalize file path by
+     * 1. Collapsing adjacent /
+     * 2. ensure it has a leading /
+     * 4. Remove leading and trailing spaces from path components. 
+     * 3. Optionally, fold case.
      *
      * @param foldCase if true, convert name to lowercase 
      *
@@ -245,7 +256,8 @@ public class RuleUtils {
             path = path.toLowerCase();
         }
 
-        return "/" + StringUtils.join(Collections2.filter(Arrays.asList(path.split("/+")),
+        return "/" + StringUtils.join(Collections2.filter(Collections2.transform(Arrays.asList(path.split("/+")),
+                                                                                 new StringTrimmer()),
                                                           Predicates.not(new IsEmptyOrNull())),
                                       "/");
     }

@@ -58,6 +58,8 @@ public class RuleUtilsTest extends UnitTest {
         assertEquals("/a", RuleUtils.normalize("A"));
         assertEquals("/", RuleUtils.normalize(""));
         assertEquals("/a/bcd/efg", RuleUtils.normalize("//a///BcD//efG/////"));
+        assertEquals("/a/bcd/efg", RuleUtils.normalize("  / /a///BcD  //efG/////  "));
+        assertEquals("/a/B/C", RuleUtils.normalize("/a/B/C  ", false));
     }
 
     @Test
