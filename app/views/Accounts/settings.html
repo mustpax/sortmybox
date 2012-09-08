@@ -2,7 +2,6 @@
 #{set title:'Settings'/}
 #{set settings:'active'/}
 
-
 <div class="row">
   <div class="span8 offset2">
     <dl class="dl-horizontal account-info ">
@@ -26,6 +25,13 @@
             <button class="btn disabled">Disabled</button>        
         #{/form}
         #{/else}
+      </dd>
+      <dt>Sorting folder</dt>
+      <dd>
+        #{form @sortingFolder(), method:'POST', class:'form-inline' }
+          <input type="text" name="folder" value="${user.sortingFolder}">
+          <input type="submit" class="btn" value="Update">
+        #{/form}
       </dd>
       <dt>Last sync</dt>
       #{if user.lastSync}

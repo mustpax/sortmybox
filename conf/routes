@@ -12,6 +12,7 @@ GET     /account/settings                       Accounts.settings
 POST    /account/settings                       Accounts.settingsPost
 GET     /account/delete                         Accounts.delete
 POST    /account/delete                         Accounts.deletePost
+POST    /account/sortingFolder                  Accounts.sortingFolder
 
 # Footer
 GET     /team                                   Footer.team
