@@ -30,23 +30,23 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="/">SortMyBox</a>
-	      <ul class="nav">
+          <ul class="nav">
             <li class="#{get 'faq'}#{/get}"><a href="@{Footer.faq()}">FAQ</a></li>
-	      </ul>
-	      <ul class="nav pull-right">
-	        #{if user}
+          </ul>
+          <ul class="nav pull-right">
+            #{if user}
                 #{if user.isAdmin() }
                     <li class="#{get 'admin'}#{/get}"><a href="@{Admin.usageStats()}">Admin</a></li>
                 #{/if}
-	            <li class="dropdown">
-	              <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
-	              <ul class="dropdown-menu">
-	                <li><a href="@{Accounts.settings()}">Settings</a></li>
-	                <li class="divider"></li>
-	                <li><a href="@{Login.logout()}">Logout</a></li>
-	              </ul>
-	            </li>
-	          #{/if}
+                <li class="dropdown">
+                  <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="@{Accounts.settings()}">Settings</a></li>
+                    <li class="divider"></li>
+                    <li><a href="@{Login.logout()}">Logout</a></li>
+                  </ul>
+                </li>
+              #{/if}
            </ul>
         </div>
       </div>
@@ -73,19 +73,19 @@
       </div>
     </div>
     #{if play.mode.isDev() }
-	    <script src="#{static-path '/public/js/json2.js'/}"></script>
-	    <script src="#{static-path '/public/js/underscore.js'/}"></script>
-	    <script src="#{static-path '/public/js/jquery-1.7.2.js'/}"></script>
-	    <script src="#{static-path '/public/js/bootstrap.js'/}"></script>
+        <script src="#{static-path '/public/js/json2.js'/}"></script>
+        <script src="#{static-path '/public/js/underscore.js'/}"></script>
+        <script src="#{static-path '/public/js/jquery-1.7.2.js'/}"></script>
+        <script src="#{static-path '/public/js/bootstrap.js'/}"></script>
         <script src="#{static-path '/public/js/jquery-ui-1.8.20.custom.js'/}"></script>
-	    <script src="#{static-path '/public/js/sortbox.js'/}"></script>
+        <script src="#{static-path '/public/js/sortbox.js'/}"></script>
     #{/if}
     #{else}
-	    <script src="#{static-path '/public/js/all.js'/}"></script>
+        <script src="#{static-path '/public/js/all.js'/}"></script>
     #{/else}
     
     <script>
-	    window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
+        window.csrfToken = '${session.getAuthenticityToken().escapeJavaScript()}';
     </script>
     #{include 'js-templates.html' /}
 
