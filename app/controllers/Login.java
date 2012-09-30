@@ -202,8 +202,7 @@ public class Login extends Controller {
             redirectToOriginalURL();
         } else {
             flash.keep(REDIRECT_URL);
-            String api = Box.API_KEY;
-            render(api);
+            render();
         } 
     }
 
