@@ -89,12 +89,16 @@
     
     $('.exp a[href]').live('click', function(e) {
         var path = $(this).attr('data-path');
+        var input = $(this).parents('td').first().find('input');
+
         if (path) {
-            var input = $(this).parents('td').first().find('input');
             input.val(path);
             input.trigger('change');
             input.focus();
+        } else {
+            input.blur();
         }
+
         return false;
     });
 
