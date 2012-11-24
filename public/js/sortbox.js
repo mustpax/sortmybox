@@ -59,7 +59,12 @@
             templateCache[name] = t;
         }
 
-        return $(t(context));
+        var html = t(context).trim();
+        if (html) {
+            return $(html);
+        }
+
+        return null;
     }
     window.sortbox.template = template;
 
