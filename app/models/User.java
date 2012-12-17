@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
@@ -121,7 +122,16 @@ public class User implements Serializable {
     }
 
     private static Set<Long> getAdmins() {
-        String ids= Play.configuration.getProperty("sortbox.admins", "").trim();
+        if (Play.configuration == null) {
+            return Collections.emptySet();
+        }
+        
+        String ids = Play.configuration.getProperty("sortbox.admins", "");
+        if (ids == null) {
+            ids = "";
+        } else {
+            ids = ids.trim();
+        }
         ImmutableSet.Builder<Long> builder = ImmutableSet.builder();
         for (String id : ids.split(",")) {
             if (id.isEmpty()) continue;
