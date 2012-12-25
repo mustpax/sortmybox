@@ -33,7 +33,7 @@
                 if(col.name === 'uniqueFileMoveUsers' && scope === 'aggr') {
                     return;
                 }
-                var chart = nv.models.lineWithFocusChart()
+                var chart = nv.models.lineChart()
                                      .forceY([0])
                                      .showLegend(false);
 
@@ -43,13 +43,7 @@
                          return d3.time.format('%x')(new Date(d));
                      });
                 
-                chart.x2Axis
-                     .tickFormat(function(d) {
-                         return d3.time.format('%x')(new Date(d));
-                     });
-
                 chart.yAxis
-                     .axisLabel('Value')
                      .tickFormat(d3.format(',g'));
 
                 d3.select('.chart.' + scope + '.' + col.name + ' svg')
