@@ -1,6 +1,6 @@
 /*global google:true */
 
-(function($, google, _) {
+(function($, _) {
     'use strict';
 
     var cols = [
@@ -22,49 +22,45 @@
      * @param (optional) selectedColumn if present, only display columns with this name
      */
     function tablify(data, selectedColumn) {
-        var ret = new google.visualization.DataTable();
-        $.each(cols, function(i, v) {
-            if ((i === 0) ||
-                (! selectedColumn) ||
-                (selectedColumn === v.name)) {
-                ret.addColumn(v.type, v.label);
-            }
+        return _.map(data, function(row) {
+            return {x: row.created, y: row[selectedColumn]};
         });
-
-        $.each(data, function(i, v) {
-            var row = [];
-            $.each(cols, function(j, col) {
-                // Always include Label column (the first column)
-                // If selected column specified, only diplay that column
-                if ((j === 0) ||
-                    (! selectedColumn) ||
-                    (selectedColumn === col.name)) {
-
-                    if ('date' === col.type) {
-                        row.push(new Date(v[col.name]));
-                    } else {
-                        row.push(v[col.name]);
-                    }
-                }
-            });
-            ret.addRow(row);
-        });
-
-        return ret;
     }
 
     function displayCharts(data) {
         _.each(['daily', 'aggr'], function(scope) {
             _.each(_.rest(cols), function(col) { 
-                var elem = $('.chart.' + scope + '.' + col.name).get(0);
-                console.log(scope, col, elem);
                 if(col.name === 'uniqueFileMoveUsers' && scope === 'aggr') {
                     return;
                 }
-                new google.visualization.LineChart(elem)
-                    .draw(tablify(data[scope], col.name), { 'title': scope + ' usage stats: ' + col.label,
-                                                          'width': 1000,
-                                                          'height': 420 });
+                var chart = nv.models.lineWithFocusChart()
+                                     .forceY([0])
+                                     .showLegend(false);
+
+                chart.xAxis
+                     .axisLabel('Date')
+                     .tickFormat(function(d) {
+                         return d3.time.format('%x')(new Date(d));
+                     });
+                
+                chart.x2Axis
+                     .tickFormat(function(d) {
+                         return d3.time.format('%x')(new Date(d));
+                     });
+
+                chart.yAxis
+                     .axisLabel('Value')
+                     .tickFormat(d3.format(',g'));
+
+                d3.select('.chart.' + scope + '.' + col.name + ' svg')
+                    .datum([{
+                        values: tablify(data[scope], col.name),
+                        key: scope + ' usage stats: ' + col.label
+                    }])
+                    .transition().duration(500)
+                    .call(chart);
+
+                nv.utils.windowResize(chart.update);
             });
         });
     }
@@ -72,7 +68,12 @@
     function init() {
         _.each(['daily', 'aggr'], function(scope) {
             _.each(_.rest(cols), function(col) {
-                $('.charts').append(sortbox.template('stats-chart', {'scope' : scope, 'column' : col.name}));
+                if(col.name === 'uniqueFileMoveUsers' && scope === 'aggr') {
+                    return;
+                }
+                
+                $('.charts').append(sortbox.template('stats-chart',
+                                                     {'scope' : scope, 'column' : col.name}));
             });
         });
 
@@ -85,12 +86,5 @@
             success: displayCharts
         });
     }
-
-    // Load the Visualization API and the chart package.
-    google.load('visualization',
-                '1.0',
-                {
-                    'packages' : ['corechart'],
-                    'callback' : init
-                });
-})(jQuery, google, _);
+    $(init);
+})(jQuery, _);

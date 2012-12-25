@@ -2,9 +2,13 @@
 #{set title:'Usage stats'/}
 #{set usageStats:'active'/}
 
-<div class="charts"></div>
+<link rel="stylesheet" href="#{static-path '/public/css/nv.d3.css' /}">
+
+<div class="charts">
+</div>
 
 #{set 'script'}
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="#{static-path '/public/js/d3.v2.js' /}"></script>
+<script type="text/javascript" src="#{static-path '/public/js/nv.d3.js' /}"></script>
 <script type="text/javascript" src="#{static-path '/public/js/usageStats.js' /}"></script>
 #{/set}

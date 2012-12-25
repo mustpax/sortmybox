@@ -82,7 +82,11 @@
 <script type="text/template" id="stats-chart">
     <div class="row">
         <div class="span12">
-            <div class="chart {{scope}} {{column}}"></div>
+            <h3>Scope: {{scope}} Value: {{column}}</h3>
+            <div class="chart {{scope}} {{column}}">
+                <svg></svg>
+            </div>
+            <hr>
         </div>
     </div>
 </script>

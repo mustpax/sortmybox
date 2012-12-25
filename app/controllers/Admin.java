@@ -74,6 +74,7 @@ public class Admin extends Controller {
 
     public static void usageStats(boolean fake) {
         if (Play.mode.isDev() && fake) {
+            Logger.warn("Generating fake data.");
             long users = 0L;
             long rules = 30L;
             long fileMoves = 100L;
@@ -97,6 +98,7 @@ public class Admin extends Controller {
                 dus.created = cur;
                 dus.save();
             }
+            Logger.warn("Done generating fake data.");
         }
 
         User user = Login.getUser();
