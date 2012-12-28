@@ -1,9 +1,8 @@
 alljs = public/js/all.js
 jsfiles = public/js/json2.min.js public/js/jquery-1.7.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js public/js/jquery-ui-1.8.20.custom.min.js public/js/sortbox.js
-playgae = submodules/play-gae/lib/play-gae.jar
 play = submodules/play/framework/play-local.jar
 
-all: deps js conf/secret.conf ${play} ${playgae}
+all: deps js conf/secret.conf ${play} 
 	build/prep-webxml.py
 
 test: all
@@ -30,10 +29,6 @@ deps: ${play} .lastdepsrun
 conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
-${playgae}: 
-	git submodule update --init
-	ant -f submodules/play-gae/build.xml -Dplay.path=${PLAY_PATH}
-
 ${play}:
 	git submodule update --init
 	ant -f submodules/play/framework/build.xml -Dversion=local
@@ -57,12 +52,11 @@ lint:
 clean:
 	-play clean
 	-rm $(alljs)
-	-rm ${playgae}
 	-rm ${play}
 	-rm .lastdepsrun
 	-rm lib/*
 
-auto-test: conf/secret.conf ${play} ${playgae}
+auto-test: conf/secret.conf ${play}
 	play auto-test --deps
 
 superclean:
