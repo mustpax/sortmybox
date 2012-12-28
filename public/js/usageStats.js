@@ -27,6 +27,44 @@
         });
     }
 
+    function sum(a, b) {
+        return a + b;
+    }
+    
+    function avg(list){
+        if (! (_.isArray(list) && list.length)) {
+            throw 'Empty or non-array input.';
+        }
+        
+        if (list.length === 1) {
+            return list[0];
+        }
+        
+        return _.reduce(list, sum) / list.length;
+    }
+
+    /**
+     * @param values a list of data points, each data point has a x and y value.
+     *               y must be numeric. x must be an integer epoch-millis date
+     *
+     * @return list of data points of a movign average
+     */
+    function movingAvg(values, slideSize) {
+        var sorted = _.sortBy(values, function(d) { return d.x; }),
+            ret = [],
+            sliding = [];
+
+        $.each(sorted, function() {
+            sliding.push(this.y);
+            while (sliding.length > slideSize) {
+                sliding.shift();
+            }
+            ret.push({y: avg(sliding), x: this.x});
+        });
+
+        return ret;
+    }
+
     function displayCharts(data) {
         _.each(['daily', 'aggr'], function(scope) {
             _.each(_.rest(cols), function(col) { 
@@ -34,8 +72,7 @@
                     return;
                 }
                 var chart = nv.models.lineChart()
-                                     .forceY([0])
-                                     .showLegend(false);
+                                     .forceY([0]);
 
                 chart.xAxis
                      .axisLabel('Date')
@@ -46,10 +83,19 @@
                 chart.yAxis
                      .tickFormat(d3.format(',g'));
 
+                var values = tablify(data[scope], col.name);
                 d3.select('.chart.' + scope + '.' + col.name + ' svg')
                     .datum([{
-                        values: tablify(data[scope], col.name),
-                        key: scope + ' usage stats: ' + col.label
+                        values: values,
+                        key: 'Daily: ' + scope + ' usage stats: ' + col.label
+                    },
+                    {
+                        values: movingAvg(values, 7),
+                        key: 'Weekly mov avg: ' + scope + ' usage stats: ' + col.label
+                    },
+                    {
+                        values: movingAvg(values, 30),
+                        key: '30-day mov avg: ' + scope + ' usage stats: ' + col.label
                     }])
                     .transition().duration(500)
                     .call(chart);
