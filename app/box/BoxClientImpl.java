@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import oauth.signpost.OAuth;
+
 import play.Logger;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
@@ -302,9 +304,9 @@ public class BoxClientImpl implements BoxClient {
 
         String url;
         if (BoxItem.FOLDER.equals(type)) {
-            url = "/folders/";
+            url = "/folders/" + OAuth.percentEncode(id) + "?limit=1000";
         } else {
-            url = "/files/";
+            url = "/files/" + OAuth.percentEncode(id);
         }
 
         Logger.info("getMetadata: id: %s type: %s", id, type);
