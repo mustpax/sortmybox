@@ -86,6 +86,10 @@ public class BoxClientImpl implements BoxClient {
                             return NULL_ITEM;
                         }
 
+                        if (miniChild.isFile()) {
+                            return new NullableItem(miniChild);
+                        }
+                        // If we're fetching a folder, need to fetch it again to get contents
                         return new NullableItem(getMetadata(miniChild.id, miniChild.type));
                     } catch (InvalidTokenException e) {
                         return INVALID_TOKEN_ITEM;
