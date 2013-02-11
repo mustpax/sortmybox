@@ -306,15 +306,16 @@ public class BoxClientImpl implements BoxClient {
             throw new NullPointerException("Parent id cannot be null");
         }
 
-        String url;
+        WSRequest request;
         if (BoxItem.FOLDER.equals(type)) {
-            url = "/folders/" + OAuth.percentEncode(id) + "?limit=1000";
+            request = req("/folders/" + OAuth.percentEncode(id))
+                          .setParameter("limit", 1000);
         } else {
-            url = "/files/" + OAuth.percentEncode(id);
+            request = req("/files/" + OAuth.percentEncode(id));
         }
 
         Logger.info("getMetadata: id: %s type: %s", id, type);
-        HttpResponse resp = req(url + id).get();
+        HttpResponse resp = request.get();
         if (resp.success()) {
             return new Gson().fromJson(resp.getJson(), BoxItem.class);
         }
