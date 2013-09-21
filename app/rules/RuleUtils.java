@@ -58,16 +58,19 @@ public class RuleUtils {
                 out.append(".");
                 break;
             case '.':
-                out.append("\\.");
-                break;
             case '\\':
-                out.append("\\\\");
-                break;
             case '[':
-                out.append("\\[");
-                break;
             case ']':
-                out.append("\\]");
+            case '{':
+            case '}':
+            case '(':
+            case ')':
+            case '+':
+            case '^':
+            case '$':
+            case '|':
+                out.append("\\");
+                out.append(c);
                 break;
             default:
                 out.append(c);
