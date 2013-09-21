@@ -63,6 +63,12 @@ public class RuleUtils {
             case '\\':
                 out.append("\\\\");
                 break;
+            case '[':
+                out.append("\\[");
+                break;
+            case ']':
+                out.append("\\]");
+                break;
             default:
                 out.append(c);
             }
