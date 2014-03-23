@@ -10,8 +10,10 @@ import play.libs.XPath;
  * Global values for the Box v2 API.
  */
 public class Box {
-    public static final String API_KEY = Play.mode.isProd() ? Play.configuration.getProperty("box.apiKey") :
-                                                              Play.configuration.getProperty("box.apiKeyDev");
+    public static final String CLIENT_ID = Play.mode.isProd() ? Play.configuration.getProperty("box.apiKey") :
+                                                                Play.configuration.getProperty("box.apiKeyDev");
+    public static final String CLIENT_SECRET = Play.mode.isProd() ? Play.configuration.getProperty("box.apiKeySecret") :
+                                                                    Play.configuration.getProperty("box.apiKeyDevSecret");
 
     
     public static class URLs {
