@@ -1,10 +1,16 @@
 package box;
 
+import java.net.URLEncoder;
+
+import com.google.common.base.Joiner;
+import com.google.gson.Gson;
+
 import play.Play;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 import play.libs.XPath;
+import play.mvc.Router;
 
 /**
  * Global values for the Box v2 API.
@@ -17,46 +23,31 @@ public class Box {
 
     
     public static class URLs {
-        public static final String BASE_V1 = "https://www.box.com/api/1.0";
-        public static final String BASE_V1_REST = "https://www.box.com/api/1.0/rest";
-        public static final String BASE_V1_AUTH = "https://www.box.com/api/1.0/auth";
+        public static final String BASE_V2_OAUTH = "https://www.box.com/api/oauth2";
 
         public static final String BASE_V2 = "https://api.box.com/2.0";
     }
     
-    public static String getTicket() {
-        WSRequest ws = WS.url(URLs.BASE_V1_REST)
-                         .setParameter("action", "get_ticket")
-                         .setParameter("api_key", API_KEY);
-        HttpResponse resp = ws.get();
+    public static String getAuthUrl() {
+        return URLs.BASE_V2_OAUTH +
+                String.format("/authorize?response_type=code&client_id=%s&redirect_uri=%s",
+                              CLIENT_ID, WS.encode(Router.getFullUrl("Login.boxAuthCallback")));
+    }
+
+    public static BoxCredentials getCred(String code) {
+        WSRequest ws = WS.url(URLs.BASE_V2_OAUTH + "/token")
+                         .setParameter("grant_type", "authorization_code")
+                         .setParameter("code", code)
+                         .setParameter("client_id", CLIENT_ID)
+                         .setParameter("client_secret", CLIENT_SECRET);
+
+        HttpResponse resp = ws.post();
         if (resp.success()) {
-            return XPath.selectText("//ticket", resp.getXml());
+            return new Gson().fromJson(resp.getJson(), BoxCredentials.class);
         }
 
-        throw new IllegalStateException("Failed fetching ticket. Status: " + resp.getStatus() +
+        throw new IllegalStateException("Failed fetching box account credentials. Status: " + resp.getStatus() +
                                         " Error: " + resp.getString());
     }
-
-    public static String getAuthUrl(String ticket) {
-        return URLs.BASE_V1_AUTH + "/" + WS.encode(ticket);
-    }
-
-    public static BoxAccount getAccount(String ticket) {
-        WSRequest ws = WS.url(URLs.BASE_V1_REST)
-                         .setParameter("action", "get_auth_token")
-                         .setParameter("api_key", API_KEY)
-                         .setParameter("ticket", ticket);
-
-        HttpResponse resp = ws.get();
-        if (resp.success()) {
-            BoxAccount ret = new BoxAccount();
-            ret.token = XPath.selectText("//auth_token", resp.getXml());
-            ret.email = XPath.selectText("//email", resp.getXml());
-            ret.id = Long.valueOf(XPath.selectText("//user_id", resp.getXml()));
-            return ret;
-        }
-
-        throw new IllegalStateException("Failed fetching account info. Status: " + resp.getStatus() +
-                                        " Error: " + resp.getString());
-    }
+    
 }
