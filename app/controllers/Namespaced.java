@@ -6,7 +6,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 
 import com.google.appengine.api.NamespaceManager;
-import com.sun.tools.apt.Main;
 
 /**
  * Update namespace for requests.
