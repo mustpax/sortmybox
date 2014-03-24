@@ -10,5 +10,5 @@ public class BoxCredentials {
     public String refeshToken;
     
     @SerializedName("expires_in")
-    public Long expiresIn;
+    public Integer expiresIn;
 }

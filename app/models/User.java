@@ -9,6 +9,7 @@ import javax.persistence.Cacheable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.joda.time.DateTime;
 
 import play.Logger;
 import play.Play;
@@ -72,6 +73,8 @@ public class User implements Serializable {
     private String secret;
     // Used by Box client only
     private String refreshToken;
+
+    private Date tokenExpiration;
     
     
     public User(AccountType at) {
@@ -108,6 +111,8 @@ public class User implements Serializable {
 		if (this.sortingFolder == null) {
 			this.sortingFolder = Dropbox.getOldSortboxPath();
 		}
+        this.tokenExpiration = (Date) entity.getProperty("tokenExpiration");
+        this.refreshToken = (String) entity.getProperty("refreshToken");
 
         this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
         if (this.accountType == null) {
@@ -308,7 +313,9 @@ public class User implements Serializable {
         user.email = account.email;
         // TODO handle null name
         user.name = account.name;
+        DateTime expiration = DateTime.now().plusSeconds(cred.expiresIn);
         user.lastLogin = new Date();
+        user.tokenExpiration = expiration.toDate();
         user.save();
         
         return user;
@@ -426,6 +433,8 @@ public class User implements Serializable {
             if (model.accountType != null) {
                 entity.setProperty("accountType", model.accountType.name());
             }
+            entity.setProperty("tokenExpiration", model.tokenExpiration);
+            entity.setProperty("refreshToken", model.refreshToken);
             return entity;
         }
 
