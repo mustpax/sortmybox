@@ -301,6 +301,19 @@ public class BoxClientImpl implements BoxClient {
         return null;
     }
 
+    @Override
+    public BoxAccount getAccount() {
+        WSRequest req = req("/users/me");
+        
+        HttpResponse resp = req.get();
+        if (resp.success()) {
+            return new Gson().fromJson(resp.getJson(), BoxAccount.class);
+        }
+        
+        throw new IllegalStateException("Failed fetching box account info. Status: " + resp.getStatus() +
+                                        " Error: " + resp.getString());
+    }
+
     private @CheckForNull BoxItem getMetadata(@Nonnull String id, String type) throws InvalidTokenException {
         if (id == null) {
             throw new NullPointerException("Parent id cannot be null");
@@ -367,6 +380,6 @@ public class BoxClientImpl implements BoxClient {
         path = path.startsWith("/") ? path : "/" + path;
         return WS.url(URLs.BASE_V2 + path)
                  .setHeader("Authorization",
-                            String.format("BoxAuth api_key=%s&auth_token=%s", Box.API_KEY, this.token));
+                            String.format("Authorization: Bearer %s", WS.encode(this.token)));
     }
 }

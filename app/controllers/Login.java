@@ -13,6 +13,9 @@ import play.mvc.Http.Header;
 import play.mvc.With;
 import box.Box;
 import box.BoxAccount;
+import box.BoxClient;
+import box.BoxClientFactory;
+import box.BoxCredentials;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
@@ -208,13 +211,14 @@ public class Login extends Controller {
 
     public static void boxAuth() {
         flash.keep(REDIRECT_URL);
-        String ticket = Box.getTicket();
-        redirect(Box.getAuthUrl(ticket));
+        redirect(Box.getAuthUrl());
     }
 
-    public static void boxAuthCallback(String ticket, String auth_token) {
-        BoxAccount ba = Box.getAccount(ticket);
-        User u = User.upsert(ba);
+    public static void boxAuthCallback(String code) {
+        BoxCredentials cred = Box.getCred(code);
+        BoxClient client = BoxClientFactory.create(cred.token);
+        BoxAccount account = client.getAccount();
+        User u = User.upsert(cred, account);
         session.put(SessionKeys.TYPE, AccountType.BOX.name());
         session.put(SessionKeys.UID, u.id);
         session.put(SessionKeys.IP, request.remoteAddress);
