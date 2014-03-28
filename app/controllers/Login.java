@@ -60,8 +60,8 @@ public class Login extends Controller {
         }
 
         // Enforce https in production
-        if (Play.mode.isProd() && !request.url.startsWith("https")) {
-            redirect(request.url.replace("http", "https"));
+        if (Play.mode.isProd() && !request.secure) {
+            redirect("https://" + request.host + request.url);
         }
     }
 
