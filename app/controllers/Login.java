@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import models.User;
 import models.User.AccountType;
 import play.Logger;
+import play.Play;
 import play.libs.OAuth;
 import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
@@ -56,6 +57,11 @@ public class Login extends Controller {
         if (request.headers.containsKey(Headers.FORWARDED_PROTO)) {
             Header h = request.headers.get(Headers.FORWARDED_PROTO);
             request.secure = "https".equals(h.value());
+        }
+
+        // Enforce https in production
+        if (Play.mode.isProd() && !request.url.startsWith("https")) {
+            redirect(request.url.replace("http", "https"));
         }
     }
 
