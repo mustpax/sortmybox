@@ -23,7 +23,7 @@ import box.Box.URLs;
 import box.gson.BoxError;
 import box.gson.BoxItem;
 import box.gson.BoxMoveReq;
-import box.gson.BoxName;
+import box.gson.BoxCreateFolderItem;
 
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Function;
@@ -224,8 +224,8 @@ public class BoxClientImpl implements BoxClient {
             return null;
         }
 
-        HttpResponse resp = req("/folders/" + parentItem.id)
-                .body(new Gson().toJson(new BoxName(RuleUtils.basename(path))))
+        HttpResponse resp = req("/folders")
+                .body(new Gson().toJson(new BoxCreateFolderItem(RuleUtils.basename(path), parentItem)))
                 .post();
 
         if (resp.success()) {
