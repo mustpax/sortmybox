@@ -9,32 +9,73 @@ import java.util.regex.Pattern;
 
 import javax.annotation.CheckForNull;
 
-import models.FileMove;
-import models.Rule;
-import models.User;
-
 import org.apache.commons.lang.StringUtils;
 
-import play.Logger;
-
-import com.google.appengine.repackaged.com.google.common.base.Pair;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+
 import common.api.ApiClient;
 import common.api.ApiClientFactory;
-
 import dropbox.Dropbox;
 import dropbox.client.FileMoveCollisionException;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
+import models.FileMove;
+import models.Rule;
+import models.User;
+import play.Logger;
 
 public class RuleUtils {
     private static final String INVALID_CHAR_REPLACEMENT = "-";
     private static final int MAX_TRIES = 10;
 
+    public static class FileAndExtension {
+        public final Optional<String> fileName;
+        public final Optional<String> extension;
+
+        public FileAndExtension(String fileName, String extension) {
+            this.fileName = Optional.fromNullable(fileName);
+            this.extension = Optional.fromNullable(extension);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((extension == null) ? 0 : extension.hashCode());
+            result = prime * result
+                    + ((fileName == null) ? 0 : fileName.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            FileAndExtension other = (FileAndExtension) obj;
+            if (extension == null) {
+                if (other.extension != null)
+                    return false;
+            } else if (!extension.equals(other.extension))
+                return false;
+            if (fileName == null) {
+                if (other.fileName != null)
+                    return false;
+            } else if (!fileName.equals(other.fileName))
+                return false;
+            return true;
+        }
+
+    }
     /**
      * Return a regex pattern that will match the given glob pattern.
      *
@@ -80,7 +121,8 @@ public class RuleUtils {
     }
     
     public static String getExt(String fileName) {
-        return splitName(fileName).second;
+        FileAndExtension fileAndExtension = splitName(fileName);
+        return fileAndExtension.extension.orNull();
     }
 
     /**
@@ -101,15 +143,15 @@ public class RuleUtils {
      * Extension may be null
      * Extension does not contain the leading period (.)
      */
-    public static Pair<String, String> splitName(String fileName) {
+    public static FileAndExtension splitName(String fileName) {
         if (fileName == null) {
-            return new Pair<String, String>(null, null);
+            return new FileAndExtension(null, null);
         }
 
         int extBegin = fileName.lastIndexOf(".");
 
         if (extBegin <= 0) {
-	        return new Pair<String, String>(fileName, null);
+	        return new FileAndExtension(fileName, null);
         }
 
         String name = fileName.substring(0, extBegin);
@@ -118,7 +160,7 @@ public class RuleUtils {
             ext = null;
         }
 
-        return new Pair<String, String>(name, ext);
+        return new FileAndExtension(name, ext);
     }
     
     /**
@@ -217,10 +259,10 @@ public class RuleUtils {
 
     public static String insertIntoName(String fileName, String suffix) {
         assert ! fileName.contains("/") : "Cannot process paths, can only process basenames.";
-        Pair<String, String> fileAndExt = splitName(fileName);
-        return fileAndExt.first +
+        FileAndExtension fileAndExt = splitName(fileName); 
+        return fileAndExt.fileName.or("") +
                (suffix == null ? "" : suffix) +
-               (fileAndExt.second == null ? "" : "." + fileAndExt.second);
+               (fileAndExt.extension.isPresent() ? "." + fileAndExt.extension.get() : "");
     }
 
     public static String basename(String path) {

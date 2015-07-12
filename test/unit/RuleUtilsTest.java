@@ -6,6 +6,7 @@ import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 import play.test.UnitTest;
 import rules.RuleUtils;
+import rules.RuleUtils.FileAndExtension;
 
 public class RuleUtilsTest extends UnitTest {
     @Test
@@ -29,17 +30,17 @@ public class RuleUtilsTest extends UnitTest {
 
     @Test
     public void testSplit() {
-        Pair<String, String> p = RuleUtils.splitName("a. a b c");
-        assertEquals("a", p.first);
-        assertEquals(" a b c", p.second);
+        FileAndExtension p = RuleUtils.splitName("a. a b c");
+        assertEquals("a", p.fileName.get());
+        assertEquals(" a b c", p.extension.get());
 
         p = RuleUtils.splitName(".bashrc");
-        assertEquals(".bashrc", p.first);
-        assertNull(p.second);
+        assertEquals(".bashrc", p.fileName.get());
+        assertFalse(p.extension.isPresent());
         
         p = RuleUtils.splitName("tab\ttab");
-        assertEquals("tab\ttab", p.first);
-        assertNull(p.second);
+        assertEquals("tab\ttab", p.fileName.get());
+        assertFalse(p.extension.isPresent());
     }
 
     @Test

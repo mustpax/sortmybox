@@ -23,8 +23,8 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableSet;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 
 import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
