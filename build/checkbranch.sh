@@ -4,7 +4,7 @@
 # Then check that the current branch matches the first argument to script, if
 # not exit with error.
 
-clean=$(git status | grep "nothing to commit (working directory clean)")
+clean=$(git status | grep "working directory clean")
 if [ -z "$clean" ]; then
     echo Error: There are uncommitted changes
     exit 1
