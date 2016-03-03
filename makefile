@@ -1,6 +1,7 @@
 alljs = public/js/all.js
 jsfiles = public/js/json2.min.js public/js/jquery-1.7.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js public/js/jquery-ui-1.8.20.custom.min.js public/js/sortbox.js
 play = submodules/play/framework/play-local.jar
+play-gae = submodules/play-gae/lib/play-gae.jar
 
 all: deps js conf/secret.conf ${play} 
 	build/prep-webxml.py
@@ -19,7 +20,7 @@ $(alljs): $(jsfiles)
 static: all
 	build/sync-bucket.sh
 
-deps: ${play} .lastdepsrun
+deps: ${play-gae} ${play} .lastdepsrun
 
 .lastdepsrun: conf/dependencies.yml
 	play deps
@@ -29,9 +30,14 @@ deps: ${play} .lastdepsrun
 conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
-${play}:
+submodules:
 	git submodule update --init
+
+${play}: submodules
 	ant -f submodules/play/framework/build.xml -Dversion=local
+
+${play-gae}: submodules
+	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
 stage: all static
 	build/checkbranch.sh staging
@@ -53,6 +59,7 @@ clean:
 	-play clean
 	-rm $(alljs)
 	-rm ${play}
+	-rm ${play-gae}
 	-rm .lastdepsrun
 	-rm lib/*
 	-rm -rf modules/
@@ -64,4 +71,4 @@ superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
 	git clean -f
 
-.PHONY : all run js static deps stage deploy dev clean superclean lint auto-test
+.PHONY : all run js static deps stage deploy dev clean superclean lint auto-test submodules

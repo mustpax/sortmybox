@@ -5,12 +5,12 @@ require:
     - play -> mockito 0.1
     - com.google.guava -> guava 10.0.1
     - commons-lang 2.5
-    - mustpax -> play-gae gae17
+    - play-gae -> play-gae
 
 repositories:
-    - mustpax:
-        type:       http
-        artifact:   "http://mustpax.github.com/[module]/[revision].zip"
+    - play-gae:
+        type:       local
+        artifact:   ${application.path}/submodules/play-gae
         contains:
-            - mustpax -> *
+            - play-gae
 
