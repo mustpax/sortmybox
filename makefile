@@ -55,6 +55,7 @@ clean:
 	-rm ${play}
 	-rm .lastdepsrun
 	-rm lib/*
+	-rm -rf modules/
 
 auto-test: conf/secret.conf ${play}
 	play auto-test --deps
