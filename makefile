@@ -36,7 +36,7 @@ submodules:
 ${play}: submodules
 	ant -f submodules/play/framework/build.xml -Dversion=local
 
-${play-gae}: submodules
+${play-gae}: ${play} submodules
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
 stage: all static
