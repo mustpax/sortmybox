@@ -3,8 +3,11 @@ jsfiles = public/js/json2.min.js public/js/jquery-1.7.2.min.js public/js/bootstr
 play = submodules/play/framework/play-local.jar
 play-gae = submodules/play-gae/lib/play-gae.jar
 
-all: deps js conf/secret.conf ${play} 
+all: deps js conf/secret.conf ${play} ${play-gae}
 	build/prep-webxml.py
+
+auto-test: all
+	play auto-test
 
 test: all
 	play test
@@ -21,8 +24,9 @@ static: all
 	build/sync-bucket.sh
 
 deps: ${play-gae} ${play} .lastdepsrun
+deps: .lastdepsrun
 
-.lastdepsrun: conf/dependencies.yml
+.lastdepsrun: conf/dependencies.yml ${play-gae} ${play} 
 	play deps
 	play ec
 	date > .lastdepsrun
@@ -30,13 +34,12 @@ deps: ${play-gae} ${play} .lastdepsrun
 conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
-submodules:
+${play}:
 	git submodule update --init
-
-${play}: submodules
 	ant -f submodules/play/framework/build.xml -Dversion=local
 
-${play-gae}: ${play} submodules
+${play-gae}: ${play}
+	git submodule update --init
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
 stage: all static
@@ -64,9 +67,6 @@ clean:
 	-rm lib/*
 	-rm -rf modules/
 	-rm -rf tmp/
-
-auto-test: conf/secret.conf ${play}
-	play auto-test --deps
 
 superclean:
 	# RUN THIS AT YOUR OWN RISK, THIS WILL DELETE EVERY UNTRACKED FILE 
