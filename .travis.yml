@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - openjdk6
+  - oraclejdk7
 install:
   - export PLAY_PATH=`pwd`/submodules/play
   - export PATH=${PATH}:${PLAY_PATH}
