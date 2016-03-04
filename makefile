@@ -63,6 +63,7 @@ clean:
 	-rm .lastdepsrun
 	-rm lib/*
 	-rm -rf modules/
+	-rm -rf tmp/
 
 auto-test: conf/secret.conf ${play}
 	play auto-test --deps
