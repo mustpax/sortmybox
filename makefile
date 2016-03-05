@@ -48,6 +48,7 @@ ${play}:
 
 ${play-gae}: ${play}
 	git submodule update --init
+	play deps submodules/play-gae --sync
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
 .PHONY: stage
