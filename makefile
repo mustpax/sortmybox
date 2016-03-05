@@ -3,8 +3,6 @@ jsfiles = public/js/json2.min.js public/js/jquery-1.7.2.min.js public/js/bootstr
 play = submodules/play/framework/play-local.jar
 play-gae = submodules/play-gae/lib/play-gae.jar
 
-export JAVA_HOME=$(shell /usr/libexec/java_home -v 1.7)
-
 .PHONY: all
 all: deps js conf/secret.conf
 	build/prep-webxml.py
