@@ -4,9 +4,15 @@
     <threadsafe>true</threadsafe>
     <system-properties>
         <property name="app.id" value="prod" />
-    </system-properties> 
+    </system-properties>
 
     <env-variables>
         <env-var name="NAMESPACE" value="{namespace}" />
     </env-variables>
+
+    <automatic-scaling>
+        <min-idle-instances>1</min-idle-instances>
+        <max-idle-instances>1</max-idle-instances>
+        <max-concurrent-requests>20</max-concurrent-requests>
+    </automatic-scaling>
 </appengine-web-app>
