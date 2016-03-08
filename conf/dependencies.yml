@@ -7,7 +7,9 @@ require:
     - commons-lang 2.5
     - com.google.appengine -> appengine-remote-api 1.9.26
     - play-gae -> play-gae
-    - com.getsentry.raven -> raven-appengine 7.0.0
+    - com.getsentry.raven -> raven-appengine 7.0.0:
+        exclude:
+            - com.google.appengine -> * # GAE deps are managed through the play-gae module
 
 repositories:
     - play-gae:
