@@ -34,13 +34,13 @@ public class ErrorReporter extends Controller {
                 .withSentryInterface(new ExceptionInterface(e));
         
         if (u != null) {
-            eb = eb.withTag("user", u.getKey().toString());
+            eb = eb.withTag("id", u.getKey().toString());
         }
         if (request.url != null) {
             eb = eb.withTag("url", request.url);
         }
         if (request.remoteAddress != null) {
-            eb = eb.withTag("ip", request.remoteAddress);
+            eb = eb.withTag("ip_address", request.remoteAddress);
         }
         for (Header header: request.headers.values()) {
             eb = eb.withTag("Header: " + header.name, header.value());
