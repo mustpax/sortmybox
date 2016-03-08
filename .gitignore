@@ -40,6 +40,7 @@ build/config/buildinfo.properties
 # Eclipse related
 eclipse/
 .classpath
+.pydevproject
 
 # Play framework related
 tmp/
