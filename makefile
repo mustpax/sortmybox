@@ -2,7 +2,7 @@ alljs = public/js/all.js
 jsfiles = public/js/json2.min.js public/js/jquery-1.7.2.min.js public/js/bootstrap.min.js public/js/underscore-min.js public/js/jquery-ui-1.8.20.custom.min.js public/js/sortbox.js
 play = submodules/play/framework/play-local.jar
 play-gae = submodules/play-gae/lib/play-gae.jar
-JAVA_HOME=$([[ -z "$TRAVIS" ]] && /usr/libexec/java_home -v 1.7 || echo $JAVA_HOME)
+JAVA_HOME = $(shell [[ -z "$$TRAVIS" ]] && /usr/libexec/java_home -v 1.7 || echo $$JAVA_HOME)
 
 .PHONY: all
 all: deps js conf/secret.conf
@@ -80,3 +80,7 @@ clean:
 	-rm lib/*
 	-rm -rf modules/
 	-rm -rf tmp/
+
+.PHONY: java_home
+java_home:
+	echo ${JAVA_HOME}
