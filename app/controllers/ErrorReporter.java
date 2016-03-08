@@ -43,7 +43,10 @@ public class ErrorReporter extends Controller {
             eb = eb.withTag("ip_address", request.remoteAddress);
         }
         for (Header header: request.headers.values()) {
-            eb = eb.withTag("Header: " + header.name, header.value());
+            if ("cookie".equalsIgnoreCase(header.name)) {
+                continue;
+            }
+            eb = eb.withExtra("Header: " + header.name, header.value());
         }
 
         RAVEN.sendEvent(eb.build());
@@ -53,6 +56,7 @@ public class ErrorReporter extends Controller {
     static void logError(Throwable e) {
         User u = Login.getUser();
         Key id  = u == null ? null : u.getKey();
+        logSentry(e, u);
         Mails.logError(id, e, request.headers.values());
     }
 }
