@@ -32,6 +32,7 @@ import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -65,7 +66,7 @@ public class BoxClientImpl implements BoxClient {
 
     public final String token;
 
-    private Cache<String, NullableItem> itemCache = CacheBuilder
+    private LoadingCache<String, NullableItem> itemCache = CacheBuilder
             .newBuilder()
             .build(CacheLoader.from(new Function<String, NullableItem>() {
                 @Override
