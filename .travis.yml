@@ -4,4 +4,6 @@ jdk:
 install:
   - export PLAY_PATH=`pwd`/submodules/play
   - export PATH=${PATH}:${PLAY_PATH}
+cache:
+
 script: make auto-test
