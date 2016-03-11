@@ -58,6 +58,7 @@
 
     <security-constraint>
         <web-resource-collection>
+            <web-resource-name>appstats</web-resource-name>
             <url-pattern>/appstats/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
