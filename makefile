@@ -53,15 +53,15 @@ ${play-gae}: ${play} submodules
 	play deps submodules/play-gae --sync
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
+.PHONY: package
+package: all
+	play gae:package
+
 .PHONY: stage
 stage: all static
 	build/checkbranch.sh staging
 	-play gae:deploy
 	git push origin staging
-
-.PHONY: package
-package: all static
-	play gae:package
 
 .PHONY: deploy
 deploy: all static
