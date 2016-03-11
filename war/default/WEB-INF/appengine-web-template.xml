@@ -7,10 +7,13 @@
     <system-properties>
         <property name="app.id" value="prod" />
     </system-properties>
-
     <env-variables>
         <env-var name="NAMESPACE" value="{namespace}" />
     </env-variables>
+
+    <static-files>
+        <include path="/public/**" />
+    </static-files>
 
     <automatic-scaling>
         <min-idle-instances>1</min-idle-instances>
