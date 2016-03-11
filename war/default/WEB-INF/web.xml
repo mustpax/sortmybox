@@ -41,11 +41,6 @@
         <filter-class>com.google.appengine.tools.appstats.AppstatsFilter</filter-class>
     </filter>
 
-    <filter-mapping>
-        <filter-name>appstats</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
     <servlet>
         <servlet-name>appstats</servlet-name>
         <servlet-class>com.google.appengine.tools.appstats.AppstatsServlet</servlet-class>
