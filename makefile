@@ -41,28 +41,34 @@ conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
 ${play}:
+	build/checksubmodules.sh
 	git submodule update --init
 	ant -f submodules/play/framework/build.xml -Dversion=local
 
 ${play-gae}: ${play}
+	build/checksubmodules.sh
 	git submodule update --init
 	play deps submodules/play-gae --sync
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
 
+.PHONY: package
+package: all
+	play gae:package
+
 .PHONY: stage
-stage: all static
+stage: all
 	build/checkbranch.sh staging
 	-play gae:deploy
 	git push origin staging
 
 .PHONY: deploy
-deploy: all static
+deploy: all
 	build/checkbranch.sh prod
 	play gae:deploy
 	git push origin prod
 
 .PHONY: dev
-dev: all static
+dev: all
 	play gae:deploy
 
 .PHONY: lint

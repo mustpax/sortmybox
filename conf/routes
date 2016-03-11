@@ -35,7 +35,6 @@ GET    /admin/debugApi                          Admin.debugApi
 POST    /rules                                  Rules.update
 
 # Background tasks
-# TODO(syyang): secure /tasks and /cron path
 GET     /tasks                                  TaskManager.process
 POST    /tasks                                  TaskManager.process
 

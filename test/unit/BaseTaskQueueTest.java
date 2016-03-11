@@ -6,12 +6,13 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Before;
 
-import play.test.FunctionalTest;
-
 import com.google.appengine.tools.development.LocalServerEnvironment;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
+import com.google.common.base.Joiner;
+
+import play.test.FunctionalTest;
 
 /**
  * Base test for testing task queue. Ripped off from:
@@ -25,6 +26,9 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
     private LocalDatastoreServiceTestConfig datastoreConfig;
     private LocalTaskQueueTestConfig taskQueueConfig;
     
+    private static final String APP_DIR =
+            Joiner.on(File.separator).join("war", "default");
+    
     @Before
     public void setUp() throws Exception {
         datastoreConfig = new LocalDatastoreServiceTestConfig().setNoStorage(true);
@@ -33,17 +37,17 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
             @Override
             protected LocalServerEnvironment newLocalServerEnvironment() {
                 final LocalServerEnvironment lse = super.newLocalServerEnvironment();
-                    return new LocalServerEnvironment() {
-                        @Override public File getAppDir() { return new File("war"); }
-                        @Override public String getAddress() { return lse.getAddress(); }
-                        @Override public int getPort() { return lse.getPort(); }
-                        @Override public boolean enforceApiDeadlines() { return false; }
-                        @Override public String getHostName() { return null; }
-                        @Override public boolean simulateProductionLatencies() { return false; }
-                        @Override public void waitForServerToStart() throws InterruptedException {
-                            lse.waitForServerToStart();
-                        }
-                    };
+                return new LocalServerEnvironment() {
+                    @Override public File getAppDir() { return new File(APP_DIR); }
+                    @Override public String getAddress() { return lse.getAddress(); }
+                    @Override public int getPort() { return lse.getPort(); }
+                    @Override public boolean enforceApiDeadlines() { return false; }
+                    @Override public String getHostName() { return null; }
+                    @Override public boolean simulateProductionLatencies() { return false; }
+                    @Override public void waitForServerToStart() throws InterruptedException {
+                        lse.waitForServerToStart();
+                    }
+                };
             }
         };
         helper.setEnvAuthDomain("auth");

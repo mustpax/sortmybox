@@ -1,14 +1,18 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
     <application>sortmybox-hrd</application>
-    <version>12-02-{suffix}</version>
+    <module>default</module>
+    <version>{branch}-{version}</version>
     <threadsafe>true</threadsafe>
     <system-properties>
         <property name="app.id" value="prod" />
     </system-properties>
-
     <env-variables>
         <env-var name="NAMESPACE" value="{namespace}" />
     </env-variables>
+
+    <static-files>
+        <include path="/public/**" expiration="180d"/>
+    </static-files>
 
     <automatic-scaling>
         <min-idle-instances>1</min-idle-instances>

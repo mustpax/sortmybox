@@ -13,10 +13,14 @@ import com.google.appengine.api.NamespaceManager;
  * @author mustpax
  */
 public class Namespaced extends Controller {
+    public static String getNamespace() {
+        return System.getenv("NAMESPACE");
+    }
+
     @Before(priority=1)
     static void setNamespace() {
         if (NamespaceManager.get() == null) {
-            String namespace = System.getenv("NAMESPACE");
+            String namespace = getNamespace();
             if (namespace != null && ! namespace.isEmpty()) {
                 Logger.info("Updating namespace to %s", namespace);
                 NamespaceManager.set(namespace);

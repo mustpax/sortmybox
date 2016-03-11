@@ -19,16 +19,18 @@ public class ReflectionUtilsTest extends UnitTest {
     }
     
     @Test
-    public void testNewInstance_negative() throws Exception {
-        try {
-            ReflectionUtils.newInstance(Task.class, "Foo");
-            fail();
-        } catch (Exception e) {
-            // expected
-        }
-        
+    public void testNewInstance() throws Exception {
         Task task = ReflectionUtils.newInstance(Task.class, DummyTask.class.getName());
         assertTrue("unexpected Task implementation", task instanceof DummyTask);
     }
-    
+
+    @Test(expected=ClassNotFoundException.class)
+    public void testClassMissingException() throws Exception {
+        ReflectionUtils.newInstance(Task.class, "Foo");
+    }
+
+    @Test(expected=ClassCastException.class)
+    public void testClassCastException() throws Exception {
+        ReflectionUtils.newInstance(Task.class, String.class.getCanonicalName());
+    }
 }
