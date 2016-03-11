@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <description>SortMyBox</description>
+  <display-name>sortmybox-hrd</display-name>
+
+  <!-- Modules -->
+  <!-- The default module should be listed first -->
+  <module>
+    <web>
+      <web-uri>default</web-uri>
+      <context-root>default</context-root>
+    </web>
+  </module>
+  <module>
+    <web>
+      <web-uri>background</web-uri>
+      <context-root>background</context-root>
+    </web>
+  </module>
+
+</application>
