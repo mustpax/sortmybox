@@ -56,19 +56,19 @@ package: all
 	play gae:package
 
 .PHONY: stage
-stage: all static
+stage: all
 	build/checkbranch.sh staging
 	-play gae:deploy
 	git push origin staging
 
 .PHONY: deploy
-deploy: all static
+deploy: all
 	build/checkbranch.sh prod
 	play gae:deploy
 	git push origin prod
 
 .PHONY: dev
-dev: all static
+dev: all
 	play gae:deploy
 
 .PHONY: lint
