@@ -1,22 +1,20 @@
 package controllers;
 
+import com.getsentry.raven.Raven;
+import com.getsentry.raven.appengine.AppEngineRavenFactory;
+import com.getsentry.raven.event.Event;
+import com.getsentry.raven.event.EventBuilder;
+import com.getsentry.raven.event.interfaces.ExceptionInterface;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.modules.ModulesServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
+
 import models.User;
 import notifiers.Mails;
 import play.Play;
 import play.mvc.Catch;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-
-import java.util.Map;
-
-import com.getsentry.raven.Raven;
-import com.getsentry.raven.RavenFactory;
-import com.getsentry.raven.appengine.AppEngineRavenFactory;
-import com.getsentry.raven.appengine.event.helper.AppEngineEventBuilderHelper;
-import com.getsentry.raven.event.Event;
-import com.getsentry.raven.event.EventBuilder;
-import com.getsentry.raven.event.interfaces.ExceptionInterface;
-import com.google.appengine.api.datastore.Key;
 
 /**
  * Catch unhandled exceptions and report them via email
@@ -33,6 +31,13 @@ public class ErrorReporter extends Controller {
                 .withLevel(Event.Level.ERROR)
                 .withSentryInterface(new ExceptionInterface(e));
         
+        // Runtime information
+        eb = eb.withTag("version", SystemProperty.applicationVersion.get());
+        eb = eb.withTag("module", ModulesServiceFactory.getModulesService().getCurrentModule());
+        eb = eb.withExtra("namespace", Namespaced.getNamespace());
+        eb = eb.withExtra("play.app.id", Play.id);
+        
+        // Request information
         if (u != null) {
             eb = eb.withTag("id", u.getKey().toString());
         }
