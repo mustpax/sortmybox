@@ -40,15 +40,13 @@ deps: .lastdepsrun
 conf/secret.conf:
 	cp conf/secret.conf.template conf/secret.conf
 
-.PHONY: submodules
-submodules:
+${play}:
 	build/checksubmodules.sh
 	git submodule update --init
-
-${play}: submodules
 	ant -f submodules/play/framework/build.xml -Dversion=local
 
-${play-gae}: ${play} submodules
+${play-gae}: ${play}
+	build/checksubmodules.sh
 	git submodule update --init
 	play deps submodules/play-gae --sync
 	ant -f submodules/play-gae/build.xml -Dplay.path="`pwd`/submodules/play"
