@@ -3,4 +3,11 @@
     <application>sortmybox-hrd</application>
     <module>background</module>
     <version>{branch}-{version}</version>
+    <threadsafe>true</threadsafe>
+    <system-properties>
+        <property name="app.id" value="prod" />
+    </system-properties>
+    <env-variables>
+        <env-var name="NAMESPACE" value="{namespace}" />
+    </env-variables>
 </appengine-web-app>
