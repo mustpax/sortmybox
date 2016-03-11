@@ -33,17 +33,17 @@ public abstract class BaseTaskQueueTest extends FunctionalTest {
             @Override
             protected LocalServerEnvironment newLocalServerEnvironment() {
                 final LocalServerEnvironment lse = super.newLocalServerEnvironment();
-                    return new LocalServerEnvironment() {
-                        @Override public File getAppDir() { return new File("war"); }
-                        @Override public String getAddress() { return lse.getAddress(); }
-                        @Override public int getPort() { return lse.getPort(); }
-                        @Override public boolean enforceApiDeadlines() { return false; }
-                        @Override public String getHostName() { return null; }
-                        @Override public boolean simulateProductionLatencies() { return false; }
-                        @Override public void waitForServerToStart() throws InterruptedException {
-                            lse.waitForServerToStart();
-                        }
-                    };
+                return new LocalServerEnvironment() {
+                    @Override public File getAppDir() { return new File("war"); }
+                    @Override public String getAddress() { return lse.getAddress(); }
+                    @Override public int getPort() { return lse.getPort(); }
+                    @Override public boolean enforceApiDeadlines() { return false; }
+                    @Override public String getHostName() { return null; }
+                    @Override public boolean simulateProductionLatencies() { return false; }
+                    @Override public void waitForServerToStart() throws InterruptedException {
+                        lse.waitForServerToStart();
+                    }
+                };
             }
         };
         helper.setEnvAuthDomain("auth");
