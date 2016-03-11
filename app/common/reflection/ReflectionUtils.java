@@ -20,17 +20,21 @@ public class ReflectionUtils {
      * Creates a new zero-arg instance of the specified class
      */
     @SuppressWarnings("unchecked")
-    public static <T> T newInstance(Class<T> theClass, String className) {
+    public static <T> T newInstance(Class<T> theClass, String className) throws ClassCastException, ClassNotFoundException {
         try {
             Constructor<T> ctr = (Constructor<T>) CONSTRUCTOR_CACHE.get(className);
             if (ctr == null) {
-
                 Class<T> clazz = (Class<T>) Class.forName(className);
+                if (! theClass.isAssignableFrom(clazz)) {
+                    throw new ClassCastException(String.format("Cannot cast class %s into %s", className, theClass.getCanonicalName()));
+                }
                 ctr = (Constructor<T>) clazz.getDeclaredConstructor(EMPTY_ARRAY);
                 ctr.setAccessible(true);
                 CONSTRUCTOR_CACHE.put(className, ctr);
             }
             return ctr.newInstance();
+        } catch (ClassCastException|ClassNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to instantiate task: " + className, e);
         }

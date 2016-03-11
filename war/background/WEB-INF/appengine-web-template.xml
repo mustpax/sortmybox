@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appengine-web-app>
+    <application>sortmybox-hrd</application>
+    <module>background</module>
+    <version>{branch}-{version}</version>
+</appengine-web-app>
