@@ -10,4 +10,8 @@
     <env-variables>
         <env-var name="NAMESPACE" value="{namespace}" />
     </env-variables>
+
+    <manual-scaling>
+        <instances>1</instances>
+    </manual-scaling>
 </appengine-web-app>
