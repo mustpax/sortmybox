@@ -11,7 +11,7 @@
     </env-variables>
 
     <static-files>
-        <include path="/public/**" />
+        <include path="/public/**" expiration="180d"/>
     </static-files>
 
     <automatic-scaling>
