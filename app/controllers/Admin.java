@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -196,6 +197,10 @@ public class Admin extends Controller {
         }
 
         render(userId, url, method, apiResp, type);
+    }
+
+    public static void module() {
+        renderText(String.format("Module: %s\n", ModulesServiceFactory.getModulesService().getCurrentModule()));
     }
 
     private static Key getUserKey(String userId) {

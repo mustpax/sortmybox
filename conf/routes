@@ -30,6 +30,7 @@ GET    /admin/searchUser                        Admin.searchUser
 GET    /admin/deleteUser                        Admin.deleteUser
 POST   /admin/deleteUserPost                    Admin.deleteUserPost
 GET    /admin/debugApi                          Admin.debugApi
+GET    /admin/module                            Admin.module
 
 # Rules
 POST    /rules                                  Rules.update

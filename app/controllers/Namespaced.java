@@ -6,6 +6,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 
 import com.google.appengine.api.NamespaceManager;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 
 /**
  * Update namespace for requests.
@@ -15,6 +16,16 @@ import com.google.appengine.api.NamespaceManager;
 public class Namespaced extends Controller {
     public static String getNamespace() {
         return System.getenv("NAMESPACE");
+    }
+
+    @Before
+    static void addHeaders() {
+        try {
+            response.setHeader("X-SMB-Namespace", getNamespace());
+            response.setHeader("X-SMB-Module",
+                               ModulesServiceFactory.getModulesService().getCurrentModule());
+        } catch (Throwable t) {}
+        
     }
 
     @Before(priority=1)
