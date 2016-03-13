@@ -55,6 +55,10 @@ ${play-gae}: ${play}
 package: all
 	play gae:package
 
+.PHONY: dispatch
+dispatch: all
+	play gae:update_dispatch
+
 .PHONY: stage
 stage: all
 	build/checkbranch.sh staging

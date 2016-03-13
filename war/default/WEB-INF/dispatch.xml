@@ -2,7 +2,12 @@
 <dispatch-entries>
   <dispatch>
       <!-- Run tasks in the background module. -->
-      <url>*/tasks/*</url>
+      <url>*/tasks</url>
+      <module>background</module>
+  </dispatch>
+  <dispatch>
+      <!-- Used to verify that dispatch.xml works. -->
+      <url>*/admin/module</url>
       <module>background</module>
   </dispatch>
 </dispatch-entries>
