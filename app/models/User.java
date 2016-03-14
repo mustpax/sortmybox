@@ -11,23 +11,22 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
-import play.Logger;
-import play.Play;
-import play.exceptions.UnexpectedException;
-import play.libs.Crypto;
-import box.BoxAccount;
-import box.BoxCredentials;
-
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 
+import box.BoxAccount;
+import box.BoxCredentials;
 import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
+import play.Logger;
+import play.Play;
+import play.exceptions.UnexpectedException;
+import play.libs.Crypto;
 
 @Cacheable
 public class User implements Serializable {
@@ -398,7 +397,7 @@ public class User implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(User.class)
+        return MoreObjects.toStringHelper(User.class)
             .add("id", id)
             .add("accountType", accountType)
             .add("name", name)

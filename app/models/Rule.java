@@ -13,9 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import play.Logger;
-import rules.RuleType;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -23,10 +20,13 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
+
+import play.Logger;
+import rules.RuleType;
 
 /**
  * A sorting rule that allows files to be moved to a specified
@@ -207,7 +207,7 @@ public class Rule implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(Rule.class)
+        return MoreObjects.toStringHelper(Rule.class)
             .add("id", id)
             .add("rule type", type)
             .add("pattern", pattern)

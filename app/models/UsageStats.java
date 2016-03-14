@@ -7,7 +7,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public class UsageStats implements Serializable {
 
@@ -51,7 +51,7 @@ public class UsageStats implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(UsageStats.class)
+        return MoreObjects.toStringHelper(UsageStats.class)
             .add("id", id)
             .add("users", users)
             .add("rules", rules)

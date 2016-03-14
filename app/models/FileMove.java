@@ -11,7 +11,7 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public class FileMove implements Serializable {
     private static final FileMoveMapper MAPPER = new FileMoveMapper();
@@ -57,7 +57,7 @@ public class FileMove implements Serializable {
     
     @Override
     public String toString() {
-        return Objects.toStringHelper(FileMove.class)
+        return MoreObjects.toStringHelper(FileMove.class)
                       .add("id", id)
                       .add("fromFile", fromFile)
                       .add("toDir", toDir)

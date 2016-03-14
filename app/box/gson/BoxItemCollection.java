@@ -2,7 +2,7 @@ package box.gson;
 
 import java.util.List;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.gson.annotations.SerializedName;
 
 public class BoxItemCollection {
@@ -13,7 +13,7 @@ public class BoxItemCollection {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(getClass())
+        return MoreObjects.toStringHelper(getClass())
                       .add("totalCount", totalCount)
                       .add("entries", entries)
                       .toString();
