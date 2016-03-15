@@ -57,7 +57,15 @@ package: all
 
 .PHONY: dispatch
 dispatch: all
+	build/checkbranch.sh prod
 	play gae:update_dispatch
+
+.PHONY: default_version
+default_version: all
+	build/checkbranch.sh prod
+	@build/confirm.py "Set default version to **`cat VERSION`** for all modules?"
+	appcfg.sh set_default_version war/background
+	appcfg.sh set_default_version war/default
 
 .PHONY: stage
 stage: all
