@@ -5,15 +5,6 @@
 
 #{set 'head'}
 <link rel="canonical" href="@@{Login.login()}">
- 
-#{if play.mode.isProd() }
-	#{if alt}
-	    #{abtest.alt /}
-	#{/if}
-	#{else}
-	    #{abtest.original /}
-	#{/else}
-#{/if}
 #{/set}
 
 #{set 'script'}

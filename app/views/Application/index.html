@@ -77,10 +77,6 @@
 #{set 'script'}
 <script src="#{static-path '/public/js/editor.js'/}"></script>
 <script src="#{static-path '/public/js/explorer.js'/}"></script>
-
-#{if play.mode.isProd()}
-	#{abtest.conversion /}
-#{/if}
 #{/set}
 
 
