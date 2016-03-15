@@ -11,6 +11,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
+import play.mvc.Util;
 import play.mvc.With;
 import box.Box;
 import box.BoxAccount;
@@ -123,9 +124,7 @@ public class Login extends Controller {
         if (oauthResponse.error == null) {
             Logger.info("Succesfully authenticated with Dropbox.");
             User u = upsertUser(oauthResponse.token, oauthResponse.secret);
-            session.put(SessionKeys.TYPE, AccountType.DROPBOX.name());
-            session.put(SessionKeys.UID, u.id);
-            session.put(SessionKeys.IP, request.remoteAddress);
+            setLoginCookie(u);
             session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
             redirectToOriginalURL();
         } else {
@@ -225,10 +224,15 @@ public class Login extends Controller {
         BoxClient client = BoxClientFactory.create(cred.token);
         BoxAccount account = client.getAccount();
         User u = User.upsert(cred, account);
-        session.put(SessionKeys.TYPE, AccountType.BOX.name());
-        session.put(SessionKeys.UID, u.id);
-        session.put(SessionKeys.IP, request.remoteAddress);
+        setLoginCookie(u);
         redirectToOriginalURL();
+    }
+
+    @Util
+    public static void setLoginCookie(User user) {
+        session.put(SessionKeys.TYPE, user.accountType.name());
+        session.put(SessionKeys.UID, user.id);
+        session.put(SessionKeys.IP, request.remoteAddress);
     }
 
     public static void logout() {

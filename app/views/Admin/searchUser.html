@@ -34,6 +34,13 @@
          <td>${result.lastSync}</td>
          <td>${result.lastLogin}</td>
          <td>${result.created}</td>
+         <td>
+            <form action="@{sudo}" class="form-inline">
+                #{authenticityToken/}
+                <input type="hidden" name="userKey" value="${com.google.appengine.api.datastore.KeyFactory.keyToString(result.getKey())}"/>
+                <button type="submit" class="btn">sudo</button>
+            </form>
+         </td>
        </tr>
      #{/list}
      </tbody>

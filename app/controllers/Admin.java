@@ -106,6 +106,19 @@ public class Admin extends Controller {
         render(user);
     }
 
+    public static void sudo(String userKey) {
+        checkAuthenticity();
+        Key key = KeyFactory.stringToKey(userKey);
+        User user = User.findByKey(key);
+        if (user == null) {
+            badRequest("User not found");
+        } else {
+            Logger.warn("Sudoing as user: '%s' Current admin user: '%s'", user, Login.getUser());
+            Login.setLoginCookie(user);
+            Application.index();
+        }
+    }
+
     public static void searchUser(String query) {
         boolean ranSearch = false;
         List<User> results = Lists.newArrayList();

@@ -247,7 +247,11 @@ public class User implements Serializable {
      * @return fully loaded user for the given id, null if not found.
      */
     public static User findById(AccountType accountType, long id) {
-        return DatastoreUtil.get(key(accountType, id), MAPPER);
+        return findByKey(key(accountType, id));
+    }
+
+    public static User findByKey(Key key) {
+        return DatastoreUtil.get(key, MAPPER);
     }
 
     public static Key key(AccountType accountType, long id) {
