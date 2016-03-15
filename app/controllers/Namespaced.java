@@ -21,7 +21,11 @@ public class Namespaced extends Controller {
     @Before
     static void addHeaders() {
         try {
-            response.setHeader("X-SMB-Namespace", getNamespace());
+            String namespace = getNamespace();
+            if (namespace == null) {
+                namespace = "";
+            }
+            response.setHeader("X-SMB-Namespace", namespace);
             response.setHeader("X-SMB-Module",
                                ModulesServiceFactory.getModulesService().getCurrentModule());
         } catch (Throwable t) {}
