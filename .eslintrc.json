@@ -1,0 +1,17 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "indent": [1, 2],
+    "no-console": 0,
+    "quotes": 0,
+    "guard-for-in": 2,
+    "strict": [2, "global"],
+    "no-unused-vars": [2, { "args": "none", "vars": "local"}],
+    "eqeqeq": 2,
+    "no-native-reassign": 2
+  }
+}

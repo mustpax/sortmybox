@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "eslint": "^3.0.1",
+  },
+  "scripts": {}
+}
