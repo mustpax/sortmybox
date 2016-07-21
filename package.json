@@ -10,10 +10,14 @@
     "watchify": "^3.7.0"
   },
   "scripts": {
-    "start": "browserify client.js -o bundle.js -t [ babelify --presets [ es2015 react ] ]",
-    "watch": "watchify client.js -o bundle.js -t [ babelify --presets [ es2015 react ] ]"
+    "start": "node app",
+    "dev": "concurrently -k \"npm run watch\" \"nodemon app\"",
+    "postinstall": "browserify client/index.js -o public/bundle.js -t [ babelify --presets [ es2015 react ] ]",
+    "watch": "watchify client/index.js -o public/bundle.js -t [ babelify --presets [ es2015 react ] ]"
   },
   "dependencies": {
+    "concurrently": "^2.2.0",
+    "express": "^4.14.0",
     "react": "^15.2.0",
     "react-dom": "^15.2.0"
   }
