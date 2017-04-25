@@ -3,8 +3,13 @@
     "browser": true,
     "node": true
   },
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
   "extends": "eslint:recommended",
   "rules": {
+    "linebreak-style": [2, "unix"],
+    "default-case": 2,
     "indent": [1, 2],
     "no-unexpected-multiline": 2,
     "semi": ["error", "always"],
