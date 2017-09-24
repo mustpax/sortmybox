@@ -107,9 +107,9 @@ public class User implements Serializable {
         Long tmpFileMoves = (Long) entity.getProperty("fileMoves");
         this.fileMoves = tmpFileMoves == null ? 0 : tmpFileMoves.intValue();
         this.sortingFolder = (String) entity.getProperty("sortingFolder");
-		if (this.sortingFolder == null) {
-			this.sortingFolder = Dropbox.getOldSortboxPath();
-		}
+        if (this.sortingFolder == null) {
+            this.sortingFolder = Dropbox.getOldSortboxPath();
+        }
         this.tokenExpiration = (Date) entity.getProperty("tokenExpiration");
         this.refreshToken = (String) entity.getProperty("refreshToken");
 
