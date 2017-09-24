@@ -6,6 +6,7 @@ import java.io.IOException;
 import play.Logger;
 import play.Play;
 import play.modules.gae.PlayDevEnvironment;
+import play.server.Server;
 
 import com.google.appengine.tools.remoteapi.RemoteApiInstaller;
 import com.google.appengine.tools.remoteapi.RemoteApiOptions;
@@ -23,6 +24,7 @@ public abstract class RemoteScript {
         RemoteApiInstaller installer = new RemoteApiInstaller();
         File root = new File(System.getProperty("application.path"));
         Play.init(root, System.getProperty("play.id", ""));
+        Play.start();
         try {
             installer.install(options);
             innerRun();
