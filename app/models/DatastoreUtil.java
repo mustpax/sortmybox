@@ -158,13 +158,13 @@ public class DatastoreUtil {
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q);
-        return Iterables.transform(pq.asIterable(), new FromEntityFunction<T>(mapper));
+        return Iterables.transform(pq.asIterable(options), new FromEntityFunction<T>(mapper));
     }
 
     public static <T> Iterable<Key> queryKeys(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q.setKeysOnly());
-        return Iterables.transform(pq.asIterable(), TO_KEY);
+        return Iterables.transform(pq.asIterable(options), TO_KEY);
     }
 
     public static <T> List<T> asList(Query q, Mapper<T> mapper) {
