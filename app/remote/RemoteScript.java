@@ -14,9 +14,10 @@ public abstract class RemoteScript {
 
     public void run() {
         RemoteApiOptions options = new RemoteApiOptions()
-            .server("11-9-prod.sortmybox.appspot.com", 443)
-            .credentials(System.getenv("user"), System.getenv("password"))
-            .remoteApiPath("/remote_api");
+            .server("sortmybox-hrd.appspot.com", 443)
+//            .credentials(System.getenv("user"), System.getenv("password"))
+            .remoteApiPath("/remote_api")
+            .useApplicationDefaultCredential();
         RemoteApiInstaller installer = new RemoteApiInstaller();
 //        ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
         try {
@@ -28,7 +29,7 @@ public abstract class RemoteScript {
             try {
                 installer.uninstall();
             } catch (Throwable e) {
-//                Logger.error(e, "Unable to uninstall");
+                Logger.error(e, "Unable to uninstall RemoteApi");
             }
         }
     }
