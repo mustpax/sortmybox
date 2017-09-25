@@ -155,6 +155,10 @@ public class DatastoreUtil {
         ds.delete(Lists.transform(models, new ModelToKeyFunction<T>(mapper)));
     }
 
+    public static <T> Iterable<T> query(Query q, Mapper<T> mapper) {
+        return query(q, FetchOptions.Builder.withDefaults(), mapper);
+    }
+
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q);

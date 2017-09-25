@@ -1,11 +1,18 @@
 package remote;
 
+import java.util.List;
+
 import com.dropbox.core.DbxException;
+import com.dropbox.core.InvalidAccessTokenException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.repackaged.com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 
 import common.api.ApiClient;
@@ -29,10 +36,19 @@ public class MigrateUser extends RemoteScript {
      * @return true if user was migrated and should be saved to the datastore, false if user was not migrated so no save is necessary
      */
     public static boolean migrate(User u) throws DbxException {
+        if (u.accountType != AccountType.DROPBOX) {
+            Logger.info("Skipping user. Not a Dropbox user");
+            return false;
+        }
+        if (u.periodicSort != Boolean.TRUE) {
+            Logger.info("Skipping user. User sorting disabled");
+            return false;
+        }
         if (u.dropboxV2Migrated) {
             Logger.info("Skipping user %d. Already migrated.", u.id);
             return false;
         }
+
         u.dropboxV2Token = DropboxV2ClientImpl.upgradeOAuth1AccessToken(u.getToken(), u.getSecret());
         u.dropboxV2Migrated = true;
         Logger.info("Successfully migrated user %d.", u.id);
@@ -41,14 +57,32 @@ public class MigrateUser extends RemoteScript {
 
     @Override
     public void innerRun() {
-        try {
-            User u = User.findById(AccountType.DROPBOX, 642874);
-            if (MigrateUser.migrate(u)) {
-                Logger.info("Saved user %d to DataStore.", u.id);
-                DatastoreUtil.put(u, User.MAPPER);
+        List<User> toSave = Lists.newArrayList();
+        Filter migratedFilter = new FilterPredicate("dropboxV2Migrated", FilterOperator.NOT_EQUAL, true);
+        for (User u: DatastoreUtil.query(User.all().setFilter(migratedFilter),
+                                        FetchOptions.Builder.withLimit(10),
+                                        User.MAPPER)) {
+            try {
+                if (MigrateUser.migrate(u)) {
+                    toSave.add(u);
+                }
+            } catch (InvalidAccessTokenException e) {
+                Logger.info("User %d token invalid, disabling user", u.id);
+                u.periodicSort = false;
+                toSave.add(u);
+            } catch (DbxException e) {
+                Logger.error(e, "Error migrating user %d", u.id);
             }
-        } catch (Throwable t) {
-            Throwables.propagate(t);
+            if (toSave.size() >= 100) {
+                DatastoreUtil.put(toSave, User.MAPPER);
+                Logger.info("Saving %d users to Datastore", toSave.size());
+                toSave.clear();
+            }
+        }
+        if (toSave.size() > 0) {
+            DatastoreUtil.put(toSave, User.MAPPER);
+            Logger.info("Saving %d users to Datastore", toSave.size());
+            toSave.clear();
         }
     }
 
