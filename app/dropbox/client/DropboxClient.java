@@ -23,4 +23,5 @@ public interface DropboxClient extends ApiClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @CheckForNull DbxMetadata getMetadata(String path) throws InvalidTokenException;
+    
 }
