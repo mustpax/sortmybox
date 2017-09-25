@@ -61,9 +61,9 @@ public class SingleUserRunRulesTest extends BaseModelTest {
     public void testConflict() throws Exception {
         addToSortbox("foo");
         setRules(new Rule(RuleType.NAME_CONTAINS, "foo", "/foo", 0, null));
-        doThrow(new FileMoveCollisionException(null))
+        doThrow(new FileMoveCollisionException((String) null))
 	        .when(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo");
-        doThrow(new FileMoveCollisionException(null))
+        doThrow(new FileMoveCollisionException((String) null))
 	        .when(testClient).move(Dropbox.getSortboxPath() + "/foo", "/foo/foo conflict");
         
         RuleUtils.runRules(u);

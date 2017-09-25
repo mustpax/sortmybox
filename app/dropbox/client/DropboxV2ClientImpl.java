@@ -8,14 +8,17 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxOAuth1AccessToken;
 import com.dropbox.core.DbxOAuth1Upgrader;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.FullAccount;
 import com.google.appengine.api.urlfetch.HTTPMethod;
-import com.google.appengine.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Throwables;
 
 import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
@@ -33,7 +36,16 @@ public class DropboxV2ClientImpl implements DropboxClient {
     @Override
     public void move(String from, String to)
             throws FileMoveCollisionException, InvalidTokenException {
-        // TODO Auto-generated method stub
+        try {
+            dbxClient.files().move(from, to);
+        } catch (RelocationErrorException e) {
+            if (e.errorValue.isTo() && e.errorValue.getToValue().isConflict()) {
+                throw new FileMoveCollisionException(e);
+            }
+            Throwables.propagate(e);
+        } catch (DbxException e) {
+            Throwables.propagate(e);
+        }
     }
 
     @Override
@@ -80,14 +92,17 @@ public class DropboxV2ClientImpl implements DropboxClient {
 
     @Override
     public boolean mkdir(String path) throws InvalidTokenException {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            dbxClient.files().createFolder(path);
+        } catch (DbxException e) {
+            Throwables.propagate(e);
+        }
+        return true;
     }
 
     @Override
     public boolean exists(String path) throws InvalidTokenException {
-        // TODO Auto-generated method stub
-        return false;
+        return getMetadata(path) != null;
     }
 
     @Override
@@ -113,7 +128,21 @@ public class DropboxV2ClientImpl implements DropboxClient {
 
     @Override
     public DbxMetadata getMetadata(String path) throws InvalidTokenException {
-        // TODO Auto-generated method stub
+        try {
+            Metadata metadata = dbxClient.files().getMetadata(path);
+            DbxMetadata ret = new DbxMetadata();
+            ret.path = metadata.getPathDisplay();
+            ret.isDir = metadata instanceof FolderMetadata;
+            return ret;
+        } catch (GetMetadataErrorException e) {
+            if (e.errorValue.isPath() && e.errorValue.getPathValue().isNotFound()) {
+                // getMetadata() is expected to return if path is not found
+                return null;
+            }
+            Throwables.propagate(e);
+        } catch (DbxException e) {
+            Throwables.propagate(e);
+        }
         return null;
     }
 
