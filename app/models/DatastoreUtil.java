@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -134,6 +135,14 @@ public class DatastoreUtil {
         } catch (EntityNotFoundException e) {
             return null;
         }
+    }
+
+    public static <T> T get(Query q, Mapper<T> mapper) {
+        List<T> matches = asList(q, mapper);
+        if (matches.isEmpty()) {
+            return null;
+        }
+        return matches.get(0);
     }
 
     public static <T> Key put(T model, Mapper<T> mapper) {

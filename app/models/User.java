@@ -11,11 +11,13 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
+import com.dropbox.core.DbxAuthFinish;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 
@@ -70,6 +72,7 @@ public class User implements Serializable {
     
     private String token;
     private String secret;
+    public String dropboxV2Id;
     public String dropboxV2Token;
     public boolean dropboxV2Migrated = false;
 
@@ -116,6 +119,7 @@ public class User implements Serializable {
         this.tokenExpiration = (Date) entity.getProperty("tokenExpiration");
         this.refreshToken = (String) entity.getProperty("refreshToken");
         this.dropboxV2Token = (String) entity.getProperty("dropboxV2Token");
+        this.dropboxV2Id = (String) entity.getProperty("dropboxV2Id");
         this.dropboxV2Migrated = (Boolean) entity.getProperty("dropboxV2Migrated") == Boolean.TRUE;
 
         this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
@@ -131,6 +135,13 @@ public class User implements Serializable {
             this.id = Long.valueOf(entity.getKey().getName().split(KEY_DELIM)[1]);
             break;
         }
+    }
+
+    public User(DbxAuthFinish auth) {
+        this(AccountType.DROPBOX);
+        this.dropboxV2Migrated = true;
+        this.dropboxV2Token = auth.getAccessToken();
+        this.dropboxV2Id = auth.getUserId();
     }
 
     private static Set<Long> getAdmins() {
@@ -211,6 +222,9 @@ public class User implements Serializable {
     }
 
     public Key getKey() {
+        if (this.id == null) {
+            return null;
+        }
         return User.key(this.accountType, this.id);
     }
 
@@ -239,7 +253,11 @@ public class User implements Serializable {
 
     public Key save() {
         this.modified = new Date();
-        return DatastoreUtil.put(this, MAPPER);
+        Key ret = DatastoreUtil.put(this, MAPPER);
+        if (this.id == null) {
+            this.id = ret.getId();
+        }
+        return ret;
     }
 
     public void delete() {
@@ -329,6 +347,20 @@ public class User implements Serializable {
         return user;
     }
 
+    public static User upsert(DbxAuthFinish auth) {
+        User u = DatastoreUtil.get(User.all().addFilter("dropboxV2Id", FilterOperator.EQUAL, auth.getUserId()), User.MAPPER);
+        if (u == null) {
+            u = new User(auth);
+            Logger.info("Dropbox user not found in datastore, creating new one: %s", u);
+        } else {
+            Logger.info("Updating Dropbox credentials for user: %s", u);
+            u.dropboxV2Token = auth.getAccessToken();
+        }
+        u.lastLogin = new Date();
+        u.save();
+        return u;
+    }
+
     public static User upsert(DbxAccount account, String token, String secret) {
         if (account == null || !account.notNull()) {
             return null;
@@ -370,6 +402,7 @@ public class User implements Serializable {
             .append(this.refreshToken)
             .append(this.dropboxV2Token)
             .append(this.dropboxV2Migrated)
+            .append(this.dropboxV2Id)
             .hashCode();
     }
 
@@ -397,6 +430,7 @@ public class User implements Serializable {
             .append(this.refreshToken, other.refreshToken)
             .append(this.dropboxV2Token, other.dropboxV2Token)
             .append(this.dropboxV2Migrated, other.dropboxV2Migrated)
+            .append(this.dropboxV2Id, other.dropboxV2Id)
             .isEquals();
     }
     
@@ -428,7 +462,12 @@ public class User implements Serializable {
     private static class UserMapper implements Mapper<User> {
         @Override
         public Entity toEntity(User model) {
-            Entity entity = new Entity(toKey(model));
+            Entity entity;
+            if (model.id == null) {
+                entity = new Entity(KIND);
+            } else {
+                entity = new Entity(toKey(model));
+            }
 
             entity.setProperty("name", model.name);
             entity.setProperty("nameLower", model.nameLower);
@@ -449,6 +488,7 @@ public class User implements Serializable {
             entity.setProperty("refreshToken", model.refreshToken);
             entity.setProperty("dropboxV2Token", model.dropboxV2Token);
             entity.setProperty("dropboxV2Migrated", model.dropboxV2Migrated);
+            entity.setProperty("dropboxV2Id", model.dropboxV2Id);
             return entity;
         }
 
