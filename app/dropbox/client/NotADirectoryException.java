@@ -12,4 +12,8 @@ public class NotADirectoryException extends DropboxException {
     public NotADirectoryException(String msg) {
         super(msg);
     }
+
+    public NotADirectoryException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -10,6 +10,8 @@ import com.dropbox.core.DbxOAuth1AccessToken;
 import com.dropbox.core.DbxOAuth1Upgrader;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
@@ -19,6 +21,7 @@ import com.google.appengine.repackaged.com.google.common.base.Throwables;
 import dropbox.Dropbox;
 import dropbox.gson.DbxAccount;
 import dropbox.gson.DbxMetadata;
+import play.Logger;
 import play.libs.WS.HttpResponse;
 
 public class DropboxV2ClientImpl implements DropboxClient {
@@ -39,6 +42,12 @@ public class DropboxV2ClientImpl implements DropboxClient {
     @Override
     public Set<String> listDir(String path)
             throws InvalidTokenException, NotADirectoryException {
+        return listDir(path, ListingType.FILES);
+    }
+
+    @Override
+    public Set<String> listDir(String path, ListingType listingType)
+            throws InvalidTokenException, NotADirectoryException {
         // Dropbox expects root folder to be specified as empty string
         if (path.equals("/")) {
             path = "";
@@ -54,22 +63,22 @@ public class DropboxV2ClientImpl implements DropboxClient {
                     result = dbxClient.files().listFolderContinue(result.getCursor());
                 }
                 for (Metadata f: result.getEntries()) {
-                    ret.add(f.getName());
+                    if ((f instanceof FileMetadata && listingType.includeFiles) ||
+                            (f instanceof FolderMetadata && listingType.includeDirs)){
+                        ret.add(f.getName());
+                    }
                 }
             } while (result.getHasMore());
         } catch (ListFolderErrorException e) {
-            Throwables.propagate(e);
+            if (e.errorValue.isPath() && e.errorValue.getPathValue().isNotFolder()) {
+                throw new NotADirectoryException(e);
+            } else {
+                Throwables.propagate(e);
+            }
         } catch (DbxException e) {
             Throwables.propagate(e);
         }
         return ret;
-    }
-
-    @Override
-    public Set<String> listDir(String path, ListingType listingType)
-            throws InvalidTokenException, NotADirectoryException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

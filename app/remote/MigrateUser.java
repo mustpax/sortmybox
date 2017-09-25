@@ -28,7 +28,7 @@ public class MigrateUser extends RemoteScript {
             String v2Token = DropboxV2ClientImpl.upgradeOAuth1AccessToken(u.getToken(), u.getSecret());
             Logger.info("Upgaded token: %s", v2Token);
             DropboxClient client = new DropboxV2ClientImpl(v2Token);
-            Logger.info("Files for user: %d", client.listDir("/").size());
+            Logger.info("Files for user: %d", client.listDir("/space mountain.jpg").size());
         } catch (Throwable t) {
             Throwables.propagate(t);
         }
