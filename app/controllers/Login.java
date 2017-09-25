@@ -23,12 +23,16 @@ import com.dropbox.core.DbxAuthFinish;
 import com.dropbox.core.DbxWebAuth.NotApprovedException;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
+
 import common.request.Headers;
 
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.DropboxException;
 import dropbox.client.DropboxV2ClientImpl;
+import dropbox.client.InvalidTokenException;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -123,7 +127,12 @@ public class Login extends Controller {
         return request.getBase() + "/auth-cb";
     }
 
-    public static void authCallback() throws Exception {
+    public static void auth() {
+        flash.keep(REDIRECT_URL);
+        redirect(Dropbox.getAuthURL(getCallbackURL(), session));
+    }
+
+    public static void authCallback() {
         try {
             DbxAuthFinish authFinish = Dropbox.finishAuth(getCallbackURL(), session, params.all());
             DbxAccount account = new DropboxV2ClientImpl(authFinish.getAccessToken()).getAccount();
@@ -132,12 +141,11 @@ public class Login extends Controller {
             redirectToOriginalURL();
         } catch (NotApprovedException e) {
             forbidden("Did not receive proper authorization from Dropbox");
+        } catch (InvalidTokenException e) {
+            forbidden("Did not receive proper authorization from Dropbox");
+        } catch (DropboxException e) {
+            Throwables.propagate(e);
         }
-    }
-
-    public static void auth() throws Exception {
-        flash.keep(REDIRECT_URL);
-        redirect(Dropbox.getAuthURL(getCallbackURL(), session));
     }
     
     /**
