@@ -7,6 +7,10 @@ package dropbox.client;
  * @author mustpax
  */
 public class InvalidTokenException extends DropboxException {
+    public InvalidTokenException(Exception cause) {
+        super(cause);
+    }
+
     public InvalidTokenException(String msg) {
         super(msg);
     }

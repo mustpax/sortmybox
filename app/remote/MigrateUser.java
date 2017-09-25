@@ -81,7 +81,7 @@ public class MigrateUser extends RemoteScript {
                     u.email = acct.email;
                     modified = true;
                 }
-            } catch (InvalidAccessTokenException e) {
+            } catch (InvalidTokenException | InvalidAccessTokenException e) {
                 Logger.info("User %d token invalid, disabling user", u.id);
                 u.periodicSort = false;
                 modified = true;

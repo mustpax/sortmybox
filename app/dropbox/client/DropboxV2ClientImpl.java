@@ -7,6 +7,7 @@ import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxOAuth1AccessToken;
 import com.dropbox.core.DbxOAuth1Upgrader;
+import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -84,6 +85,8 @@ public class DropboxV2ClientImpl implements DropboxClient {
             } else {
                 Throwables.propagate(e);
             }
+        } catch (InvalidAccessTokenException e) {
+            throw new InvalidTokenException(e);
         } catch (DbxException e) {
             Throwables.propagate(e);
         }
@@ -94,6 +97,8 @@ public class DropboxV2ClientImpl implements DropboxClient {
     public boolean mkdir(String path) throws InvalidTokenException {
         try {
             dbxClient.files().createFolder(path);
+        } catch (InvalidAccessTokenException e) {
+            throw new InvalidTokenException(e);
         } catch (DbxException e) {
             Throwables.propagate(e);
         }
@@ -112,7 +117,7 @@ public class DropboxV2ClientImpl implements DropboxClient {
     }
 
     @Override
-    public DbxAccount getAccount() {
+    public DbxAccount getAccount() throws InvalidTokenException {
         try {
             FullAccount account = dbxClient.users().getCurrentAccount();
             DbxAccount ret = new DbxAccount();
@@ -120,6 +125,8 @@ public class DropboxV2ClientImpl implements DropboxClient {
             ret.id = account.getAccountId();
             ret.email = account.getEmailVerified() ? account.getEmail() : null;
             return ret;
+        } catch (InvalidAccessTokenException e) {
+            throw new InvalidTokenException(e);
         } catch (DbxException e) {
             Throwables.propagate(e);
         }
@@ -140,6 +147,8 @@ public class DropboxV2ClientImpl implements DropboxClient {
                 return null;
             }
             Throwables.propagate(e);
+        } catch (InvalidAccessTokenException e) {
+            throw new InvalidTokenException(e);
         } catch (DbxException e) {
             Throwables.propagate(e);
         }
