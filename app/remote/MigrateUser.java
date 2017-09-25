@@ -61,7 +61,7 @@ public class MigrateUser extends RemoteScript {
     public void innerRun() {
         List<User> toSave = Lists.newArrayList();
         // You can't filter for null fields because they are not in the index
-        int lastId = 104646;
+        int lastId = 42887095;
         Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, User.key(AccountType.DROPBOX, lastId));
         for (User u: DatastoreUtil.query(User.all().setFilter(idFilter),
                                         FetchOptions.Builder.withChunkSize(1000),
