@@ -49,8 +49,6 @@ public class Login extends Controller {
     private static final String REDIRECT_URL = "url";
 
     private static class SessionKeys {
-        static final String TOKEN = "token";
-        static final String SECRET = "secret";
         static final String UID = "uid";
         static final String IP = "ip";
         static final String TYPE = "type";
