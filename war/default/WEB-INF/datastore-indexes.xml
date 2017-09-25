@@ -6,4 +6,8 @@
     <datastore-index kind="Rule" ancestor="true" source="auto">
         <property name="rank" direction="asc"/>
     </datastore-index>
+    <datastore-index kind="User" ancestor="false" source="manual">
+        <property name="periodicSort" direction="asc"/>
+        <property name="dropboxV2Migrated" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>

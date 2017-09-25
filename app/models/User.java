@@ -448,11 +448,13 @@ public class User implements Serializable {
     public String toString() {
         return MoreObjects.toStringHelper(User.class)
             .add("id", id)
+            .add("dropboxV2Id", dropboxV2Id)
             .add("accountType", accountType)
             .add("name", name)
             .add("nameLower", nameLower)
             .add("email", email)
             .add("periodicSort", periodicSort)
+            .add("dropboxV2Migrated", dropboxV2Migrated)
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)

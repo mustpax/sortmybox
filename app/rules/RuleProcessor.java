@@ -1,19 +1,20 @@
 package rules;
 
+import java.util.Arrays;
 import java.util.Map;
-
-import models.User;
-import play.Logger;
-import play.mvc.With;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import controllers.ErrorReporter;
-
 import cron.Job;
+import models.User;
+import play.Logger;
+import play.mvc.With;
 
 /**
  * A scheduled task for applying rules in background.
@@ -58,10 +59,19 @@ public class RuleProcessor implements Job {
         Logger.info("Enqueued chunkRuleProcessor messages. Chunk size: %d Num messages: %d",
 	                chunkSize, numMessages);
     }
+    
+    public static Filter getQueryFilter() {
+        return new Query.CompositeFilter(CompositeFilterOperator.AND,
+                Arrays.<Filter>asList(
+                        new Query.FilterPredicate("periodicSort", FilterOperator.EQUAL, true),
+                        new Query.FilterPredicate("dropboxV2Migrated", FilterOperator.EQUAL, true)
+                        ));
+    }
 
-    private static Iterable<Key> getAllUserKeys() {
+    public static Iterable<Key> getAllUserKeys() {
+        Filter f = getQueryFilter();
         Query q = User.all()
-                      .addFilter("periodicSort", FilterOperator.EQUAL, true)
+                      .setFilter(f)
                       .addSort(Entity.KEY_RESERVED_PROPERTY);
         return User.queryKeys(q);
     }
