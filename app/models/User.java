@@ -70,8 +70,8 @@ public class User implements Serializable {
     
     private String token;
     private String secret;
-    private String dropboxV2Token;
-    private boolean dropboxV2Migrated = false;
+    public String dropboxV2Token;
+    public boolean dropboxV2Migrated = false;
 
     // Used by Box client only
     private String refreshToken;
