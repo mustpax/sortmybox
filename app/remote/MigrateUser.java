@@ -24,6 +24,7 @@ import dropbox.client.DropboxClientFactory;
 import dropbox.client.DropboxV2ClientImpl;
 import dropbox.client.InvalidTokenException;
 import dropbox.client.NotADirectoryException;
+import dropbox.gson.DbxAccount;
 import models.DatastoreUtil;
 import models.User;
 import models.User.AccountType;
@@ -61,21 +62,34 @@ public class MigrateUser extends RemoteScript {
     public void innerRun() {
         List<User> toSave = Lists.newArrayList();
         // You can't filter for null fields because they are not in the index
-        int lastId = 42887095;
-        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, User.key(AccountType.DROPBOX, lastId));
+//        int lastId = 42887095;
+        int lastId = 1;
+        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(AccountType.DROPBOX, lastId));
         for (User u: DatastoreUtil.query(User.all().setFilter(idFilter),
                                         FetchOptions.Builder.withChunkSize(1000),
                                         User.MAPPER)) {
+            boolean modified = false;
             try {
                 if (MigrateUser.migrate(u)) {
-                    toSave.add(u);
+                    modified = true;
+                }
+                if (u.dropboxV2Migrated && u.dropboxV2Id == null) {
+                    Logger.info("Adding v2 user info to user %s", u.id);
+                    DropboxClient client = new DropboxV2ClientImpl(u.dropboxV2Token);
+                    DbxAccount acct = client.getAccount();
+                    u.dropboxV2Id = acct.id;
+                    u.email = acct.email;
+                    modified = true;
                 }
             } catch (InvalidAccessTokenException e) {
                 Logger.info("User %d token invalid, disabling user", u.id);
                 u.periodicSort = false;
-                toSave.add(u);
+                modified = true;
             } catch (DbxException e) {
                 Logger.error(e, "Error migrating user %d", u.id);
+            }
+            if (modified) {
+                toSave.add(u);
             }
             if (toSave.size() >= 100) {
                 DatastoreUtil.put(toSave, User.MAPPER);
