@@ -137,11 +137,13 @@ public class User implements Serializable {
         }
     }
 
-    public User(DbxAuthFinish auth) {
+    public User(DbxAccount acc, DbxAuthFinish auth) {
         this(AccountType.DROPBOX);
         this.dropboxV2Migrated = true;
         this.dropboxV2Token = auth.getAccessToken();
         this.dropboxV2Id = auth.getUserId();
+        this.name = acc.name;
+        this.email = acc.email;
     }
 
     private static Set<Long> getAdmins() {
@@ -347,10 +349,10 @@ public class User implements Serializable {
         return user;
     }
 
-    public static User upsert(DbxAuthFinish auth) {
+    public static User upsert(DbxAccount account, DbxAuthFinish auth) {
         User u = DatastoreUtil.get(User.all().addFilter("dropboxV2Id", FilterOperator.EQUAL, auth.getUserId()), User.MAPPER);
         if (u == null) {
-            u = new User(auth);
+            u = new User(account, auth);
             Logger.info("Dropbox user not found in datastore, creating new one: %s", u);
         } else {
             Logger.info("Updating Dropbox credentials for user: %s", u);

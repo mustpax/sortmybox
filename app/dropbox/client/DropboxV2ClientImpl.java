@@ -13,6 +13,7 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.appengine.repackaged.com.google.common.base.Throwables;
 
@@ -61,7 +62,7 @@ public class DropboxV2ClientImpl implements DropboxClient {
                 for (Metadata f: result.getEntries()) {
                     if ((f instanceof FileMetadata && listingType.includeFiles) ||
                             (f instanceof FolderMetadata && listingType.includeDirs)){
-                        ret.add(f.getName());
+                        ret.add(f.getPathDisplay());
                     }
                 }
             } while (result.getHasMore());
@@ -97,7 +98,16 @@ public class DropboxV2ClientImpl implements DropboxClient {
 
     @Override
     public DbxAccount getAccount() {
-        // TODO Auto-generated method stub
+        try {
+            FullAccount account = dbxClient.users().getCurrentAccount();
+            DbxAccount ret = new DbxAccount();
+            ret.name = account.getName().getDisplayName();
+            ret.id = account.getAccountId();
+            ret.email = account.getEmailVerified() ? account.getEmail() : null;
+            return ret;
+        } catch (DbxException e) {
+            Throwables.propagate(e);
+        }
         return null;
     }
 

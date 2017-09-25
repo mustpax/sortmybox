@@ -3,6 +3,7 @@ package common.api;
 import models.User;
 import box.BoxClientFactory;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.DropboxV2ClientImpl;
 
 /**
  * Singleton class for generating generating ApiClient for
@@ -16,7 +17,7 @@ public class ApiClientFactory {
         case BOX:
             return BoxClientFactory.create(u);
         case DROPBOX:
-            return DropboxClientFactory.create(u);
+            return new DropboxV2ClientImpl(u.dropboxV2Token);
         }
         throw new IllegalArgumentException("Unrecognized account type: " + u.accountType);
     }

@@ -28,6 +28,7 @@ import common.request.Headers;
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.DropboxV2ClientImpl;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -125,7 +126,8 @@ public class Login extends Controller {
     public static void authCallback() throws Exception {
         try {
             DbxAuthFinish authFinish = Dropbox.finishAuth(getCallbackURL(), session, params.all());
-            User u = User.upsert(authFinish);
+            DbxAccount account = new DropboxV2ClientImpl(authFinish.getAccessToken()).getAccount();
+            User u = User.upsert(account, authFinish);
             setLoginCookie(u);
             redirectToOriginalURL();
         } catch (NotApprovedException e) {

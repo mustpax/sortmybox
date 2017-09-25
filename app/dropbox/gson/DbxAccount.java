@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
  */
 public class DbxAccount {
     public Long uid;
+    public String id;
+    public String email;
     
     @SerializedName("display_name")
     public String name;
