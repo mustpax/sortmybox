@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.InvalidAccessTokenException;
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -58,9 +60,11 @@ public class MigrateUser extends RemoteScript {
     @Override
     public void innerRun() {
         List<User> toSave = Lists.newArrayList();
-        Filter migratedFilter = new FilterPredicate("dropboxV2Migrated", FilterOperator.NOT_EQUAL, true);
-        for (User u: DatastoreUtil.query(User.all().setFilter(migratedFilter),
-                                        FetchOptions.Builder.withLimit(10),
+        // You can't filter for null fields because they are not in the index
+        int lastId = 104646;
+        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, User.key(AccountType.DROPBOX, lastId));
+        for (User u: DatastoreUtil.query(User.all().setFilter(idFilter),
+                                        FetchOptions.Builder.withChunkSize(1000),
                                         User.MAPPER)) {
             try {
                 if (MigrateUser.migrate(u)) {
