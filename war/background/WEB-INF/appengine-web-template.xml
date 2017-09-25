@@ -13,6 +13,6 @@
     <automatic-scaling>
         <min-idle-instances>0</min-idle-instances>
         <max-idle-instances>1</max-idle-instances>
-        <max-concurrent-requests>20</max-concurrent-requests>
+        <max-concurrent-requests>40</max-concurrent-requests>
     </automatic-scaling>
 </appengine-web-app>
