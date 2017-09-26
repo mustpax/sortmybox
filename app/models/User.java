@@ -11,11 +11,13 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
+import com.dropbox.core.DbxAuthFinish;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 
@@ -70,6 +72,10 @@ public class User implements Serializable {
     
     private String token;
     private String secret;
+    public String dropboxV2Id;
+    public String dropboxV2Token;
+    public boolean dropboxV2Migrated = false;
+
     // Used by Box client only
     private String refreshToken;
 
@@ -107,11 +113,14 @@ public class User implements Serializable {
         Long tmpFileMoves = (Long) entity.getProperty("fileMoves");
         this.fileMoves = tmpFileMoves == null ? 0 : tmpFileMoves.intValue();
         this.sortingFolder = (String) entity.getProperty("sortingFolder");
-		if (this.sortingFolder == null) {
-			this.sortingFolder = Dropbox.getOldSortboxPath();
-		}
+        if (this.sortingFolder == null) {
+            this.sortingFolder = Dropbox.getOldSortboxPath();
+        }
         this.tokenExpiration = (Date) entity.getProperty("tokenExpiration");
         this.refreshToken = (String) entity.getProperty("refreshToken");
+        this.dropboxV2Token = (String) entity.getProperty("dropboxV2Token");
+        this.dropboxV2Id = (String) entity.getProperty("dropboxV2Id");
+        this.dropboxV2Migrated = (Boolean) entity.getProperty("dropboxV2Migrated") == Boolean.TRUE;
 
         this.accountType = AccountType.fromDbValue((String) entity.getProperty("accountType"));
         if (this.accountType == null) {
@@ -363,6 +372,9 @@ public class User implements Serializable {
             .append(this.sortingFolder)
             .append(this.accountType)
             .append(this.refreshToken)
+            .append(this.dropboxV2Token)
+            .append(this.dropboxV2Migrated)
+            .append(this.dropboxV2Id)
             .hashCode();
     }
 
@@ -388,6 +400,9 @@ public class User implements Serializable {
             .append(this.sortingFolder, other.sortingFolder)
             .append(this.accountType, other.accountType)
             .append(this.refreshToken, other.refreshToken)
+            .append(this.dropboxV2Token, other.dropboxV2Token)
+            .append(this.dropboxV2Migrated, other.dropboxV2Migrated)
+            .append(this.dropboxV2Id, other.dropboxV2Id)
             .isEquals();
     }
     
@@ -403,11 +418,13 @@ public class User implements Serializable {
     public String toString() {
         return MoreObjects.toStringHelper(User.class)
             .add("id", id)
+            .add("dropboxV2Id", dropboxV2Id)
             .add("accountType", accountType)
             .add("name", name)
             .add("nameLower", nameLower)
             .add("email", email)
             .add("periodicSort", periodicSort)
+            .add("dropboxV2Migrated", dropboxV2Migrated)
             .add("created_date", created)
             .add("last_update", modified)
             .add("last_sync", lastSync)
@@ -438,6 +455,9 @@ public class User implements Serializable {
             }
             entity.setProperty("tokenExpiration", model.tokenExpiration);
             entity.setProperty("refreshToken", model.refreshToken);
+            entity.setProperty("dropboxV2Token", model.dropboxV2Token);
+            entity.setProperty("dropboxV2Migrated", model.dropboxV2Migrated);
+            entity.setProperty("dropboxV2Id", model.dropboxV2Id);
             return entity;
         }
 
