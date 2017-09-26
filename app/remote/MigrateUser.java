@@ -62,14 +62,17 @@ public class MigrateUser extends RemoteScript {
     public void innerRun() {
         List<User> toSave = Lists.newArrayList();
         // You can't filter for null fields because they are not in the index
-//        int lastId = 42887095;
-        int lastId = 1;
-//        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(AccountType.DROPBOX, lastId));
-        Filter sortFilter = new FilterPredicate("periodicSort", FilterOperator.EQUAL, true);
+//        int lastId = 1204045;
+//        int lastId = 642874;
+//        Filter filter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, User.key(AccountType.DROPBOX, lastId));
+        Filter filter = new FilterPredicate("periodicSort", FilterOperator.EQUAL, true);
+        int tot = 0;
+        int migrated = 0;
         for (User u: DatastoreUtil.query(User.all()
-                                             .setFilter(sortFilter),
-                                        FetchOptions.Builder.withChunkSize(1000),
+                                             .setFilter(filter),
+                                        FetchOptions.Builder.withLimit(100000).chunkSize(1000),
                                         User.MAPPER)) {
+            tot++;
             boolean modified = false;
             try {
                 if (MigrateUser.migrate(u)) {
@@ -92,6 +95,7 @@ public class MigrateUser extends RemoteScript {
             }
             if (modified) {
                 toSave.add(u);
+                migrated++;
             }
             if (toSave.size() >= 100) {
                 DatastoreUtil.put(toSave, User.MAPPER);
@@ -104,6 +108,7 @@ public class MigrateUser extends RemoteScript {
             Logger.info("Saving %d users to Datastore", toSave.size());
             toSave.clear();
         }
+        Logger.info("Done. Processed: %d Migrated: %d", tot, migrated);
     }
 
     public static void main(String[] args) {
