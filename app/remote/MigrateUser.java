@@ -32,7 +32,7 @@ import play.Logger;
 
 public class MigrateUser extends RemoteScript {
     /**
-     * Migrate the given user to a Dropbox V2 API toke.
+     * Migrate the given user to a Dropbox V2 API token.
      * DOES NOT Update user in the AppEngine datastore. That responsibility is yours!
      * 
      * @param u user to migrate, once migrated user will be updated
