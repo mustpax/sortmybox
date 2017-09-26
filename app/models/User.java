@@ -141,8 +141,8 @@ public class User implements Serializable {
         this(AccountType.DROPBOX);
         this.dropboxV2Migrated = true;
         this.dropboxV2Token = auth.getAccessToken();
-        this.dropboxV2Id = auth.getUserId();
-        this.name = acc.name;
+        this.dropboxV2Id = acc.id;
+        this.setName(name);
         this.email = acc.email;
     }
 
@@ -350,10 +350,12 @@ public class User implements Serializable {
     }
 
     public static User upsert(DbxAccount account, DbxAuthFinish auth) {
-        User u = DatastoreUtil.get(User.all().addFilter("dropboxV2Id", FilterOperator.EQUAL, auth.getUserId()), User.MAPPER);
+        User u = DatastoreUtil.get(
+                User.all().setFilter(DatastoreUtil.pred("dropboxV2Id", FilterOperator.EQUAL, account.id)),
+                User.MAPPER);
         if (u == null) {
             u = new User(account, auth);
-            Logger.info("Dropbox user not found in datastore, creating new one: %s", u);
+            Logger.info("Dropbox user not found with id %s in datastore, creating new one: %s", account.id, u);
         } else {
             Logger.info("Updating Dropbox credentials for user: %s", u);
             u.dropboxV2Token = auth.getAccessToken();
