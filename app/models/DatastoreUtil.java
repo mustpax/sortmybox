@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -136,6 +137,14 @@ public class DatastoreUtil {
         }
     }
 
+    public static <T> T get(Query q, Mapper<T> mapper) {
+        List<T> matches = asList(q, mapper);
+        if (matches.isEmpty()) {
+            return null;
+        }
+        return matches.get(0);
+    }
+
     public static <T> Key put(T model, Mapper<T> mapper) {
         return put(Collections.singleton(model), mapper).get(0);
     }
@@ -155,16 +164,20 @@ public class DatastoreUtil {
         ds.delete(Lists.transform(models, new ModelToKeyFunction<T>(mapper)));
     }
 
+    public static <T> Iterable<T> query(Query q, Mapper<T> mapper) {
+        return query(q, FetchOptions.Builder.withDefaults(), mapper);
+    }
+
     public static <T> Iterable<T> query(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q);
-        return Iterables.transform(pq.asIterable(), new FromEntityFunction<T>(mapper));
+        return Iterables.transform(pq.asIterable(options), new FromEntityFunction<T>(mapper));
     }
 
     public static <T> Iterable<Key> queryKeys(Query q, FetchOptions options, Mapper<T> mapper) {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery pq = ds.prepare(q.setKeysOnly());
-        return Iterables.transform(pq.asIterable(), TO_KEY);
+        return Iterables.transform(pq.asIterable(options), TO_KEY);
     }
 
     public static <T> List<T> asList(Query q, Mapper<T> mapper) {

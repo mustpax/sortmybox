@@ -57,6 +57,9 @@ class Cache {
     }
     
     public <T> void delete(T model, Mapper<T> mapper) {
-        play.cache.Cache.delete(KeyFactory.keyToString(mapper.toKey(model)));
+        Key k = mapper.toKey(model);
+        if (k != null) {
+            play.cache.Cache.delete(KeyFactory.keyToString(k));
+        }
     }
 }

@@ -7,10 +7,13 @@ import tasks.Task;
 import tasks.TaskContext;
 import tasks.TaskUtils;
 
+import java.util.Arrays;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskHandle;
@@ -69,10 +72,14 @@ public class ChunkedRuleProcessor implements Task {
     }
 
     public static Iterable<User> getUsersForKeyRange(Key startKey, Key lastKey) {
+        Query.Filter f = new Query.CompositeFilter(CompositeFilterOperator.AND,
+                Arrays.<Query.Filter>asList(
+                            RuleProcessor.getQueryFilter(),
+                            new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, startKey),
+                            new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, lastKey)
+                        ));
         Query q = User.all()
-			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, startKey)
-			          .addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN_OR_EQUAL, lastKey)
-			          .addFilter("periodicSort", FilterOperator.EQUAL, true);
+                      .setFilter(f);
         return User.query(q);
     }
 }

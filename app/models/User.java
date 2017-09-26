@@ -137,6 +137,15 @@ public class User implements Serializable {
         }
     }
 
+    public User(DbxAccount acc, DbxAuthFinish auth) {
+        this(AccountType.DROPBOX);
+        this.dropboxV2Migrated = true;
+        this.dropboxV2Token = auth.getAccessToken();
+        this.dropboxV2Id = auth.getUserId();
+        this.name = acc.name;
+        this.email = acc.email;
+    }
+
     private static Set<Long> getAdmins() {
         if (Play.configuration == null) {
             return Collections.emptySet();
@@ -215,6 +224,9 @@ public class User implements Serializable {
     }
 
     public Key getKey() {
+        if (this.id == null) {
+            return null;
+        }
         return User.key(this.accountType, this.id);
     }
 
@@ -243,7 +255,11 @@ public class User implements Serializable {
 
     public Key save() {
         this.modified = new Date();
-        return DatastoreUtil.put(this, MAPPER);
+        Key ret = DatastoreUtil.put(this, MAPPER);
+        if (this.id == null) {
+            this.id = ret.getId();
+        }
+        return ret;
     }
 
     public void delete() {
@@ -331,6 +347,20 @@ public class User implements Serializable {
         user.save();
         
         return user;
+    }
+
+    public static User upsert(DbxAccount account, DbxAuthFinish auth) {
+        User u = DatastoreUtil.get(User.all().addFilter("dropboxV2Id", FilterOperator.EQUAL, auth.getUserId()), User.MAPPER);
+        if (u == null) {
+            u = new User(account, auth);
+            Logger.info("Dropbox user not found in datastore, creating new one: %s", u);
+        } else {
+            Logger.info("Updating Dropbox credentials for user: %s", u);
+            u.dropboxV2Token = auth.getAccessToken();
+        }
+        u.lastLogin = new Date();
+        u.save();
+        return u;
     }
 
     public static User upsert(DbxAccount account, String token, String secret) {
@@ -436,7 +466,12 @@ public class User implements Serializable {
     private static class UserMapper implements Mapper<User> {
         @Override
         public Entity toEntity(User model) {
-            Entity entity = new Entity(toKey(model));
+            Entity entity;
+            if (model.id == null) {
+                entity = new Entity(KIND);
+            } else {
+                entity = new Entity(toKey(model));
+            }
 
             entity.setProperty("name", model.name);
             entity.setProperty("nameLower", model.nameLower);

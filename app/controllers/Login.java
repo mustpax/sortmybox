@@ -19,13 +19,20 @@ import box.BoxClient;
 import box.BoxClientFactory;
 import box.BoxCredentials;
 
+import com.dropbox.core.DbxAuthFinish;
+import com.dropbox.core.DbxWebAuth.NotApprovedException;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
+
 import common.request.Headers;
 
 import dropbox.Dropbox;
 import dropbox.client.DropboxClient;
 import dropbox.client.DropboxClientFactory;
+import dropbox.client.DropboxException;
+import dropbox.client.DropboxV2ClientImpl;
+import dropbox.client.InvalidTokenException;
 import dropbox.gson.DbxAccount;
 
 /**
@@ -42,8 +49,6 @@ public class Login extends Controller {
     private static final String REDIRECT_URL = "url";
 
     private static class SessionKeys {
-        static final String TOKEN = "token";
-        static final String SECRET = "secret";
         static final String UID = "uid";
         static final String IP = "ip";
         static final String TYPE = "type";
@@ -115,51 +120,30 @@ public class Login extends Controller {
     public static boolean isLoggedIn() {
         return getUser() != null;
     }
-
-    public static void authCallback() throws Exception {
-        String token = session.get(SessionKeys.TOKEN);
-        String secret = session.get(SessionKeys.SECRET);
-        ServiceInfo serviceInfo = Dropbox.OAUTH;
-        OAuth.Response oauthResponse = OAuth.service(serviceInfo).retrieveAccessToken(token, secret);
-        if (oauthResponse.error == null) {
-            Logger.info("Succesfully authenticated with Dropbox.");
-            User u = upsertUser(oauthResponse.token, oauthResponse.secret);
-            setLoginCookie(u);
-            session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
-            redirectToOriginalURL();
-        } else {
-            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
-            session.remove(SessionKeys.TOKEN, SessionKeys.SECRET);
-            forbidden("Could not authenticate with Dropbox.");
-        }
-    }
-
-    public static void auth() throws Exception {
-        flash.keep(REDIRECT_URL);
-        ServiceInfo serviceInfo = Dropbox.OAUTH;
-        OAuth oauth = OAuth.service(serviceInfo);
-        OAuth.Response oauthResponse = oauth.retrieveRequestToken();
-        if (oauthResponse.error == null) {
-            Logger.info("Redirecting to Dropbox for auth.");
-            session.put(SessionKeys.TOKEN, oauthResponse.token);
-            session.put(SessionKeys.SECRET, oauthResponse.secret);
-            redirect(oauth.redirectUrl(oauthResponse.token) +
-                    "&oauth_callback=" +
-                    URLEncoder.encode(request.getBase() + "/auth-cb", "UTF-8"));
-        } else {
-            Logger.error("Error connecting to Dropbox: " + oauthResponse.error);
-            error("Error connecting to Dropbox.");
-        }
-    }
     
-    /**
-     * Ensure that the Dropbox user authenticated with the given oauth credentials
-     * is in the datastore.
-     */
-    private static User upsertUser(String token, String secret) {
-        DropboxClient client = DropboxClientFactory.create(token, secret);
-        DbxAccount account = client.getAccount();
-        return User.upsert(account, token, secret);
+    private static String getCallbackURL() {
+        return request.getBase() + "/auth-cb";
+    }
+
+    public static void auth() {
+        flash.keep(REDIRECT_URL);
+        redirect(Dropbox.getAuthURL(getCallbackURL(), session));
+    }
+
+    public static void authCallback() {
+        try {
+            DbxAuthFinish authFinish = Dropbox.finishAuth(getCallbackURL(), session, params.all());
+            DbxAccount account = new DropboxV2ClientImpl(authFinish.getAccessToken()).getAccount();
+            User u = User.upsert(account, authFinish);
+            setLoginCookie(u);
+            redirectToOriginalURL();
+        } catch (NotApprovedException e) {
+            forbidden("Did not receive proper authorization from Dropbox");
+        } catch (InvalidTokenException e) {
+            forbidden("Did not receive proper authorization from Dropbox");
+        } catch (DropboxException e) {
+            Throwables.propagate(e);
+        }
     }
     
     /**

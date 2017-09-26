@@ -12,8 +12,9 @@ public interface DropboxClient extends ApiClient {
 
     /**
      * Gets information about currently logged in user's Dropbox account.
+     * @throws InvalidTokenException if token is not valid or expired 
      */
-    @Nonnull DbxAccount getAccount();
+    @Nonnull DbxAccount getAccount() throws InvalidTokenException;
     
     /**
      * Get file or directory metadata.
@@ -23,4 +24,5 @@ public interface DropboxClient extends ApiClient {
      * @throws InvalidTokenException if OAuth token for the current user is not valid
      */
     @CheckForNull DbxMetadata getMetadata(String path) throws InvalidTokenException;
+    
 }

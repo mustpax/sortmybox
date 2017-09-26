@@ -10,6 +10,7 @@ require:
     - com.getsentry.raven -> raven-appengine 7.0.0:
         exclude:
             - com.google.appengine -> * # GAE deps are managed through the play-gae module
+    - com.dropbox.core -> dropbox-core-sdk 3.0.3
 
 repositories:
     - play-gae:
