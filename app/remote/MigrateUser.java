@@ -44,11 +44,11 @@ public class MigrateUser extends RemoteScript {
             return false;
         }
         if (u.periodicSort != Boolean.TRUE) {
-            Logger.info("Skipping user. User sorting disabled");
+//            Logger.info("Skipping user. User sorting disabled");
             return false;
         }
         if (u.dropboxV2Migrated) {
-            Logger.info("Skipping user %d. Already migrated.", u.id);
+//            Logger.info("Skipping user %d. Already migrated.", u.id);
             return false;
         }
 
@@ -64,8 +64,10 @@ public class MigrateUser extends RemoteScript {
         // You can't filter for null fields because they are not in the index
 //        int lastId = 42887095;
         int lastId = 1;
-        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(AccountType.DROPBOX, lastId));
-        for (User u: DatastoreUtil.query(User.all().setFilter(idFilter),
+//        Filter idFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN_OR_EQUAL, User.key(AccountType.DROPBOX, lastId));
+        Filter sortFilter = new FilterPredicate("periodicSort", FilterOperator.EQUAL, true);
+        for (User u: DatastoreUtil.query(User.all()
+                                             .setFilter(sortFilter),
                                         FetchOptions.Builder.withChunkSize(1000),
                                         User.MAPPER)) {
             boolean modified = false;
