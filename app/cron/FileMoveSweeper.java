@@ -15,9 +15,11 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.common.collect.Iterables;
 
 /**
  * Deletes all file moves that are older than {@link FileMove#RETENTION_DAYS}.
@@ -25,6 +27,23 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 public class FileMoveSweeper implements Job {
 
     private static final int CHUNK_SIZE = 100;
+    
+    public static void deleteOldFileMoves() {
+        Date oldestPermitted = DateTime.now().minusDays(FileMove.RETENTION_DAYS).toDate();
+        Query query = FileMove.all()
+                              .setFilter(DatastoreUtil.pred("when", FilterOperator.LESS_THAN, oldestPermitted));
+        int i = 0;
+        for (List<Key> chunk: Iterables.partition(
+                DatastoreUtil.queryKeys(query, FetchOptions.Builder.withChunkSize(CHUNK_SIZE).limit(CHUNK_SIZE * 10), FileMove.MAPPER),
+                CHUNK_SIZE)) {
+            Logger.info("%02d Deleting %s file moves", i, chunk.size());
+            DatastoreServiceFactory.getDatastoreService().delete(chunk);
+            i++;
+            if (i < 10) {
+                return;
+            }
+        }
+    }
 
     @Override
     public void execute(Map<String, String> jobData) {

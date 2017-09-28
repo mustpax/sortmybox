@@ -14,7 +14,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.base.MoreObjects;
 
 public class FileMove implements Serializable {
-    private static final FileMoveMapper MAPPER = new FileMoveMapper();
+    public static final FileMoveMapper MAPPER = new FileMoveMapper();
 
     private static final long serialVersionUID = 45L;
 
