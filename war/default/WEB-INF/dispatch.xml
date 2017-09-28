@@ -10,4 +10,9 @@
       <url>*/admin/module</url>
       <module>background</module>
   </dispatch>
+  <dispatch>
+      <!-- Used to verify that dispatch.xml works. -->
+      <url>*/_ah/queue</url>
+      <module>background</module>
+  </dispatch>
 </dispatch-entries>
