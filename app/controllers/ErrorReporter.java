@@ -89,6 +89,5 @@ public class ErrorReporter extends Controller {
         User u = Login.getUser();
         Key id = u == null ? null : u.getKey();
         logSentry(e, u);
-        Mails.logError(id, e, request.headers.values());
     }
 }

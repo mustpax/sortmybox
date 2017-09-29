@@ -82,6 +82,8 @@ public class DropboxV2ClientImpl implements DropboxClient {
         } catch (ListFolderErrorException e) {
             if (e.errorValue.isPath() && e.errorValue.getPathValue().isNotFolder()) {
                 throw new NotADirectoryException(e);
+            } else if (e.errorValue.isPath() && e.errorValue.getPathValue().isNotFound()) {
+                throw new NotADirectoryException(e);
             } else {
                 Throwables.propagate(e);
             }

@@ -142,7 +142,7 @@ public class User implements Serializable {
         this.dropboxV2Migrated = true;
         this.dropboxV2Token = auth.getAccessToken();
         this.dropboxV2Id = acc.id;
-        this.setName(name);
+        this.setName(acc.name);
         this.email = acc.email;
     }
 
@@ -171,7 +171,7 @@ public class User implements Serializable {
     
     public void setName(String name) {
         this.name = name;
-        this.nameLower = name.toLowerCase();
+        this.nameLower = name == null ? null : name.toLowerCase();
     }
     
     
