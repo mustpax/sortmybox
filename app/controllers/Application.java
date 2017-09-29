@@ -68,10 +68,10 @@ public class Application extends Controller {
         try {
 	        renderJSON(client.listDir(path, ApiClient.ListingType.DIRS));
         } catch (NotADirectoryException e) {
-            Logger.error(e, "User attempt to list a directory which is infact a file or missing: %s", u);
+            Logger.info(e, "User attempt to list a directory which is infact a file or missing: %s", u);
             renderJSON(Collections.emptyList());
         } catch (InvalidTokenException e) {
-            Logger.error(e, "Invalid OAuth token for user %s", u);
+            Logger.info(e, "Invalid OAuth token for user %s", u);
             Login.logout();
         } catch (IllegalArgumentException e) {
             badRequest();
