@@ -1,6 +1,5 @@
 # [SortMyBox][sortbox]
 
-![Test status](https://secure.travis-ci.org/mustpax/sortmybox.png?branch=master)
 
 Like e-mail filters, for your Dropbox.
 
