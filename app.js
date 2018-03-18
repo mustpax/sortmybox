@@ -7,6 +7,7 @@ var express = require('express');
 var path = require('path');
 
 var app = express();
+app.enable('trust proxy');
 
 var hbs = require('express-handlebars')({
   defaultLayout: 'main',
