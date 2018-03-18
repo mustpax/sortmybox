@@ -1,9 +1,6 @@
 {
-  "devDependencies": {
-    "eslint": "3.0.1"
-  },
   "scripts": {
-    "start": "node app"
+    "start": "ts-node src/app"
   },
   "engines": {
     "node": ">=8.1"
@@ -13,6 +10,8 @@
     "body-parser": "1.17.x",
     "express": "4.14.x",
     "express-handlebars": "3.0.x",
+    "ts-node": "^5.0.1",
+    "typescript": "^2.7.2",
     "underscore": "1.8.3"
   }
 }
