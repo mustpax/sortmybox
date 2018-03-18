@@ -16,14 +16,19 @@
         ],
         "no-var-keyword": true,
         "quotemark": [
-            true,
-            "double",
-            "avoid-escape"
+            false
         ],
         "semicolon": [
             true,
             "always",
             "ignore-bound-class-methods"
+        ],
+        "no-unused-variable": [
+          true,
+          {
+            "ignore-pattern": "^_",
+            "check-parameters": false
+          }
         ],
         "whitespace": [
             true,
@@ -54,7 +59,6 @@
         "no-internal-module": true,
         "no-trailing-whitespace": true,
         "no-null-keyword": true,
-        "prefer-const": true,
         "jsdoc-format": true
     }
 }
