@@ -7,7 +7,6 @@
   "parserOptions": {
     "ecmaVersion": 6
   },
-  "parser": "babel-eslint",
   "extends": "eslint:recommended",
   "rules": {
     "linebreak-style": [2, "unix"],
