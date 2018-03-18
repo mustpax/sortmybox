@@ -1,5 +1,6 @@
 "use strict";
 
+require('dotenv').config();
 var express = require('express');
 var path = require('path');
 
@@ -18,8 +19,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', function(req, res) {
-  res.render('index');
+var { datastore, Visit } = require('./models');
+
+app.get('/', async function(req, res) {
+  var visit = new Visit();
+  await visit.save();
+  var visits = await datastore.runQuery(Visit.all());
+  res.render('index', {
+    visits
+  });
 });
 
 var port = process.env.PORT || 3000;
