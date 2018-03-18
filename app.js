@@ -22,12 +22,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 var { datastore, Visit } = require('./models');
 
 app.get('/', async function(req, res) {
-  var visit = new Visit();
-  await visit.save();
-  var visits = await datastore.runQuery(Visit.all());
-  res.render('index', {
-    visits
-  });
+  try {
+    var visit = Visit.create();
+    await visit.save();
+    var visits = await datastore.runQuery(Visit.all());
+    console.log(visits);
+    res.render('index', {
+      visits: visits[0]
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json(e);
+  }
+});
+
+app.get('/delete', async function(req, res) {
+  var result = await Visit.query(Visit.all().select(['__key__']));
+  console.log(result[0]);
+  res.json(result);
 });
 
 var port = process.env.PORT || 3000;

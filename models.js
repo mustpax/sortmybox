@@ -28,6 +28,12 @@ class Visit {
     return datastore.key([Visit.kind()]);
   }
 
+  static async query(q) {
+    var results = await datastore.runQuery(q);
+    results[0] = results[0].map(Visit.fromEntity);
+    return results;
+  }
+
   static fromEntity(entity) {
     var ret = new Visit();
     Object.assign(ret, _.pick(entity, Visit.fields()));
@@ -40,9 +46,14 @@ class Visit {
     return datastore.createQuery(Visit.kind());
   }
 
+  static create(fields) {
+    fields = Object.assign(fields, Visit.defaults(), fields);
+    return new Visit(fields);
+  }
+
   constructor(fields) {
     fields = fields || {};
-    Object.assign(this, Visit.defaults(), fields);
+    Object.assign(this, fields);
   }
 
   toObj() {
@@ -51,7 +62,7 @@ class Visit {
 
   async save() {
     return await datastore.save({
-      key: this.key(),
+      key: Visit.key(this.id),
       data: this.toObj()
     });
   }
