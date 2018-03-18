@@ -2,5 +2,6 @@ node_modules
 npm-debug.log
 .DS_Store
 public/bundle.js
-.env
+.env*
+env.*sh
 google-creds.json

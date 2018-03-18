@@ -1,6 +1,8 @@
 "use strict";
 
-require('dotenv').config();
+var env = require('./env');
+env.validate();
+
 var express = require('express');
 var path = require('path');
 
@@ -26,9 +28,8 @@ app.get('/', async function(req, res) {
     var visit = Visit.create();
     await visit.save();
     var visits = await datastore.runQuery(Visit.all());
-    console.log(visits);
     res.render('index', {
-      visits: visits[0]
+      visits: visits[0].map(Visit.fromEntity)
     });
   } catch (e) {
     console.log(e);
@@ -37,9 +38,22 @@ app.get('/', async function(req, res) {
 });
 
 app.get('/delete', async function(req, res) {
-  var result = await Visit.query(Visit.all().select(['__key__']));
-  console.log(result[0]);
-  res.json(result);
+  var results = await datastore.runQuery(Visit.all().select(['__key__']));
+  var keys = results[0].map(result => result[datastore.KEY]);
+  var [del] = await datastore.delete(keys);
+  res.json({
+    deleted: del
+  });
+});
+
+app.post('/delete/:id', async function(req, res) {
+  if (! req.params.id || isNaN(req.params.id)) {
+    res.status(400).send('Missing id parameter');
+    return;
+  }
+  var id = parseInt(req.params.id);
+  await Visit.deleteById(id);
+  res.redirect('/');
 });
 
 var port = process.env.PORT || 3000;

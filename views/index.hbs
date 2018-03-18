@@ -2,6 +2,11 @@
 
 <ul>
   {{#each visits}}
-    <li>{{created}}</li>
+    <li>
+      Id: {{id}} Date: {{created}}
+      <form method="post" action="/delete/{{ id }}">
+        <input type="submit" value="Delete">
+      </form>
+    </li>
   {{/each}}
 </ul>

@@ -47,8 +47,14 @@ class Visit {
   }
 
   static create(fields) {
-    fields = Object.assign(fields, Visit.defaults(), fields);
+    fields = fields || {};
+    fields = _.defaults(fields, Visit.defaults());
     return new Visit(fields);
+  }
+
+  static async deleteById(id) {
+    var key = Visit.key(id);
+    return await datastore.delete(key);
   }
 
   constructor(fields) {
@@ -60,11 +66,19 @@ class Visit {
     return _.pick(this, Visit.fields());
   }
 
+  key() {
+    return Visit.key(this.id);
+  }
+
   async save() {
     return await datastore.save({
-      key: Visit.key(this.id),
+      key: this.key(),
       data: this.toObj()
     });
+  }
+
+  async delete() {
+    datastore.delete(this.key());
   }
 }
 
