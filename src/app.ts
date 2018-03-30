@@ -23,8 +23,6 @@ app.use(express.static('public'));
 
 let { datastore, Visit } = require('./models');
 
-let test: {[datastore.KEY]: string};
-
 app.get('/', async function(_req, res) {
   try {
     let visit = Visit.create();
