@@ -8,26 +8,26 @@ import { CommitResult } from '@google-cloud/datastore/request';
 const datastore = new Datastore({});
 const _ = require('underscore');
 
-interface FieldDefinition {
-  name: string;
-  type: type;
-}
-
-interface Schema {
-  kind: string;
-  fields: {
-    [fieldName: string]: FieldDefinition
-  };
-}
-
-interface Model {
-  key(): DatastoreKey;
-}
-
-class VisitSchema implements Schema {
-  readonly kind = "visit";
-  readonly
-}
+// interface FieldDefinition {
+//   name: string;
+//   type: type;
+// }
+//
+// interface Schema {
+//   kind: string;
+//   fields: {
+//     [fieldName: string]: FieldDefinition
+//   };
+// }
+//
+// interface Model {
+//   key(): DatastoreKey;
+// }
+//
+// class VisitSchema implements Schema {
+//   readonly kind = "visit";
+//   readonly
+// }
 
 class Visit {
   static kind() {
