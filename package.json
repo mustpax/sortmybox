@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "ts-node src/app"
+    "start": "ts-node src/app",
+    "dev": "nodemon"
   },
   "engines": {
     "node": ">=8.1"
@@ -21,5 +22,8 @@
     "ts-node": "5.0.1",
     "typescript": "2.7.2",
     "underscore": "1.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "1.17.3"
   }
 }
