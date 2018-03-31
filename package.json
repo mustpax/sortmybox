@@ -2,7 +2,7 @@
   "scripts": {
     "start": "ts-node src/app",
     "dev": "nodemon",
-    "test": "mocha -r ts-node/register src/test/**/*.test.ts",
+    "test": "mocha --exit -r ts-node/register src/test/**/*.test.ts",
     "deploy": "gcloud app deploy"
   },
   "engines": {
