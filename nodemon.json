@@ -1,5 +1,6 @@
 {
   "verbose": true,
+  "ext": "ts",
   "watch": ["src/**/*.ts"],
   "ignore": ["client/**", "public/**","src/**/*.spec.ts"],
   "exec": "npm start"
