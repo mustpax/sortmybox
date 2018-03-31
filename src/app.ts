@@ -29,8 +29,9 @@ import { datastore, VisitService as VS } from './models';
 app.get('/', async function(_req, res, next) {
   try {
     let visit = VS.makeNew();
-    VS.save([visit]);
+    await VS.save([visit]);
     let visits = await VS.query(VS.all());
+    console.log('v', visits)
     res.render('index', {
       visits: visits
     });

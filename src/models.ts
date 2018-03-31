@@ -26,6 +26,11 @@ export interface Model {
   id?: ModelId;
 }
 
+export interface Entity {
+  key: DatastoreKey;
+  data: any;
+}
+
 export class Visit implements Model {
   id?: number;
   created: Date;
@@ -48,13 +53,16 @@ export class VisitSchema implements Schema<Visit> {
     return this.fromEntity(await datastore.get(k));
   }
 
-  toEntity(v: Visit): object {
-    let ret = {} as any;
-    ret[Datastore.KEY] = this.toKey(v);
+  toEntity(v: Visit): Entity {
+    let data = {} as any;
     for (let f of this.fields) {
-      ret[f] = (v as any)[f];
+      data[f] = (v as any)[f];
     }
-    return ret;
+
+    return {
+      key: this.toKey(v),
+      data
+    };
   }
 
   fromEntity(e: any) {
@@ -97,8 +105,10 @@ export class VisitSchema implements Schema<Visit> {
 
   async save(visits: Visit[]) {
     let entities = visits.map(visit => this.toEntity(visit));
-    let savedEntities = await datastore.save(entities) as any[];
-    return savedEntities.map(entity => entity.key.path[1]);
+    datastore.save(entities).then(console.error).catch(console.error);
+    let savedEntities = await datastore.save(entities);
+    let mutationResults = savedEntities[0].mutationResults as any[];
+    return mutationResults.map(mr => mr.key.path[0].id) as ModelId[];
   }
 }
 
