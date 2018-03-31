@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "lib": ["es2017"],
+    "lib": ["es2015", "es2017"],
     "rootDir": "src",
-    "outDir": "dist",
     "module": "commonjs",
     "declaration": true,
     "noImplicitAny": true,
@@ -14,7 +13,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "inlineSources": true,
-    "types": ["node", "mocha"]
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*"
