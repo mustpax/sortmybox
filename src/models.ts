@@ -68,7 +68,7 @@ export class VisitSchema implements Schema<Visit> {
   fromEntity(e: any) {
     let ret = {} as any;
     let k = e[Datastore.KEY];
-    ret.id = k && k[1];
+    ret.id = k && k.path[1];
     for (let f of this.fields) {
       ret[f] = e[f];
     }
