@@ -15,10 +15,13 @@ let hbs = require('express-handlebars')({
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
 
-import bodyParser = require('body-parser');
 
+app.use(require('morgan')('tiny'));
+
+import bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(express.static('public'));
 
 import { datastore, VisitService as VS } from './models';
