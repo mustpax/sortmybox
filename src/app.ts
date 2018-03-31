@@ -24,20 +24,28 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static('public'));
 
-import { datastore, VisitService as VS } from './models';
+import { VisitService as VS } from './models';
 
-app.get('/', async function(_req, res, next) {
-  try {
-    let visit = VS.makeNew();
-    await VS.save([visit]);
-    let visits = await VS.query(VS.all());
-    res.render('index', {
-      visits: visits
-    });
-  } catch (e) {
-    next(e);
-  }
-});
+type RouteFn = (req: express.Request, res: express.Response, next: express.NextFunction) => Promise<any>;
+
+let asyncRoute = (route: RouteFn): RouteFn => {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      await route(req, res, next);
+    } catch (e) {
+      next(e);
+    }
+  };
+};
+
+app.get('/', asyncRoute(async function(_req, res) {
+  let visit = VS.makeNew();
+  await VS.save([visit]);
+  let visits = await VS.query(VS.all());
+  res.render('index', {
+    visits: visits
+  });
+}));
 
 // app.get('/delete', async function(_req, res) {
 //   let visits = await VS.query(VS.all());
@@ -48,7 +56,7 @@ app.get('/', async function(_req, res, next) {
 //   });
 // });
 
-app.post('/delete/:id', async function(req, res) {
+app.post('/delete/:id', asyncRoute(async function(req, res) {
   if (! req.params.id || isNaN(req.params.id)) {
     res.status(400).send('Missing id parameter');
     return;
@@ -56,7 +64,7 @@ app.post('/delete/:id', async function(req, res) {
   let id = parseInt(req.params.id);
   await VS.removeById([id]);
   res.redirect('/');
-});
+}));
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.log('Error', err);
