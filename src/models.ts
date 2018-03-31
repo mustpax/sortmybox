@@ -18,6 +18,7 @@ export interface Schema<T extends Model> {
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
   all(): Query;
+  removeById(ids: ModelId[]): Promise<void>;
   remove(t: T[]): Promise<void>;
   save(t: T[]): Promise<ModelId[]>;
 }
@@ -100,8 +101,18 @@ export class VisitSchema implements Schema<Visit> {
     return results.map(e => this.fromEntity(e));
   }
 
+  async removeById(ids: (ModelId|undefined)[]) {
+    let keys: DatastoreKey[] = [];
+    for (let id of ids) {
+      if (id) {
+        keys.push(datastore.key([this.kind, id]));
+      }
+    }
+    await datastore.delete(keys);
+  }
+
   async remove(visits: Visit[]) {
-    await datastore.delete(visits.map(visit => this.toKey(visit)));
+    await this.removeById(visits.map(visit => visit.id));
   }
 
   async save(visits: Visit[]) {

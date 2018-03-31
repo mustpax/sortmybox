@@ -39,24 +39,24 @@ app.get('/', async function(_req, res, next) {
   }
 });
 
-app.get('/delete', async function(_req, res) {
-  let visits = await VS.query(VS.all());
-  let keys = visits.map(visit => VS.toKey(visit));
-  let [del] = await datastore.delete(keys);
-  res.json({
-    deleted: del
-  });
-});
-
-// app.post('/delete/:id', async function(req, res) {
-//   if (! req.params.id || isNaN(req.params.id)) {
-//     res.status(400).send('Missing id parameter');
-//     return;
-//   }
-//   let id = parseInt(req.params.id);
-//   await Visit.deleteById(id);
-//   res.redirect('/');
+// app.get('/delete', async function(_req, res) {
+//   let visits = await VS.query(VS.all());
+//   let keys = visits.map(visit => VS.toKey(visit));
+//   let [del] = await datastore.delete(keys);
+//   res.json({
+//     deleted: del
+//   });
 // });
+
+app.post('/delete/:id', async function(req, res) {
+  if (! req.params.id || isNaN(req.params.id)) {
+    res.status(400).send('Missing id parameter');
+    return;
+  }
+  let id = parseInt(req.params.id);
+  await VS.removeById([id]);
+  res.redirect('/');
+});
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.log('Error', err);
