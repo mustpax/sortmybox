@@ -95,7 +95,8 @@ export class VisitSchema implements Schema<Visit> {
   }
 
   async query(q: Query) {
-    let results = await datastore.runQuery(q);
+    let resp = await datastore.runQuery(q);
+    let results = resp[0];
     return results.map(e => this.fromEntity(e));
   }
 

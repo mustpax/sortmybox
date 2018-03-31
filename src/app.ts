@@ -31,7 +31,6 @@ app.get('/', async function(_req, res, next) {
     let visit = VS.makeNew();
     await VS.save([visit]);
     let visits = await VS.query(VS.all());
-    console.log('v', visits)
     res.render('index', {
       visits: visits
     });
