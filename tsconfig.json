@@ -13,7 +13,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "inlineSources": true,
-    "types": ["node", "jest"]
+    "types": ["node", "mocha"]
   },
   "include": [
     "src/**/*"
