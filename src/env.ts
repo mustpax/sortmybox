@@ -1,6 +1,7 @@
 "use strict";
 
-let required: string[] = ['GOOGLE_CLOUD_PROJECT', 'GOOGLE_APPLICATION_CREDENTIALS'];
+const required = ['GOOGLE_CLOUD_PROJECT', 'SECRET'];
+const requiredDev = ['GOOGLE_APPLICATION_CREDENTIALS'];
 
 export function validate() {
   required.forEach(varName => {
@@ -9,4 +10,13 @@ export function validate() {
       process.exit(1);
     }
   });
+
+  if (process.env.NODE_ENV !== 'production') {
+    requiredDev.forEach(varName => {
+      if (! process.env[varName]) {
+        console.error('Environment DEV-ONLY variable missing', varName);
+        process.exit(1);
+      }
+    });
+  }
 }

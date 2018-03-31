@@ -18,6 +18,7 @@
     "@types/morgan": "1.7.35",
     "@types/underscore": "1.8.8",
     "body-parser": "1.17.x",
+    "dotenv": "^5.0.1",
     "express": "4.14.x",
     "express-handlebars": "3.0.x",
     "morgan": "1.9.0",
