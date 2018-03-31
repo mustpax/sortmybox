@@ -47,14 +47,13 @@ app.get('/', asyncRoute(async function(_req, res) {
   });
 }));
 
-// app.get('/delete', async function(_req, res) {
-//   let visits = await VS.query(VS.all());
-//   let keys = visits.map(visit => VS.toKey(visit));
-//   let [del] = await datastore.delete(keys);
-//   res.json({
-//     deleted: del
-//   });
-// });
+app.get('/delete', async function(_req, res) {
+  let visits = await VS.query(VS.all());
+  await VS.remove(visits);
+  res.json({
+    deleted: true
+  });
+});
 
 app.post('/delete/:id', asyncRoute(async function(req, res) {
   if (! req.params.id || isNaN(req.params.id)) {

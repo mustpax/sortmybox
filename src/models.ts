@@ -105,7 +105,7 @@ export class VisitSchema implements Schema<Visit> {
     let keys: DatastoreKey[] = [];
     for (let id of ids) {
       if (id) {
-        keys.push(datastore.key([this.kind, id]));
+        keys.push(datastore.key([this.kind, parseInt(id as string)]));
       }
     }
     await datastore.delete(keys);
@@ -117,7 +117,6 @@ export class VisitSchema implements Schema<Visit> {
 
   async save(visits: Visit[]) {
     let entities = visits.map(visit => this.toEntity(visit));
-    datastore.save(entities).then(console.error).catch(console.error);
     let savedEntities = await datastore.save(entities);
     let mutationResults = savedEntities[0].mutationResults as any[];
     return mutationResults.map(mr => mr.key.path[0].id) as ModelId[];
