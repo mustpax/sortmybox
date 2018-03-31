@@ -3,7 +3,7 @@
 import { validate } from './env';
 validate();
 
-import * as express from 'express';
+import express = require('express');
 
 let app = express();
 app.enable('trust proxy');
@@ -15,45 +15,51 @@ let hbs = require('express-handlebars')({
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
 
-let bodyParser = require('body-parser');
+import bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
-let { datastore, Visit } = require('./models');
+import { datastore, VisitService as VS } from './models';
 
-app.get('/', async function(_req, res) {
+app.get('/', async function(_req, res, next) {
   try {
-    let visit = Visit.create();
-    await visit.save();
-    let visits = await datastore.runQuery(Visit.all());
+    let visit = VS.makeNew();
+    VS.save([visit]);
+    let visits = await VS.query(VS.all());
     res.render('index', {
-      visits: visits[0].map(Visit.fromEntity)
+      visits: visits
     });
   } catch (e) {
-    console.log(e);
-    res.status(500).json(e);
+    next(e);
   }
 });
 
 app.get('/delete', async function(_req, res) {
-  let results = await datastore.runQuery(Visit.all().select(['__key__']));
-  let keys = results[0].map((result: any) => result[datastore.KEY]);
+  let visits = await VS.query(VS.all());
+  let keys = visits.map(visit => VS.toKey(visit));
   let [del] = await datastore.delete(keys);
   res.json({
     deleted: del
   });
 });
 
-app.post('/delete/:id', async function(req, res) {
-  if (! req.params.id || isNaN(req.params.id)) {
-    res.status(400).send('Missing id parameter');
-    return;
-  }
-  let id = parseInt(req.params.id);
-  await Visit.deleteById(id);
-  res.redirect('/');
+// app.post('/delete/:id', async function(req, res) {
+//   if (! req.params.id || isNaN(req.params.id)) {
+//     res.status(400).send('Missing id parameter');
+//     return;
+//   }
+//   let id = parseInt(req.params.id);
+//   await Visit.deleteById(id);
+//   res.redirect('/');
+// });
+
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.log('Error', err);
+  res.status(err.status || 500).json({
+    error: err.message
+  });
 });
 
 let port = process.env.PORT || 3000;

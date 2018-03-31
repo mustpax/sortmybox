@@ -3,31 +3,9 @@
 import Datastore = require('@google-cloud/datastore');
 import { Query } from '@google-cloud/datastore/query';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
-import { CommitResult } from '@google-cloud/datastore/request';
+// import { CommitResult } from '@google-cloud/datastore/request';
 
 export const datastore = new Datastore({});
-// const _ = require('underscore');
-
-// interface FieldDefinition {
-//   name: string;
-//   type: type;
-// }
-//
-// interface Schema {
-//   kind: string;
-//   fields: {
-//     [fieldName: string]: FieldDefinition
-//   };
-// }
-//
-// interface Model {
-//   key(): DatastoreKey;
-// }
-//
-// class VisitSchema implements Schema {
-//   readonly kind = "visit";
-//   readonly
-// }
 
 export type ModelId = string|number;
 
@@ -39,12 +17,18 @@ export interface Schema<T extends Model> {
   fromEntity(e: object): T;
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
+  all(): Query;
   remove(t: T[]): Promise<void>;
   save(t: T[]): Promise<ModelId[]>;
 }
 
 export interface Model {
   id?: ModelId;
+}
+
+export class Visit implements Model {
+  id?: number;
+  created: Date;
 }
 
 export class VisitSchema implements Schema<Visit> {
@@ -118,88 +102,4 @@ export class VisitSchema implements Schema<Visit> {
   }
 }
 
-export const visitSchema = new VisitSchema();
-
-export class Visit implements Model {
-  id?: number;
-  created: Date;
-}
-
-// class Visit2 {
-//   static kind() {
-//     return 'visit';
-//   }
-//
-//   static defaults() {
-//     return {
-//       created: new Date()
-//     };
-//   }
-//
-//   static fields() {
-//     return [
-//       'created'
-//     ];
-//   }
-//
-//
-//   static key(id: number): DatastoreKey {
-//     if (id) {
-//       return datastore.key([Visit.kind(), id]);
-//     }
-//     return datastore.key([Visit.kind()]);
-//   }
-//
-//   static async query(q: Query) {
-//     let results = await datastore.runQuery(q);
-//     results[0] = results[0].map(Visit.fromEntity);
-//     return results;
-//   }
-//
-//   static fromEntity(entity: any): Visit {
-//     let ret = new Visit();
-//     Object.assign(ret, _.pick(entity, Visit.fields()));
-//     let key = entity[datastore.KEY];
-//     ret.id = key && key.path && key.path[1];
-//     return ret;
-//   }
-//
-//   static all() {
-//     return datastore.createQuery(Visit.kind());
-//   }
-//
-//   static async deleteById(id: number) {
-//     let key = Visit.key(id);
-//     return await datastore.delete(key);
-//   }
-//
-//   id: number;
-//   created: Date;
-//
-//   constructor() {
-//   }
-//
-//   toObj(): any {
-//     return _.pick(this, Visit.fields());
-//   }
-//
-//   key(): DatastoreKey {
-//     return Visit.key(this.id);
-//   }
-//
-//   async save(): Promise<CommitResult> {
-//     return await datastore.save({
-//       key: this.key(),
-//       data: this.toObj()
-//     });
-//   }
-//
-//   async delete() {
-//     datastore.delete(this.key());
-//   }
-// }
-
-module.exports = {
-  datastore,
-  Visit
-};
+export let VisitService = new VisitSchema();
