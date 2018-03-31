@@ -2,7 +2,8 @@
   "scripts": {
     "start": "ts-node src/app",
     "dev": "nodemon",
-    "test": "jest --forceExit --verbose"
+    "test": "jest --forceExit --verbose",
+    "deploy": "gcloud app deploy"
   },
   "engines": {
     "node": ">=8.1"
