@@ -2,7 +2,7 @@
   "scripts": {
     "start": "ts-node src/app",
     "dev": "nodemon",
-    "test": "mocha --exit -r ts-node/register src/test/**/*.test.ts",
+    "test": "mocha --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
     "deploy": "gcloud app deploy"
   },
   "engines": {
