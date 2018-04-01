@@ -13,7 +13,7 @@ export interface Schema<T extends Model> {
   fields: string[];
   kind: string;
   makeNew(): T;
-  findById(id: ModelId): Promise<T>;
+  findByIds(ids: ModelId[]): Promise<T[]>;
   fromEntity(e: object): T;
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
@@ -49,9 +49,9 @@ export class VisitSchema implements Schema<Visit> {
     return ret;
   }
 
-  async findById(id: ModelId) {
-    let k = datastore.key([this.kind, id]);
-    return this.fromEntity(await datastore.get(k));
+  async findByIds(ids: ModelId[]) {
+    let keys = ids.map(id => this.keyFromId(id));
+    return (await datastore.get(keys)).map(e => this.fromEntity(e));
   }
 
   toEntity(v: Visit): Entity {
@@ -76,9 +76,13 @@ export class VisitSchema implements Schema<Visit> {
     return ret as Visit;
   }
 
+  keyFromId(id: ModelId) {
+    return datastore.key([this.kind, parseInt(id as string)]);
+  }
+
   toKey(v: Visit): DatastoreKey {
     if (v.id) {
-      return datastore.key([this.kind, v.id]);
+      return this.keyFromId(v.id);
     }
     return datastore.key([this.kind]);
   }
