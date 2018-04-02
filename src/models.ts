@@ -2,21 +2,28 @@
 
 import Datastore = require('@google-cloud/datastore');
 import { Query } from '@google-cloud/datastore/query';
-import { DatastoreKey } from '@google-cloud/datastore/entity';
+import { DatastoreKey, DatastoreInt, PathElement } from '@google-cloud/datastore/entity';
+import joi = require('joi');
+
 // import { CommitResult } from '@google-cloud/datastore/request';
 
 export const datastore = new Datastore({});
 
-export type ModelId = string|number;
+export type ModelId = PathElement;
+export type Int = DatastoreInt;
 
 export interface Schema<T extends Model> {
-  fields: string[];
+  schema: {
+    [key: string]: joi.Schema
+  };
   kind: string;
   makeNew(): T;
   findByIds(ids: ModelId[]): Promise<T[]>;
   fromEntity(e: object): T;
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
+  keyFromId(id: ModelId): DatastoreKey;
+  idFromKey(key: DatastoreKey): ModelId|undefined;
   all(): Query;
   removeById(ids: ModelId[]): Promise<void>;
   remove(t: T[]): Promise<void>;
@@ -33,14 +40,20 @@ export interface Entity {
 }
 
 export class Visit implements Model {
-  id?: number;
-  created: Date;
+  id?: Int;
+  created?: Date;
+}
+
+function toArraySchema(schema: joi.SchemaMap): joi.Schema {
+  // Add optional id field to every schema
+  let schemaWithId = joi.object(schema).keys({id: joi.optional()});
+  return joi.array().items(schemaWithId);
 }
 
 export class VisitSchema implements Schema<Visit> {
-  fields = [
-    'created'
-  ];
+  schema = {
+    created: joi.date().required()
+  };
   kind = 'visit';
 
   makeNew() {
@@ -51,48 +64,44 @@ export class VisitSchema implements Schema<Visit> {
 
   async findByIds(ids: ModelId[]) {
     let keys = ids.map(id => this.keyFromId(id));
-    return (await datastore.get(keys)).map(e => this.fromEntity(e));
+    // datastore.get() returns [results]
+    let [entities] = await datastore.get(keys);
+    return entities.map(e => this.fromEntity(e));
   }
 
   toEntity(v: Visit): Entity {
     let data = {} as any;
-    for (let f of this.fields) {
+    for (let f of Object.keys(this.schema)) {
       data[f] = (v as any)[f];
     }
 
     return {
-      key: this.toKey(v),
+      key: this.keyFromId(v.id),
       data
     };
   }
 
   fromEntity(e: any) {
     let ret = {} as any;
-    let k = e[Datastore.KEY];
-    ret.id = k && k.path[1];
-    for (let f of this.fields) {
+    ret.id = this.idFromKey(e[datastore.KEY]);
+    for (let f of Object.keys(this.schema)) {
       ret[f] = e[f];
     }
     return ret as Visit;
   }
 
-  keyFromId(id: ModelId) {
-    return datastore.key([this.kind, parseInt(id as string)]);
-  }
-
-  toKey(v: Visit): DatastoreKey {
-    if (v.id) {
-      return this.keyFromId(v.id);
+  keyFromId(id?: ModelId) {
+    if (id) {
+      return datastore.key([this.kind, datastore.int(id as string)]);
     }
     return datastore.key([this.kind]);
   }
 
-  idFromKey(k: DatastoreKey): ModelId|null {
-    let path = k.path as ModelId[];
-    if (path.length > 1) {
-      return path[1];
+  idFromKey(k: DatastoreKey): ModelId|undefined {
+    if (! k || k.path.length < 2) {
+      return undefined;
     }
-    return null;
+    return k.path[1];
   }
 
   all(): Query {
@@ -120,6 +129,21 @@ export class VisitSchema implements Schema<Visit> {
   }
 
   async save(visits: Visit[]) {
+    let errors = visits.map(visit => joi.validate(visit, this.schema).error);
+    // Remove empty errors
+    errors = errors.filter(error => !! error);
+    // If there are any errors
+    if (errors.length) {
+      let msg;
+      if (errors.length > 1) {
+        msg = `Validation failed: ${errors.length} errors: ` + errors[0].message;
+      } else {
+        msg = 'Validation failed: ' + errors[0].message;
+      }
+      let error: any = new Error(msg);
+      error.errors = errors;
+      throw error;
+    }
     let entities = visits.map(visit => this.toEntity(visit));
     let savedEntities = await datastore.save(entities);
     let mutationResults = savedEntities[0].mutationResults as any[];
