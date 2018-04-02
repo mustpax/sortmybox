@@ -129,21 +129,8 @@ export class VisitSchema implements Schema<Visit> {
   }
 
   async save(visits: Visit[]) {
-    let errors = visits.map(visit => joi.validate(visit, this.schema).error);
-    // Remove empty errors
-    errors = errors.filter(error => !! error);
-    // If there are any errors
-    if (errors.length) {
-      let msg;
-      if (errors.length > 1) {
-        msg = `Validation failed: ${errors.length} errors: ` + errors[0].message;
-      } else {
-        msg = 'Validation failed: ' + errors[0].message;
-      }
-      let error: any = new Error(msg);
-      error.errors = errors;
-      throw error;
-    }
+    let schema = toArraySchema(this.schema);
+    joi.assert(visits, schema);
     let entities = visits.map(visit => this.toEntity(visit));
     let savedEntities = await datastore.save(entities);
     let mutationResults = savedEntities[0].mutationResults as any[];
