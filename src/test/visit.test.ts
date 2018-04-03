@@ -1,7 +1,6 @@
-import { datastore as ds, VisitService as VS, Int } from '../models';
+import { datastore as ds, VisitService as VS } from '../models';
 import joi = require('joi');
 import { expect } from 'chai';
-import _ = require('underscore');
 
 describe('Visit', function() {
   it('validation: valid object', function() {
@@ -50,7 +49,7 @@ describe('Visit', function() {
 
   it("save() with no id then findByIds()", async function() {
     let dates = [1522522000482, 1522522060482];
-    let visits = dates.map((date, i) => {
+    let visits = dates.map((date) => {
       let visit = VS.makeNew();
       visit.created = new Date(date);
       return visit;
@@ -59,5 +58,18 @@ describe('Visit', function() {
     let fromDS = await VS.findByIds(ids);
     expect(fromDS.map(v => v.created)).deep.equal(visits.map(v => v.created));
   });
-  it("save() with id then findByIds()");
+
+  it("save() with id then findByIds()", async function() {
+    let dates = [1522522000482, 1522522060482];
+    let ids = [5, 15].map(id => ds.int(id));
+    let visits = dates.map((date, i) => {
+      let visit = VS.makeNew();
+      visit.id = ids[i];
+      visit.created = new Date(date);
+      return visit;
+    });
+    await VS.save(visits);
+    let fromDS = await VS.findByIds(ids);
+    expect(fromDS.map(v => v.created)).deep.equal(visits.map(v => v.created));
+  });
 });

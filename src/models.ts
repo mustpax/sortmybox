@@ -92,7 +92,10 @@ export class VisitSchema implements Schema<Visit> {
 
   keyFromId(id?: ModelId) {
     if (id) {
-      return datastore.key([this.kind, datastore.int(id as string)]);
+      if (typeof id === 'string') {
+        id = datastore.int(id);
+      }
+      return datastore.key([this.kind, id]);
     }
     return datastore.key([this.kind]);
   }
@@ -134,7 +137,9 @@ export class VisitSchema implements Schema<Visit> {
     let entities = visits.map(visit => this.toEntity(visit));
     let savedEntities = await datastore.save(entities);
     let mutationResults = savedEntities[0].mutationResults as any[];
-    return mutationResults.map(mr => mr.key.path[0].id) as ModelId[];
+    // mr.key is only set (i.e. non-empty) if datastore generated a key for
+    // us. If we specify a key/id ahead of time, then it's empty.
+    return mutationResults.map(mr => mr.key && mr.key.path[0].id);
   }
 }
 
