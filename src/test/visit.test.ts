@@ -5,6 +5,7 @@ import { expect } from 'chai';
 describe('Visit', function() {
   it('validation: valid object', function() {
     let visit = VS.makeNew();
+    visit.id = ds.int('123');
     let { error } = joi.validate(visit, VS.schema);
     expect(error).be.null;
   });
@@ -44,8 +45,23 @@ describe('Visit', function() {
   it('toEntity()', function() {
     let visit = VS.makeNew();
     visit.id = ds.int('12');
+    let entity = VS.toEntity(visit);
+    expect(entity).to.deep.equal({
+      key: VS.keyFromId(visit.id),
+      data: {
+        created: visit.created
+      }
+    });
   });
-  it('makeNew()');
+
+  it('makeNew()', function() {
+    let visit = VS.makeNew();
+    expect(visit.created).to.be.not.null;
+    expect(visit.id).to.be.null;
+  });
+
+  it('idFromKey');
+  it('keyFromId');
 
   it("save() with no id then findByIds()", async function() {
     let dates = [1522522000482, 1522522060482];

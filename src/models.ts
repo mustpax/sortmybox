@@ -28,6 +28,8 @@ export interface Schema<T extends Model> {
   removeById(ids: ModelId[]): Promise<void>;
   remove(t: T[]): Promise<void>;
   save(t: T[]): Promise<ModelId[]>;
+  validate?(t: T): joi.ValidationError;
+  validate?(ts: T[]): joi.ValidationError;
 }
 
 export interface Model {
