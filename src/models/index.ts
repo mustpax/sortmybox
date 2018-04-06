@@ -5,7 +5,7 @@ import joi = require('joi');
 import datastore from './datastore';
 export { datastore };
 
-export interface Schema<K, T extends Model<K>> {
+export interface ModelService<K, T extends Model<K>> {
   schema: {
     [key: string]: joi.Schema
   };
@@ -48,7 +48,7 @@ function toArraySchema(schema: joi.SchemaMap): joi.Schema {
   return joi.array().items(schemaWithId);
 }
 
-export class VisitSchema implements Schema<string, Visit> {
+export class VisitSchema implements ModelService<string, Visit> {
   schema = {
     created: joi.date().required()
   };
