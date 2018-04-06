@@ -1,13 +1,9 @@
-"use strict";
-
-import Datastore = require('@google-cloud/datastore');
 import { Query } from '@google-cloud/datastore/query';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
 import joi = require('joi');
 
-// import { CommitResult } from '@google-cloud/datastore/request';
-
-export const datastore = new Datastore({});
+import datastore from './datastore';
+export { datastore };
 
 export interface Schema<K, T extends Model<K>> {
   schema: {
