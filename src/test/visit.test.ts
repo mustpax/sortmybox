@@ -10,7 +10,7 @@ describe('Visit', function() {
     expect(error).be.null;
   });
 
-  it('validation: invalid object', function() {
+  it('validation: missing created', function() {
     let visit = VS.makeNew();
     visit.created = undefined;
     let { error } = joi.validate(visit, VS.schema);
@@ -89,6 +89,9 @@ describe('Visit', function() {
   });
 
   it('keyFromId', function() {
+    let id = '123';
+    let k = VS.keyFromId(id);
+    assert.deepEqual(k, ds.key([VS.kind, ds.int(id)]));
   });
 
   it("save() with no id then findByIds()", async function() {
@@ -115,5 +118,21 @@ describe('Visit', function() {
     await VS.save(visits);
     let fromDS = await VS.findByIds(ids);
     expect(fromDS.map(v => v.created)).deep.equal(visits.map(v => v.created));
+  });
+
+  it("save() then findByIds() then save()", async function() {
+    const date1 = new Date(1522522000482);
+    const date2 = new Date(1522522060482);
+    let visit = VS.makeNew();
+
+    visit.created = date1;
+    let [id] = await VS.save([visit]);
+    let [fromDS] = await VS.findByIds([id]);
+    assert.deepEqual(fromDS.created, visit.created);
+
+    fromDS.created = date2;
+    await VS.save([fromDS]);
+    [fromDS] = await VS.findByIds([id]);
+    assert.deepEqual(fromDS.created, date2);
   });
 });
