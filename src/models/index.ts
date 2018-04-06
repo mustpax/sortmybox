@@ -21,8 +21,7 @@ export interface Schema<K, T extends Model<K>> {
   removeById(ids: K[]): Promise<void>;
   remove(t: T[]): Promise<void>;
   save(t: T[]): Promise<K[]>;
-  validate?(t: T): joi.ValidationError;
-  validate?(ts: T[]): joi.ValidationError;
+  validate(ts: T[]): joi.ValidationError;
 }
 
 export interface Model<K> {
@@ -39,12 +38,12 @@ export class Visit implements Model<string> {
   created?: Date;
 }
 
-export function addIdToSchema(schema: joi.SchemaMap): joi.Schema {
+function addIdToSchema(schema: joi.SchemaMap): joi.Schema {
   // Add optional id field to every schema
   return joi.object(schema).keys({id: joi.optional()});
 }
 
-export function toArraySchema(schema: joi.SchemaMap): joi.Schema {
+function toArraySchema(schema: joi.SchemaMap): joi.Schema {
   let schemaWithId = addIdToSchema(schema);
   return joi.array().items(schemaWithId);
 }
@@ -128,14 +127,20 @@ export class VisitSchema implements Schema<string, Visit> {
   }
 
   async save(visits: Visit[]) {
-    let schema = toArraySchema(this.schema);
-    joi.assert(visits, schema);
+    let error = this.validate(visits);
+    if (error) {
+      throw error;
+    }
     let entities = visits.map(visit => this.toEntity(visit));
     let savedEntities = await datastore.save(entities);
     let mutationResults = savedEntities[0].mutationResults as any[];
     // mr.key is only set (i.e. non-empty) if datastore generated a key for
     // us. If we specify a key/id ahead of time, then it's empty.
     return mutationResults.map(mr => mr.key && mr.key.path[0].id);
+  }
+
+  validate(visits: Visit[]): joi.ValidationError {
+    return joi.validate(visits, toArraySchema(this.schema)).error;
   }
 }
 

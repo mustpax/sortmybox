@@ -1,19 +1,18 @@
-import { datastore as ds, VisitService as VS, addIdToSchema } from '../models';
-import joi = require('joi');
+import { datastore as ds, VisitService as VS } from '../models';
 import { expect, assert } from 'chai';
 
 describe('Visit', function() {
   it('validation: valid object', function() {
     let visit = VS.makeNew();
     visit.id = '123';
-    let { error } = joi.validate(visit, addIdToSchema(VS.schema));
+    let error = VS.validate([visit]);
     expect(error).be.null;
   });
 
   it('validation: missing created', function() {
     let visit = VS.makeNew();
     visit.created = undefined;
-    let { error } = joi.validate(visit, VS.schema);
+    let error = VS.validate([visit]);
     expect(error).not.be.null;
   });
 
