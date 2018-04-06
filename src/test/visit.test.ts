@@ -1,11 +1,11 @@
 import { datastore as ds, VisitService as VS } from '../models';
 import joi = require('joi');
-import { expect } from 'chai';
+import { expect, assert } from 'chai';
 
 describe('Visit', function() {
   it('validation: valid object', function() {
     let visit = VS.makeNew();
-    visit.id = ds.int('123');
+    visit.id = '123';
     let { error } = joi.validate(visit, VS.schema);
     expect(error).be.null;
   });
@@ -44,7 +44,7 @@ describe('Visit', function() {
 
   it('toEntity()', function() {
     let visit = VS.makeNew();
-    visit.id = ds.int('12');
+    visit.id = '12';
     let entity = VS.toEntity(visit);
     expect(entity).to.deep.equal({
       key: VS.keyFromId(visit.id),
@@ -56,11 +56,38 @@ describe('Visit', function() {
 
   it('makeNew()', function() {
     let visit = VS.makeNew();
-    expect(visit.created).to.be.not.null;
-    expect(visit.id).to.be.null;
+    expect(visit.created).to.be.ok;
+    expect(visit.id).to.be.not.ok;
   });
 
-  it('idFromKey');
+  it('idFromKey string', function() {
+    let expectedId = '123';
+    let k = ds.key(['a', expectedId]);
+    let actual = VS.idFromKey(k);
+    assert.deepEqual(actual, expectedId);
+  });
+
+  it('idFromKey int', function() {
+    let expectedId = 123;
+    let k = ds.key(['a', expectedId]);
+    let actual = VS.idFromKey(k);
+    assert.deepEqual(actual, '123');
+  });
+
+  it('idFromKey ds.int(number)', function() {
+    let expectedId = ds.int(123);
+    let k = ds.key(['a', expectedId]);
+    let actual = VS.idFromKey(k);
+    assert.deepEqual(actual, '123');
+  });
+
+  it('idFromKey ds.int(string)', function() {
+    let expectedId = ds.int('123');
+    let k = ds.key(['a', expectedId]);
+    let actual = VS.idFromKey(k);
+    assert.deepEqual(actual, '123');
+  });
+
   it('keyFromId');
 
   it("save() with no id then findByIds()", async function() {
@@ -77,7 +104,7 @@ describe('Visit', function() {
 
   it("save() with id then findByIds()", async function() {
     let dates = [1522522000482, 1522522060482];
-    let ids = [5, 15].map(id => ds.int(id));
+    let ids = ['5', '15'];
     let visits = dates.map((date, i) => {
       let visit = VS.makeNew();
       visit.id = ids[i];

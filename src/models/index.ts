@@ -2,7 +2,7 @@
 
 import Datastore = require('@google-cloud/datastore');
 import { Query } from '@google-cloud/datastore/query';
-import { DatastoreKey, DatastoreInt, PathElement } from '@google-cloud/datastore/entity';
+import { DatastoreKey, PathElement } from '@google-cloud/datastore/entity';
 import joi = require('joi');
 
 // import { CommitResult } from '@google-cloud/datastore/request';
@@ -10,7 +10,6 @@ import joi = require('joi');
 export const datastore = new Datastore({});
 
 export type ModelId = PathElement;
-export type Int = DatastoreInt;
 
 export interface Schema<T extends Model> {
   schema: {
@@ -42,7 +41,7 @@ export interface Entity {
 }
 
 export class Visit implements Model {
-  id?: Int;
+  id?: string;
   created?: Date;
 }
 
@@ -106,7 +105,7 @@ export class VisitSchema implements Schema<Visit> {
     if (! k || k.path.length < 2) {
       return undefined;
     }
-    return k.path[1];
+    return String(k.path[1]);
   }
 
   all(): Query {
