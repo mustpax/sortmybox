@@ -2,37 +2,35 @@
 
 import Datastore = require('@google-cloud/datastore');
 import { Query } from '@google-cloud/datastore/query';
-import { DatastoreKey, PathElement } from '@google-cloud/datastore/entity';
+import { DatastoreKey } from '@google-cloud/datastore/entity';
 import joi = require('joi');
 
 // import { CommitResult } from '@google-cloud/datastore/request';
 
 export const datastore = new Datastore({});
 
-export type ModelId = PathElement;
-
-export interface Schema<T extends Model> {
+export interface Schema<K, T extends Model<K>> {
   schema: {
     [key: string]: joi.Schema
   };
   kind: string;
   makeNew(): T;
-  findByIds(ids: ModelId[]): Promise<T[]>;
+  findByIds(ids: K[]): Promise<T[]>;
   fromEntity(e: object): T;
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
-  keyFromId(id: ModelId): DatastoreKey;
-  idFromKey(key: DatastoreKey): ModelId|undefined;
+  keyFromId(id: K): DatastoreKey;
+  idFromKey(key: DatastoreKey): K|undefined;
   all(): Query;
-  removeById(ids: ModelId[]): Promise<void>;
+  removeById(ids: K[]): Promise<void>;
   remove(t: T[]): Promise<void>;
-  save(t: T[]): Promise<ModelId[]>;
+  save(t: T[]): Promise<K[]>;
   validate?(t: T): joi.ValidationError;
   validate?(ts: T[]): joi.ValidationError;
 }
 
-export interface Model {
-  id?: ModelId;
+export interface Model<K> {
+  id?: K;
 }
 
 export interface Entity {
@@ -40,18 +38,22 @@ export interface Entity {
   data: any;
 }
 
-export class Visit implements Model {
+export class Visit implements Model<string> {
   id?: string;
   created?: Date;
 }
 
-function toArraySchema(schema: joi.SchemaMap): joi.Schema {
+export function addIdToSchema(schema: joi.SchemaMap): joi.Schema {
   // Add optional id field to every schema
-  let schemaWithId = joi.object(schema).keys({id: joi.optional()});
+  return joi.object(schema).keys({id: joi.optional()});
+}
+
+export function toArraySchema(schema: joi.SchemaMap): joi.Schema {
+  let schemaWithId = addIdToSchema(schema);
   return joi.array().items(schemaWithId);
 }
 
-export class VisitSchema implements Schema<Visit> {
+export class VisitSchema implements Schema<string, Visit> {
   schema = {
     created: joi.date().required()
   };
@@ -63,7 +65,7 @@ export class VisitSchema implements Schema<Visit> {
     return ret;
   }
 
-  async findByIds(ids: ModelId[]) {
+  async findByIds(ids: string[]) {
     let keys = ids.map(id => this.keyFromId(id));
     // datastore.get() returns [results]
     let [entities] = await datastore.get(keys);
@@ -91,17 +93,14 @@ export class VisitSchema implements Schema<Visit> {
     return ret as Visit;
   }
 
-  keyFromId(id?: ModelId) {
+  keyFromId(id?: string) {
     if (id) {
-      if (typeof id === 'string') {
-        id = datastore.int(id);
-      }
-      return datastore.key([this.kind, id]);
+      return datastore.key([this.kind, datastore.int(id)]);
     }
     return datastore.key([this.kind]);
   }
 
-  idFromKey(k: DatastoreKey): ModelId|undefined {
+  idFromKey(k: DatastoreKey): string|undefined {
     if (! k || k.path.length < 2) {
       return undefined;
     }
@@ -118,7 +117,7 @@ export class VisitSchema implements Schema<Visit> {
     return results.map(e => this.fromEntity(e));
   }
 
-  async removeById(ids: (ModelId|undefined)[]) {
+  async removeById(ids: (string|undefined)[]) {
     let keys: DatastoreKey[] = [];
     for (let id of ids) {
       if (id) {

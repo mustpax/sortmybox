@@ -40,7 +40,7 @@ let asyncRoute = (route: RouteFn): RouteFn => {
   };
 };
 
-app.get('/', asyncRoute(async function(_req, res) {
+app.get('/', asyncRoute(async function(req, res) {
   let visit = VS.makeNew();
   await VS.save([visit]);
   let visits = await VS.query(VS.all());
@@ -49,7 +49,7 @@ app.get('/', asyncRoute(async function(_req, res) {
   });
 }));
 
-app.get('/delete', async function(_req, res) {
+app.get('/delete', async function(req, res) {
   let visits = await VS.query(VS.all());
   await VS.remove(visits);
   res.json({
@@ -62,12 +62,11 @@ app.post('/delete/:id', asyncRoute(async function(req, res) {
     res.status(400).send('Missing id parameter');
     return;
   }
-  let id = parseInt(req.params.id);
-  await VS.removeById([id]);
+  await VS.removeById([req.params.id]);
   res.redirect('/');
 }));
 
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log('Error', err);
   res.status(err.status || 500).json({
     error: err.message

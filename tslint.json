@@ -24,11 +24,7 @@
       "ignore-bound-class-methods"
     ],
     "no-unused-variable": [
-      true,
-      {
-        "ignore-pattern": "^_",
-        "check-parameters": false
-      }
+      true
     ],
     "whitespace": [
       true,

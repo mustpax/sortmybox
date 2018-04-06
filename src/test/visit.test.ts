@@ -1,4 +1,4 @@
-import { datastore as ds, VisitService as VS } from '../models';
+import { datastore as ds, VisitService as VS, addIdToSchema } from '../models';
 import joi = require('joi');
 import { expect, assert } from 'chai';
 
@@ -6,7 +6,7 @@ describe('Visit', function() {
   it('validation: valid object', function() {
     let visit = VS.makeNew();
     visit.id = '123';
-    let { error } = joi.validate(visit, VS.schema);
+    let { error } = joi.validate(visit, addIdToSchema(VS.schema));
     expect(error).be.null;
   });
 
@@ -88,7 +88,8 @@ describe('Visit', function() {
     assert.deepEqual(actual, '123');
   });
 
-  it('keyFromId');
+  it('keyFromId', function() {
+  });
 
   it("save() with no id then findByIds()", async function() {
     let dates = [1522522000482, 1522522060482];
