@@ -5,3 +5,4 @@ public/bundle.js
 .env*
 env.*sh
 google-creds.json
+tmp/
