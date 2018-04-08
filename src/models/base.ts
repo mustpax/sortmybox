@@ -47,8 +47,7 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
   abstract kind: string;
   abstract makeNew(): T;
   abstract fromEntity(e: object): T;
-  abstract toEntity(t: T): object;
-  abstract keyFromId(id: K): DatastoreKey;
+  abstract keyFromId(id?: K): DatastoreKey;
   abstract idFromKey(key: DatastoreKey): K|undefined;
 
   async findByIds(ids: K[]) {
@@ -78,6 +77,22 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     }
     await datastore.delete(keys);
   }
+
+  toEntity(t: T): Entity {
+    let data = {} as any;
+    for (let f of Object.keys(this.schema)) {
+      // Do not serialize the id field, it's handled by the key
+      if (f !== 'id') {
+        data[f] = (t as any)[f];
+      }
+    }
+
+    return {
+      key: this.keyFromId(t.id),
+      data
+    };
+  }
+
 
   // TODO
   async remove(tarr: T[]): Promise<void> {

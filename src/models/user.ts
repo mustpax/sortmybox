@@ -60,20 +60,6 @@ export class UserSchema extends AbstractModelService<string, User> {
     return ret;
   }
 
-  toEntity(v: User): Entity {
-    let data = {} as any;
-    for (let f of Object.keys(this.schema)) {
-      if (f !== 'id') {
-        data[f] = (v as any)[f];
-      }
-    }
-
-    return {
-      key: this.keyFromId(v.id),
-      data
-    };
-  }
-
   fromEntity(e: any) {
     let ret = {} as any;
     ret.id = this.idFromKey(e[datastore.KEY]);

@@ -1,4 +1,4 @@
-import { Entity, Model, AbstractModelService } from './base';
+import { Model, AbstractModelService } from './base';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
 
 import datastore from './datastore';
@@ -20,18 +20,6 @@ export class VisitSchema extends AbstractModelService<string, Visit> {
     let ret = new Visit();
     ret.created = new Date();
     return ret;
-  }
-
-  toEntity(v: Visit): Entity {
-    let data = {} as any;
-    for (let f of Object.keys(this.schema)) {
-      data[f] = (v as any)[f];
-    }
-
-    return {
-      key: this.keyFromId(v.id),
-      data
-    };
   }
 
   fromEntity(e: any) {
