@@ -1,6 +1,32 @@
 import { datastore as ds, User, UserService as us } from '../models';
 import { assert } from 'chai';
 
+function testUser(id?: string) {
+  let user = us.makeNew();
+  if (id) {
+    user.id = id;
+  }
+  user.periodicSort = true;
+  user.created = new Date();
+  user.modified = new Date();
+  user.fileMoves = 0;
+  user.name = 'x';
+  user.nameLower = 'x';
+  user.email = 'x';
+  user.lastSync = new Date();
+  user.lastLogin = new Date();
+  user.token = 'x';
+  user.secret = 'x';
+  user.sortingFolder = 'x';
+  user.tokenExpiration = new Date();
+  user.refreshToken = 'x';
+  user.dropboxV2Token = 'x';
+  user.dropboxV2Id = 'x';
+  user.dropboxV2Migrated = false;
+  user.accountType = 'BOX';
+  return user;
+}
+
 describe('User', function() {
   it('validation: user with only required fields is valid', function() {
     let user = {} as User;
@@ -225,45 +251,43 @@ describe('User', function() {
     assert.deepEqual(k, ds.key([us.kind, id]));
   });
 
-  // it("save() with no id then findByIds()", async function() {
-  //   let dates = [1522522000482, 1522522060482];
-  //   let visits = dates.map((date) => {
-  //     let visit = VS.makeNew();
-  //     visit.created = new Date(date);
-  //     return visit;
-  //   });
-  //   let ids = await VS.save(visits);
-  //   let fromDS = await VS.findByIds(ids);
-  //   expect(fromDS.map(v => v.created)).deep.equal(visits.map(v => v.created));
-  // });
-  //
-  // it("save() with id then findByIds()", async function() {
-  //   let dates = [1522522000482, 1522522060482];
-  //   let ids = ['5', '15'];
-  //   let visits = dates.map((date, i) => {
-  //     let visit = VS.makeNew();
-  //     visit.id = ids[i];
-  //     visit.created = new Date(date);
-  //     return visit;
-  //   });
-  //   await VS.save(visits);
-  //   let fromDS = await VS.findByIds(ids);
-  //   expect(fromDS.map(v => v.created)).deep.equal(visits.map(v => v.created));
-  // });
-  //
-  // it("save() then findByIds() then save()", async function() {
-  //   const date1 = new Date(1522522000482);
-  //   const date2 = new Date(1522522060482);
-  //   let visit = VS.makeNew();
-  //
-  //   visit.created = date1;
-  //   let [id] = await VS.save([visit]);
-  //   let [fromDS] = await VS.findByIds([id]);
-  //   assert.deepEqual(fromDS.created, visit.created);
-  //
-  //   fromDS.created = date2;
-  //   await VS.save([fromDS]);
-  //   [fromDS] = await VS.findByIds([id]);
-  //   assert.deepEqual(fromDS.created, date2);
-  // });
+  it("save() with NO id then read back with findByIds()", async function() {
+    let user = testUser();
+    let [id] = await us.save([user]);
+    let [fromDS] = await us.findByIds([id]);
+    // user starts out with no id, gets datastore generated id
+    user.id = id;
+    assert.deepEqual(fromDS, user);
+  });
+
+  it("save() with id then read back with findByIds()", async function() {
+    let id = 'x555';
+    let user = testUser(id);
+    await us.save([user]);
+    let [fromDS] = await us.findByIds([id]);
+    assert.deepEqual(fromDS, user);
+  });
+
+  it("save() with numeric id then read back with findByIds()", async function() {
+    let id = '555';
+    let user = testUser(id);
+    await us.save([user]);
+    let [fromDS] = await us.findByIds([id]);
+    assert.deepEqual(fromDS, user);
+  });
+
+
+  it("save() then findByIds() then save()", async function() {
+    let user = testUser();
+    let [id] = await us.save([user]);
+    let [fromDS] = await us.findByIds([id]);
+    // user starts out with no id, gets datastore generated id
+    user.id = id;
+    assert.deepEqual(fromDS, user);
+    user.fileMoves = 12345;
+    user.email = 'new@example.com';
+    await us.save([user]);
+    [fromDS] = await us.findByIds([id]);
+    assert.deepEqual(fromDS, user);
+  });
 });
