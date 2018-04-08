@@ -36,17 +36,17 @@ export class UserSchema extends AbstractModelService<string, User> {
     created: joi.date().required(),
     modified: joi.date().required(),
     lastSync: joi.date(),
-    lastLogin: joi.date(),
+    lastLogin: joi.date().required(),
     token: joi.string(),
     secret: joi.string(),
     fileMoves: joi.number().required(),
-    sortingFolder: joi.string(),
+    sortingFolder: joi.string().required(),
     tokenExpiration: joi.date(),
     refreshToken: joi.string(),
     dropboxV2Token: joi.string(),
     dropboxV2Id: joi.string(),
     dropboxV2Migrated: joi.boolean(),
-    accountType: joi.string().allow('DROPBOX', 'BOX'),
+    accountType: joi.string().required().only('DROPBOX', 'BOX'),
   };
   kind = 'User';
 

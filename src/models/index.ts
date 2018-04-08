@@ -1,9 +1,10 @@
 import datastore from './datastore';
 import { VisitService } from './visit';
-import { UserService } from './user';
+import { User, UserService } from './user';
 
 export {
   datastore,
   VisitService,
+  User,
   UserService
 };
