@@ -145,64 +145,86 @@ describe('User', function() {
       accountType: 'DROPBOX'
     };
     let user = us.fromEntity(entity);
+    // Delete key and replace with id field to convert to user from entity
+    // manually
     delete entity[ds.KEY];
     entity.id = id;
     assert.deepEqual(entity, user as any);
   });
 
-  //
-  // it('toEntity()', function() {
-  //   let visit = VS.makeNew();
-  //   visit.id = '12';
-  //   let entity = VS.toEntity(visit);
-  //   expect(entity).to.deep.equal({
-  //     key: VS.keyFromId(visit.id),
-  //     data: {
-  //       created: visit.created
-  //     }
-  //   });
-  // });
-  //
-  // it('makeNew()', function() {
-  //   let visit = VS.makeNew();
-  //   expect(visit.created).to.be.ok;
-  //   expect(visit.id).to.be.not.ok;
-  // });
-  //
-  // it('idFromKey string', function() {
-  //   let expectedId = '123';
-  //   let k = ds.key(['a', expectedId]);
-  //   let actual = VS.idFromKey(k);
-  //   assert.deepEqual(actual, expectedId);
-  // });
-  //
-  // it('idFromKey int', function() {
-  //   let expectedId = 123;
-  //   let k = ds.key(['a', expectedId]);
-  //   let actual = VS.idFromKey(k);
-  //   assert.deepEqual(actual, '123');
-  // });
-  //
-  // it('idFromKey ds.int(number)', function() {
-  //   let expectedId = ds.int(123);
-  //   let k = ds.key(['a', expectedId]);
-  //   let actual = VS.idFromKey(k);
-  //   assert.deepEqual(actual, '123');
-  // });
-  //
-  // it('idFromKey ds.int(string)', function() {
-  //   let expectedId = ds.int('123');
-  //   let k = ds.key(['a', expectedId]);
-  //   let actual = VS.idFromKey(k);
-  //   assert.deepEqual(actual, '123');
-  // });
-  //
-  // it('keyFromId', function() {
-  //   let id = '123';
-  //   let k = VS.keyFromId(id);
-  //   assert.deepEqual(k, ds.key([VS.kind, ds.int(id)]));
-  // });
-  //
+
+  it('toEntity()', function() {
+    let id = '123';
+    let user = {} as User;
+    user.id = id;
+    user.periodicSort = true;
+    user.created = new Date();
+    user.modified = new Date();
+    user.fileMoves = 0;
+    user.name = 'x';
+    user.nameLower = 'x';
+    user.email = 'x';
+    user.lastSync = new Date();
+    user.lastLogin = new Date();
+    user.token = 'x';
+    user.secret = 'x';
+    user.sortingFolder = 'x';
+    user.tokenExpiration = new Date();
+    user.refreshToken = 'x';
+    user.dropboxV2Token = 'x';
+    user.dropboxV2Id = 'x';
+    user.dropboxV2Migrated = false;
+    user.accountType = 'BOX';
+    let entity = us.toEntity(user);
+    delete user.id;
+    // Delete id to convert from user to entity manually
+    assert.deepEqual(entity, {
+      key: us.keyFromId(id),
+      data: user
+    });
+  });
+
+  it('idFromKey string', function() {
+    let expectedId = '123';
+    let k = ds.key(['a', expectedId]);
+    let actual = us.idFromKey(k);
+    assert.strictEqual(actual, expectedId);
+  });
+
+
+  it('idFromKey int', function() {
+    let expectedId = 123;
+    let k = ds.key(['a', expectedId]);
+    let actual = us.idFromKey(k);
+    assert.strictEqual(actual, '123');
+  });
+
+  it('idFromKey ds.int(number)', function() {
+    let expectedId = ds.int(123);
+    let k = ds.key(['a', expectedId]);
+    let actual = us.idFromKey(k);
+    assert.strictEqual(actual, '123');
+  });
+
+  it('idFromKey ds.int(string)', function() {
+    let expectedId = ds.int('123');
+    let k = ds.key(['a', expectedId]);
+    let actual = us.idFromKey(k);
+    assert.deepEqual(actual, '123');
+  });
+
+  it('keyFromId numeric-id', function() {
+    let id = '123';
+    let k = us.keyFromId(id);
+    assert.deepEqual(k, ds.key([us.kind, ds.int(id)]));
+  });
+
+  it('keyFromId string-id', function() {
+    let id = 'x123';
+    let k = us.keyFromId(id);
+    assert.deepEqual(k, ds.key([us.kind, id]));
+  });
+
   // it("save() with no id then findByIds()", async function() {
   //   let dates = [1522522000482, 1522522060482];
   //   let visits = dates.map((date) => {
