@@ -75,20 +75,81 @@ describe('User', function() {
     assert.ok(thrown);
   });
 
-  //
-  // it('fromEntity()', function() {
-  //   let id = '10';
-  //   let kind = 'foo';
-  //   let date = new Date();
-  //   let entity = {
-  //     [ds.KEY]: ds.key([kind, id]),
-  //     created: date
-  //   };
-  //   expect(VS.fromEntity(entity)).deep.equal({
-  //     id: '10',
-  //     created: date
-  //   });
-  // });
+
+  it('fromEntity() populates missing fields', function() {
+    let id = 'a12';
+    let entity = {
+      [ds.KEY]: ds.key([us.kind, id])
+    };
+    let user = us.fromEntity(entity);
+    assert.strictEqual(user.id, id);
+    assert.strictEqual(user.fileMoves, 0);
+    assert.strictEqual(user.sortingFolder, '/Sortbox');
+    assert.strictEqual(user.dropboxV2Migrated, false);
+    assert.strictEqual(user.accountType, 'DROPBOX');
+  });
+
+  it('fromEntity() does not override present fields with defaults', function() {
+    const id = 'a12';
+    const fileMoves = 5;
+    const sortingFolder = '/foo';
+    const dropboxV2Migrated = true;
+    const accountType = 'BOX';
+    let entity = {
+      [ds.KEY]: ds.key([us.kind, id]),
+      fileMoves,
+      sortingFolder,
+      dropboxV2Migrated,
+      accountType
+    };
+    let user = us.fromEntity(entity);
+    assert.strictEqual(user.id, id);
+    assert.strictEqual(user.fileMoves, fileMoves);
+    assert.strictEqual(user.sortingFolder, sortingFolder);
+    assert.strictEqual(user.dropboxV2Migrated, dropboxV2Migrated);
+    assert.strictEqual(user.accountType, accountType);
+  });
+
+  it('fromEntity() populates nameLower from name', function() {
+    const id = 'a12';
+    let entity = {
+      [ds.KEY]: ds.key([us.kind, id]),
+      name: 'TEsT'
+    };
+    let user = us.fromEntity(entity);
+    assert.strictEqual(user.name, 'TEsT');
+    assert.strictEqual(user.nameLower, 'test');
+  });
+
+  it('fromEntity() populates all fields', function() {
+    let id = 'a12';
+    let entity = {
+      [ds.KEY]: ds.key([us.kind, id]),
+      name: 'Name',
+      nameLower: 'name',
+      email: 'foo@example.com',
+      periodicSort: true,
+      created: new Date(),
+      modified: new Date(),
+      lastSync: new Date(),
+      lastLogin: new Date(),
+      token: 't',
+      secret: 's',
+      fileMoves: 123,
+      sortingFolder: '/test',
+      tokenExpiration: new Date(),
+      refreshToken: 'x',
+      dropboxV2Token: 'y',
+      dropboxV2Id: 'z',
+      dropboxV2Migrated: true,
+      accountType: 'DROPBOX'
+    };
+    let user = us.fromEntity(entity);
+    delete entity[ds.KEY];
+    entity.id = id;
+    assert.deepEqual(entity, user as any);
+  });
+
   //
   // it('toEntity()', function() {
   //   let visit = VS.makeNew();
