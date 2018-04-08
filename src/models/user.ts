@@ -80,7 +80,7 @@ export class UserSchema extends AbstractModelService<string, User> {
     for (let f of Object.keys(this.schema)) {
       ret[f] = e[f];
     }
-    if (ret.nameLower == null && ret.name != null) {
+    if ((! ret.nameLower) && ret.name) {
       ret.nameLower = ret.name.toLowerCase();
     }
     ret.fileMoves = ret.fileMoves || 0;

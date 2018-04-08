@@ -55,6 +55,7 @@
     "no-internal-module": true,
     "no-trailing-whitespace": true,
     "no-null-keyword": false,
-    "jsdoc-format": true
+    "jsdoc-format": true,
+    "triple-equals": true
   }
 }
