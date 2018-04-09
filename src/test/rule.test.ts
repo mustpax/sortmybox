@@ -356,4 +356,25 @@ describe("Rule", function() {
     let actual = rs.idFromKey(k);
     assert.deepEqual(actual, rk);
   });
+
+  it("findByOwner()", async function() {
+    let user = UserService.makeNew();
+    [user.id] = await UserService.save([user]);
+    let rules: Rule[] = [];
+    for (let i = 0; i < 5; i++) {
+      let rule = newRule();
+      rule.rank = i;
+      if (rule.id) {
+        rule.id.ownerId = user.id;
+      }
+      rules.push(rule);
+    }
+    let ruleIds = await rs.save(rules);
+    ruleIds.forEach((id, index) => {
+      rules[index].id = id;
+    });
+
+    let fromDS = await rs.findByOwner(user.id as string);
+    assert.deepEqual(fromDS, rules);
+  });
 });

@@ -6,6 +6,8 @@ import datastore from './datastore';
 
 import joi = require('joi');
 
+export const MAX_RULES = 200;
+
 export class Rule implements Model<RuleKey> {
   id?: RuleKey;
   type?: string;
@@ -48,6 +50,7 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
     }
     return super.toEntity(r);
   }
+
 
   fromEntity(e: any) {
     let ret = {} as any;
@@ -105,6 +108,14 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
       rk.ruleId = mr.key.path[1].id || mr.key.path[1].name;
       return rk;
     });
+  }
+
+  async findByOwner(ownerId: string): Promise<Rule[]> {
+    let q = this.all()
+      .hasAncestor(UserService.keyFromId(ownerId))
+      .order('rank')
+      .limit(MAX_RULES);
+    return await this.query(q);
   }
 }
 
