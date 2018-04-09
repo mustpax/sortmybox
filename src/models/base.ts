@@ -44,7 +44,6 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     [key: string]: joi.Schema
   };
   abstract kind: string;
-  abstract fromEntity(e: object): T;
   abstract keyFromId(id?: K): DatastoreKey;
   abstract idFromKey(key: DatastoreKey): K|undefined;
 
@@ -90,6 +89,17 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
       data
     };
   }
+
+  fromEntity(e: any) {
+    let ret = {} as any;
+    let key: DatastoreKey = e[datastore.KEY];
+    ret.id = this.idFromKey(key);
+    for (let f of Object.keys(this.schema)) {
+      ret[f] = e[f];
+    }
+    return ret as T;
+  }
+
 
   async remove(tarr: T[]): Promise<void> {
     await this.removeById(tarr.map(t => t.id));

@@ -22,15 +22,6 @@ export class VisitSchema extends AbstractModelService<string, Visit> {
     return ret;
   }
 
-  fromEntity(e: any) {
-    let ret = {} as any;
-    ret.id = this.idFromKey(e[datastore.KEY]);
-    for (let f of Object.keys(this.schema)) {
-      ret[f] = e[f];
-    }
-    return ret as Visit;
-  }
-
   keyFromId(id?: string) {
     if (id) {
       return datastore.key([this.kind, datastore.int(id)]);

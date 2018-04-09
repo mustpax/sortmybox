@@ -52,16 +52,6 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
   }
 
 
-  fromEntity(e: any) {
-    let ret = {} as any;
-    let key: DatastoreKey = e[datastore.KEY];
-    ret.id = this.idFromKey(key);
-    for (let f of Object.keys(this.schema)) {
-      ret[f] = e[f];
-    }
-    return ret as Rule;
-  }
-
   keyFromId(id?: RuleKey) {
     if (!id || !id.ownerId) {
       throw new Error('Cannot generate key for Rule with no owner id. ' + this);
