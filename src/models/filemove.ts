@@ -11,6 +11,8 @@ export class FileMove implements Model<FileMoveKey> {
   fromFile?: string;
   toDir?: string;
   when?: Date;
+  hasCollision?: boolean;
+  resolvedName?: string;
 }
 
 export class FileMoveKey {
