@@ -23,6 +23,7 @@
     "body-parser": "1.17.x",
     "chai": "4.1.2",
     "dotenv": "5.0.1",
+    "dropbox": "4.0.1",
     "express": "4.14.x",
     "express-handlebars": "3.0.x",
     "joi": "13.1.2",
