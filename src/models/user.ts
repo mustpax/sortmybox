@@ -92,6 +92,12 @@ export class UserSchema extends AbstractModelService<string, User> {
     }
     return String(k.path[1]);
   }
+
+  async findByDropboxId(dropboxId: string): Promise<User|undefined> {
+    let q = this.all().filter('dropboxV2Id', '=', dropboxId).limit(1);
+    let [result] = await this.query(q);
+    return result;
+  }
 }
 
 export let UserService = new UserSchema();

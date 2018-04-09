@@ -293,4 +293,13 @@ describe('User', function() {
     [fromDS] = await us.findByIds([id]);
     assert.deepEqual(fromDS, user);
   });
+
+  it("findByDropboxId()", async function() {
+    let dropboxId = String(Math.round(Math.random() * 1e7) + 1);
+    let user = testUser();
+    user.dropboxV2Id = dropboxId;
+    [user.id] = await us.save([user]);
+    let fromDS = await us.findByDropboxId(dropboxId);
+    assert.deepEqual(fromDS, user);
+  });
 });
