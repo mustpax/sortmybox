@@ -91,8 +91,6 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     };
   }
 
-
-  // TODO
   async remove(tarr: T[]): Promise<void> {
     await this.removeById(tarr.map(t => t.id));
   }
