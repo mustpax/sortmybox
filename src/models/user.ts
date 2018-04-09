@@ -1,4 +1,4 @@
-import { Entity, Model, AbstractModelService } from './base';
+import { Model, AbstractModelService } from './base';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
 
 import datastore from './datastore';

@@ -1,10 +1,8 @@
 import datastore from './datastore';
-import { VisitService } from './visit';
-import { User, UserService } from './user';
-
 export {
   datastore,
-  VisitService,
-  User,
-  UserService
 };
+
+export { VisitService } from './visit';
+export { User, UserService } from './user';
+export { Rule, RuleService, RuleKey } from './rule';

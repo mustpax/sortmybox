@@ -26,7 +26,6 @@ export interface Schema {
 }
 
 export interface ModelService<K, T extends Model<K>> extends Schema {
-  makeNew(): T;
   findByIds(ids: K[]): Promise<T[]>;
   fromEntity(e: object): T;
   toEntity(t: T): object;
@@ -36,7 +35,7 @@ export interface ModelService<K, T extends Model<K>> extends Schema {
   all(): Query;
   removeById(ids: K[]): Promise<void>;
   remove(t: T[]): Promise<void>;
-  save(t: T[]): Promise<K[]>;
+  save(t: T[]): Promise<(K|undefined)[]>;
   validate(ts: T[]): joi.ValidationError;
 }
 
@@ -45,7 +44,6 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     [key: string]: joi.Schema
   };
   abstract kind: string;
-  abstract makeNew(): T;
   abstract fromEntity(e: object): T;
   abstract keyFromId(id?: K): DatastoreKey;
   abstract idFromKey(key: DatastoreKey): K|undefined;
@@ -99,7 +97,7 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     await this.removeById(tarr.map(t => t.id));
   }
 
-  async save(tarr: T[]): Promise<K[]> {
+  async save(tarr: T[]): Promise<(K|undefined)[]> {
     let error = this.validate(tarr);
     if (error) {
       throw error;
@@ -109,12 +107,35 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     let mutationResults = savedEntities[0].mutationResults as any[];
     // mr.key is only set (i.e. non-empty) if datastore generated a key for
     // us. If we specify a key/id ahead of time, then it's empty.
-    return mutationResults.map(mr => mr.key && mr.key.path[0].id);
+    return mutationResults.map(mr => mr.key && (mr.key.path[0].id || mr.key.path[0].name));
   }
 
 
   validate(ts: T[]): joi.ValidationError {
     return joi.validate(ts, toArraySchema(this.schema)).error;
   }
-
 }
+
+export const DatastoreUtil = {
+  // Combine given array of keys into a single key.
+  // Expects most senior keys first.
+  // i.e. [grandparentKey, parentKey, childKey]
+  concat(keys: DatastoreKey[]): DatastoreKey {
+    let path = [];
+    let lastKeyIncomplete = false;
+    for (let key of keys) {
+      if (lastKeyIncomplete) {
+        throw new Error('Only the last key in the array can be incomplete');
+      }
+      path.push(key.kind);
+      if (key.name) {
+        path.push(key.name);
+      } else if (key.id) {
+        path.push(datastore.int(key.id));
+      } else {
+        lastKeyIncomplete = true;
+      }
+    }
+    return datastore.key(path);
+  }
+};

@@ -254,7 +254,8 @@ describe('User', function() {
   it("save() with NO id then read back with findByIds()", async function() {
     let user = testUser();
     let [id] = await us.save([user]);
-    let [fromDS] = await us.findByIds([id]);
+    assert.ok(id);
+    let [fromDS] = await us.findByIds([id as string]);
     // user starts out with no id, gets datastore generated id
     user.id = id;
     assert.deepEqual(fromDS, user);
@@ -279,7 +280,9 @@ describe('User', function() {
 
   it("save() then findByIds() then save()", async function() {
     let user = testUser();
-    let [id] = await us.save([user]);
+    let id: string;
+    [id] = await us.save([user]) as string[];
+    assert.ok(id);
     let [fromDS] = await us.findByIds([id]);
     // user starts out with no id, gets datastore generated id
     user.id = id;
