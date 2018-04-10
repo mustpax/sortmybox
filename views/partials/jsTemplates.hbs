@@ -1,0 +1,92 @@
+<script type="text/template" id="exp-uplink">
+<li>
+    <a href="#" data-path="{{dataPath}}">
+	    <i class="icon-chevron-up"></i>
+	    <em>Go up one folder.</em>
+    </a>
+</li>
+</script>
+
+<script type="text/template" id="exp-loading">
+<li>
+    <a>Loading <i class="icon-refresh spin"></i></a>
+</li>
+</script>
+
+<script type="text/template" id="exp-folders">
+<% if (_.isUndefined(dirs)) { %>
+<li>
+    <a><em>Can't list folder contents</em></a>
+</li>
+<% } else if (! dirs) { %>
+<li>
+    <a><em>No more folders</em></a>
+</li>
+<% } else {
+	   _.each(dirs, function(dir) { %>
+		    <li class="folder">
+		        <a href="#" data-path="{{dir}}">
+				    <i class="icon-folder-open"></i>
+		            {{basename(dir)}}
+		        </a>
+		    </li>
+<%     });
+   } %>
+</script>
+
+<script type="text/template" id="exp-select">
+    <li class="folder">
+        <a href="#">
+		    <i class="icon-ok"></i>
+            <em>Select</em> {{path}}
+        </a>
+    </li>
+</script>
+
+<script type="text/template" id="moves-list">
+<ul>
+    <% _.each(moves, function(move) {
+           var toFile = move.resolvedName || move.fromFile;
+           if (! move.hasCollision) {
+    %>
+	        <li class="move-success">
+                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code>. ({{move.when}})
+            </li>
+        <% } else if (move.resolvedName) { %>
+            <li class="move-fail">
+                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
+                there is already a file with the same name at the location. ({{move.when}})
+            </li>
+        <% } else { %>
+            <li class="move-fail">
+                Failed to move <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
+                there is already a file with the same name at the location. ({{move.when}})
+            </li>
+        <% }
+       }); %>
+</ul>
+</script>
+
+<script type="text/template" id="moves-empty">
+	<em>None yet. Create some rules and save files in your SortMyBox folder to get going.</em>
+</script>
+
+<script type="text/template" id="moves-error">
+	<em>Unable to load recent activity.</em>
+</script>
+
+<script type="text/template" id="moves-loading">
+	<em>Loading...</em><i class="icon-refresh spin"></i>
+</script>
+
+<script type="text/template" id="stats-chart">
+    <div class="row">
+        <div class="span12">
+            <h3>Scope: {{scope}} Value: {{column}}</h3>
+            <div class="chart {{scope}} {{column}}">
+                <svg></svg>
+            </div>
+            <hr>
+        </div>
+    </div>
+</script>

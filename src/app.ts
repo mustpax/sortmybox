@@ -15,7 +15,12 @@ app.enable('trust proxy');
 
 let hbs = require('express-handlebars')({
   defaultLayout: 'main',
-  extname: '.hbs'
+  extname: '.hbs',
+  helpers: {
+    static(path: string) {
+      return path;
+    }
+  }
 });
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
@@ -31,6 +36,9 @@ app.use(cookieSession({
 import bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+import csrf = require('csurf');
+app.use(csrf());
 
 app.use(express.static('public'));
 
