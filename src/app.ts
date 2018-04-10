@@ -2,6 +2,9 @@
 
 require('dotenv').config();
 
+import fetch = require('node-fetch');
+(global as any).fetch = fetch;
+
 import { validate } from './env';
 validate();
 
@@ -17,8 +20,13 @@ let hbs = require('express-handlebars')({
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
 
-
 app.use(require('morgan')('tiny'));
+
+import cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SECRET as string]
+}));
 
 import bodyParser = require('body-parser');
 app.use(bodyParser.json());

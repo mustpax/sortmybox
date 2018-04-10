@@ -1,6 +1,6 @@
 "use strict";
 
-const required = ['GOOGLE_CLOUD_PROJECT', 'SECRET'];
+const required = ['GOOGLE_CLOUD_PROJECT', 'SECRET', 'DROPBOX_KEY', 'DROPBOX_SECRET'];
 const requiredDev = ['GOOGLE_APPLICATION_CREDENTIALS'];
 
 export function validate() {

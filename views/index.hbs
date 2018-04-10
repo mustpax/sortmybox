@@ -1,12 +1,7 @@
-<h1>Welcome!</h1>
 
-<ul>
-  {{#each visits}}
-    <li>
-      Id: {{id}} Date: {{created}}
-      <form method="post" action="/delete/{{ id }}">
-        <input type="submit" value="Delete">
-      </form>
-    </li>
-  {{/each}}
-</ul>
+{{#if account}}
+<h1>Hello {{account.name.familiar_name}}</h1>
+{{else}}
+<h1>Login</h1>
+<a href="/dropbox/login">Login with Dropgox</a>
+{{/if}}
