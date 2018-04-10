@@ -1,6 +1,6 @@
 <script type="text/template" id="exp-uplink">
 <li>
-    <a href="#" data-path="{{dataPath}}">
+    <a href="#" data-path="\{{dataPath}}">
 	    <i class="icon-chevron-up"></i>
 	    <em>Go up one folder.</em>
     </a>
@@ -25,9 +25,9 @@
 <% } else {
 	   _.each(dirs, function(dir) { %>
 		    <li class="folder">
-		        <a href="#" data-path="{{dir}}">
+		        <a href="#" data-path="\{{dir}}">
 				    <i class="icon-folder-open"></i>
-		            {{basename(dir)}}
+		            \{{basename(dir)}}
 		        </a>
 		    </li>
 <%     });
@@ -38,7 +38,7 @@
     <li class="folder">
         <a href="#">
 		    <i class="icon-ok"></i>
-            <em>Select</em> {{path}}
+            <em>Select</em> \{{path}}
         </a>
     </li>
 </script>
@@ -50,17 +50,17 @@
            if (! move.hasCollision) {
     %>
 	        <li class="move-success">
-                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code>. ({{move.when}})
+                Moved <code>\{{move.fromFile}}</code> to <code>\{{move.toDir}}/\{{toFile}}</code>. (\{{move.when}})
             </li>
         <% } else if (move.resolvedName) { %>
             <li class="move-fail">
-                Moved <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
-                there is already a file with the same name at the location. ({{move.when}})
+                Moved <code>\{{move.fromFile}}</code> to <code>\{{move.toDir}}/\{{toFile}}</code> since
+                there is already a file with the same name at the location. (\{{move.when}})
             </li>
         <% } else { %>
             <li class="move-fail">
-                Failed to move <code>{{move.fromFile}}</code> to <code>{{move.toDir}}/{{toFile}}</code> since
-                there is already a file with the same name at the location. ({{move.when}})
+                Failed to move <code>\{{move.fromFile}}</code> to <code>\{{move.toDir}}/\{{toFile}}</code> since
+                there is already a file with the same name at the location. (\{{move.when}})
             </li>
         <% }
        }); %>
@@ -82,8 +82,8 @@
 <script type="text/template" id="stats-chart">
     <div class="row">
         <div class="span12">
-            <h3>Scope: {{scope}} Value: {{column}}</h3>
-            <div class="chart {{scope}} {{column}}">
+            <h3>Scope: \{{scope}} Value: \{{column}}</h3>
+            <div class="chart \{{scope}} \{{column}}">
                 <svg></svg>
             </div>
             <hr>

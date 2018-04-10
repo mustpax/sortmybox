@@ -3,16 +3,16 @@
     <div class="container">
       <a class="brand" href="/">SortMyBox</a>
       <ul class="nav">
-        <li class="#{get 'faq'}#{/get}"><a href="@{Footer.faq()}">FAQ</a></li>
+        <li><a href="/faq">FAQ</a></li>
       </ul>
       <ul class="nav pull-right">
         {{#if user}}
             <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{user.name}}<b class="caret"></b></a>
               <ul class="dropdown-menu">
-                <li><a href="@{Accounts.settings()}">Settings</a></li>
+                <li><a href="/account/settings">Settings</a></li>
                 <li class="divider"></li>
-                <li><a href="@{Login.logout()}">Logout</a></li>
+                <li><a href="/login">Logout</a></li>
               </ul>
             </li>
           {{/if}}

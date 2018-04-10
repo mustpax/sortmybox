@@ -13,12 +13,33 @@ import express = require('express');
 let app = express();
 app.enable('trust proxy');
 
+app.locals.prod = (process.env.NODE_ENV === 'production');
+
+// TODO export config values to the templates
+// email
+
+import jsesc = require("jsesc");
 let hbs = require('express-handlebars')({
   defaultLayout: 'main',
   extname: '.hbs',
   helpers: {
     static(path: string) {
       return path;
+    },
+    escapeJSString(str: string) {
+      if (! str) {
+        return null;
+      }
+      return jsesc(str, {
+        escapeEverything: true, // escape everything to \xFF hex sequences so we don't have to worry about script tags and whatnot
+        wrap: true // wrap output with single quotes
+      });
+    },
+    dateToSeconds(date?: Date) {
+      if (! date) {
+        return null;
+      }
+      return Math.round(date.getTime() / 1e3);
     }
   }
 });
@@ -39,6 +60,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 import csrf = require('csurf');
 app.use(csrf());
+app.use((req: any, res: express.Response, next: express.NextFunction) => {
+  // Make sure the template variable csrfToken is available to all templates
+  res.locals.csrfToken = req.csrfToken;
+  next();
+});
 
 app.use(express.static('public'));
 

@@ -7,16 +7,15 @@
     <meta name="author" content="Mustafa Paksoy">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 
-    <link href="{{static '/public/css/bootstrap.min.css'/}}" rel="stylesheet">
-    <link href="#{static-path '/public/css/styles.css'/}" rel="stylesheet">
+    <link href="{{static '/css/bootstrap.min.css'}}" rel="stylesheet">
+    <link href="{{static '/css/styles.css'}}" rel="stylesheet">
 
-    <link rel="shortcut icon" href="#{static-path '/public/img/favicon.png'/}">
+    <link rel="shortcut icon" href="{{static '/img/favicon.png'}}">
     <script>
         var _gaq= _gaq || [];
         _gaq.push(['_setAccount','UA-31266349-1']);
         _gaq.push(['_trackPageview']);
     </script>
-    #{get 'head'}#{/get}
   </head>
 
   <body>
@@ -25,63 +24,57 @@
         <div class="container">
           <a class="brand" href="/">SortMyBox</a>
           <ul class="nav">
-            <li class="#{get 'faq'}#{/get}"><a href="@{Footer.faq()}">FAQ</a></li>
+            <li><a href="/faq">FAQ</a></li>
           </ul>
           <ul class="nav pull-right">
-            {{if user}}
-              {{if user.isAdmin }}
-                <li class="#{get 'admin'}#{/get}"><a href="@{Admin.searchUser()}">Admin</a></li>
-              #{/if}
-                <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
-                  <ul class="dropdown-menu">
-                    <li><a href="@{Accounts.settings()}">Settings</a></li>
-                    <li class="divider"></li>
-                    <li><a href="@{Login.logout()}">Logout</a></li>
-                  </ul>
-                </li>
-              #{/if}
+            {{#if user}}
+              {{#if user.isAdmin }}
+                <li><a href="/admin/search">Admin</a></li>
+              {{/if}}
+              <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">${user.name}<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/account/settings">Settings</a></li>
+                  <li class="divider"></li>
+                  <li><a href="/logout">Logout</a></li>
+                </ul>
+              </li>
+              {{/if}}
            </ul>
         </div>
       </div>
     </div>
 
     <div class="container">
-      #{doLayout /}
+      {{{ body }}}
 
       <hr>
       <div class="row">
         <div class="span12">
         <p>
           <span class="easter">&copy;</span>
-          2012 All Rights Reserved &middot;
-          <a href="http://blog.sortmybox.com/">Blog</a> &middot;
-          <a href="@{Footer.team()}">Team</a> &middot;
-          <a href="@{Footer.terms()}">Terms</a> &middot;
-          <a href="@{Footer.privacy()}">Privacy</a> &middot;
-          <a href="mailto: ${play.configuration.getProperty("sortbox.email")}">Contact</a> &middot;
-          <a href="https://github.com/mustpax/sortmybox">GitHub</a> &middot;
-          <a href="@{Footer.press()}">Press</a>
+          2018 All Rights Reserved &middot;
+          <a href="/terms">Terms</a> &middot;
+          <a href="/privacy">Privacy</a> &middot;
+          <a href="mailto:contact@sortmybox.com">Contact</a> &middot;
+          <a href="/press">Press</a>
         </p>
       </div>
     </div>
-    #{if play.mode.isDev() }
-        <script src="#{static-path '/public/js/underscore.js'/}"></script>
-        <script src="#{static-path '/public/js/jquery-1.7.2.js'/}"></script>
-        <script src="#{static-path '/public/js/bootstrap.js'/}"></script>
-        <script src="#{static-path '/public/js/jquery-ui-1.8.20.custom.js'/}"></script>
-        <script src="#{static-path '/public/js/sortbox.js'/}"></script>
-    #{/if}
-    #{else}
-        <script src="#{static-path '/public/js/all.js'/}"></script>
-    #{/else}
+    {{#if prod}}
+        <script src="{{static '/js/all.js'}}"></script>
+    {{else}}
+        <script src="{{static '/js/underscore.js'}}"></script>
+        <script src="{{static '/js/jquery-1.7.2.js'}}"></script>
+        <script src="{{static '/js/bootstrap.js'}}"></script>
+        <script src="{{static '/js/jquery-ui-1.8.20.custom.js'}}"></script>
+        <script src="{{static '/js/sortbox.js'}}"></script>
+    {{/if}}
 
     <script>
-        window.csrfToken = '{{csrfToken}}';
+      window.csrfToken = {{{ escapeJSString ( csrfToken ) }}};
     </script>
     {{> jsTemplates }}
-
-    #{get 'script' /}
    <!-- Asynchronous Google Analytics snippet. mathiasbynens.be/notes/async-analytics-snippet -->
    <script>
        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
@@ -91,20 +84,18 @@
    <!-- end google analytics code -->
    <script id="IntercomSettingsScriptTag">
     window.intercomSettings = {
-        #{if user}
-            #{if user.email}
-                email: "${user.email.escapeJavaScript()}",
-            #{/if}
-            created_at: ${Math.floor(user.created.getTime() / 1000)},
-            name: "${user.name.escapeJavaScript()}",
-            user_id: "${user.accountType.name().escapeJavaScript()}:${user.id}",
+        {{#if user}}
+            email: {{{ escapeJSString user.email }}}, }},
+            created_at: {{ dateToSeconds user.created }},
+            name: {{{ escapeJSString user.name }}},
+            user_id: {{{ escapeJSString user.id }}},
             custom_data: {
-                #{if user.lastSync}
-                last_sync_at: ${Math.floor(user.lastSync.getTime() / 1000)}
-                #{/if}
+                {{#if user.lastSync}}
+                last_sync_at: {{ dateToSeconds user.lastSync }}
+                {{/if}}
             },
-        #{/if}
-        app_id: "${play.configuration.getProperty('sortbox.intercom_id')}"
+        {{/if}}
+        app_id: "19fa2901dd8a52f20c3fc7043af2527bffb1c3d0"
     };
 	</script>
     <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://api.intercom.io/api/js/library.js';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}};})()</script>
