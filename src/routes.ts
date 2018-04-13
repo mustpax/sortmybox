@@ -15,9 +15,9 @@ app.get('/', asyncRoute(async function(req, res) {
     account = await dbx.usersGetCurrentAccount();
   }
   // TODO remove this
-  console.log(account)
   res.render('index', {
-    account
+    account,
+    title: 'Organize your Dropbox',
   });
 }));
 

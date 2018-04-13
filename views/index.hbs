@@ -1,7 +1,151 @@
+<style>
+body {
+  background-image: url('{{ static '/img/bg2.png' }}');
+}
+</style>
 
-{{#if account}}
-<h1>Hello {{account.name.familiar_name}}</h1>
-{{else}}
-<h1>Login</h1>
-<a href="/dropbox/login">Login with Dropgox</a>
-{{/if}}
+<div class="row">
+    <div class="span12">
+        <div class="hero-unit landing">
+            <p class="logo">
+                <img alt="SortMyBox logo"
+                    src="{{static '/img/logo128-2.png' }}">
+            </p>
+            <h1>
+                SortMyBox <br>
+                <small>Like e-mail filters, for your files in the cloud.</small>
+            </h1>
+            <p>
+                <strong>SortMyBox</strong> is a magic folder that moves files to folders based on <em>your</em>
+                rules.
+            </p>
+            <p>
+                <a class="btn btn-large btn-primary login" href="/dropbox/auth">
+                    <img src="{{static '/img/dropbox_logo_black.png'}}">
+                        Login with Dropbox
+                </a>
+            </p>
+            <p>
+                 <a class="btn btn-large learn" href="/faq">Learn more</a>
+            </p>
+            <small>
+                <i class="icon-lock"></i>
+                Your credentials are encrypted and we never store your files.
+            </small>
+            <div class="share-links">
+                <iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fsortmybox&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21"
+                    scrolling="no" frameborder="0"
+                    style="border: none; overflow: hidden; width: 100px; height: 21px;"
+                    allowTransparency="true"></iframe>
+                <a href="https://twitter.com/share"
+                    class="twitter-share-button" data-count="horizontal"
+                    data-url="http://www.sortmybox.com"
+                    data-text="I use @Sortmybox to keep my Dropbox & Box organized!">Tweet</a>
+                <a href="https://twitter.com/sortmybox"
+                    class="twitter-follow-button"
+                    data-show-count="false">Follow @sortmybox</a>
+            </div>
+            <div id="fb-root"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span10 offset1">
+        <div class="landing-heading center">
+            <h1>SortMyBox is free & easy to use!</h1>
+        </div>
+        <div id="screenshots" class="carousel slide">
+            <!-- Carousel items -->
+            <div class="carousel-inner">
+                <div class="active item">
+                    <img width="780" height="448" src="{{static '/img/screen1.png'}}"
+                        alt="Rule editor screenshot">
+                    <div class="carousel-caption">
+                        <h4>1) Create sorting rules</h4>
+                        <p>Choose from among three types of rules
+                            and pick the destination folders using our
+                            convenient file explorer.
+                            <a href="/faq">Our FAQ</a>
+                            has more info on rule types.
+                        </p>
+                    </div>
+                </div>
+                <div class="item">
+                    <img width="778" height="447" src="{{static '/img/screen2.png'}}"
+                        alt="SortMyBox inside your Dropbox folder">
+                    <div class="carousel-caption">
+                        <h4>2) Save a file to SortMyBox</h4>
+                        <p>
+                            <strong>SortMyBox</strong> lives inside your
+                            Dropbox/Box. Save your files here and they will
+                            get sorted every 15 minutes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Carousel nav -->
+            <a class="carousel-control left" href="#screenshots"
+                data-slide="prev">&lsaquo;</a> <a
+                class="carousel-control right" href="#screenshots"
+                data-slide="next">&rsaquo;</a>
+        </div>
+    </div>
+</div>
+
+<div class="row faq">
+    <div class="span4">
+        <h3>What is SortMyBox?</h3>
+
+        <p>SortMyBox is a magic folder inside your cloud storage folder.
+            Save new files there and we will move them based on rules
+            you create. Like e-mail filters, for your files in the Cloud.</p>
+    </div>
+
+    <div class="span4">
+        <h3>How does it work?</h3>
+
+        <p>We check the contents of your SortMyBox folder every 15
+            minutes. If there are any files that match any of your
+            rules, we will move them to their correct location. We also
+            log all file moves so you never lose a file.</p>
+    </div>
+    <div class="span4">
+        <h3>Is it for me?</h3>
+
+        <p>Yes! Whether you're keeping your photos and videos
+            organized or sharing documents with other people, SortMyBox
+            will keep your files organized.</p>
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<div class="row testimonials">
+    <div class="span4">
+        <p>
+        <a href="http://lifehacker.com/5908324/sortbox-automatically-organizes-files-is-like-email-filters-for-dropbox">
+            <img src="{{static '/img/lifehacker.png'}}"/>
+        </a>
+        </p>
+        <p>&#8220;A solid option for automating Dropbox folder organization&#8221;</p>
+    </div>
+
+    <div class="span4">
+        <p><a href="http://www.smashingmagazine.com/smashing-newsletter-issue-59/">
+            <img src="{{static '/img/smashingMagazine.png'}}"/>
+        </a>
+        </p>
+        <p>&#8220;A very handy tool to keep your Dropbox organized.&#8221;</p>
+    </div>
+    <div class="span4">
+        <p><a href="http://agbeat.com/cities/san-francisco-cities/sortbox-streamlines-your-dropbox-chaos/">
+            <img src="{{static '/img/ag-beat.png'}}"/>
+            <em>Charlene Jimenez</em>
+        </a>
+        </p>
+        <p>&#8220;@sortmybox streamlines your Dropbox chaos.&#8221;</p>
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
