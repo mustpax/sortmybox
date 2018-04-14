@@ -1,7 +1,7 @@
 import express = require('express');
 
 import { asyncRoute } from './utils';
-import { UserService } from './models';
+import { UserService, User } from './models';
 
 const app: express.Router = express.Router();
 
@@ -25,9 +25,7 @@ app.use(asyncRoute(async function(req, res, next) {
 }));
 
 app.get('/', asyncRoute(async function(req, res) {
-  console.log('req.user', (req as any).user);
   res.render('index', {
-    user: (req as any).user,
     title: 'Organize your Dropbox',
   });
 }));
@@ -46,7 +44,6 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
     return;
   }
   let token = await (dropbox() as any).getAccessTokenFromCode(REDIRECT_URI, code);
-  console.log(token);
   let dbx = dropbox(token);
   let acct: DropboxTypes.users.FullAccount = await dbx.usersGetCurrentAccount(undefined);
   let user = await UserService.upsertDropboxAcct(token, acct);
