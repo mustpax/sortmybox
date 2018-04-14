@@ -46,6 +46,10 @@ let hbs = require('express-handlebars')({
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
 
+import raven = require('raven');
+raven.config(process.env.RAVEN_DSN).install();
+app.use(raven.requestHandler());
+
 app.use(require('morgan')('tiny'));
 
 import cookieSession = require('cookie-session');
@@ -71,6 +75,7 @@ app.use(express.static('public'));
 import routes from './routes';
 app.use(routes);
 
+app.use(raven.errorHandler());
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log('Error', err);
   res.status(err.status || 500).json({
