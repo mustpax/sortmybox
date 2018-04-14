@@ -57,6 +57,7 @@ export class UserSchema extends AbstractModelService<string, User> {
     ret.fileMoves = 0;
     ret.accountType = 'DROPBOX';
     ret.sortingFolder = '/SortMyBox';
+    ret.dropboxV2Migrated = true;
     return ret;
   }
 
@@ -97,6 +98,26 @@ export class UserSchema extends AbstractModelService<string, User> {
     let q = this.all().filter('dropboxV2Id', '=', dropboxId).limit(1);
     let [result] = await this.query(q);
     return result;
+  }
+
+  async upsertDropboxAcct(token: string, account: DropboxTypes.users.FullAccount): Promise<User> {
+    let dbxId = account.account_id;
+    let q = this.all().filter('dropboxV2Id', '=', dbxId).limit(1);
+    let [user] = await this.query(q);
+    if (user) {
+      user.lastLogin = new Date();
+      await this.save([user]);
+      return user;
+    }
+    user = this.makeNew();
+    user.name = account.name.display_name;
+    user.nameLower = user.name && user.name.toLowerCase();
+    user.email = account.email;
+    user.dropboxV2Id = dbxId;
+    user.dropboxV2Token = token;
+    let [id] = await this.save([user]);
+    user.id = id;
+    return user;
   }
 }
 
