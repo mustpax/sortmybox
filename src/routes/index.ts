@@ -56,21 +56,15 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
   res.redirect('/');
 }));
 
-app.use(asyncRoute(async function(req, res, next) {
+const auth = asyncRoute(async function(req, res, next) {
   if (! req.user || ! req.dbx) {
     res.redirect('/');
     return;
   }
   next();
-}));
+});
 
-app.get('/rules', asyncRoute(async function(req, res) {
-  // TODO handle creating sortmybox dir
-  res.render('rules', {
-    user: req.user,
-    title: 'Logged In - Organize your Dropbox',
-    rules: [],
-  });
-}));
+import authorizedRoutes from './authorizedRoutes';
+app.use(auth, authorizedRoutes);
 
 export default app;
