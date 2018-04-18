@@ -25,10 +25,15 @@ app.use(asyncRoute(async function(req, res, next) {
 }));
 
 app.get('/', asyncRoute(async function(req, res) {
+  if (req.user) {
+    res.redirect('/rules');
+    return;
+  }
   res.render('index', {
     title: 'Organize your Dropbox',
   });
 }));
+
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
   let url = (dropbox().getAuthenticationUrl as any)(REDIRECT_URI, null, 'code');
@@ -49,6 +54,23 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
   let user = await UserService.upsertDropboxAcct(token, acct);
   req.session.userId = user.id;
   res.redirect('/');
+}));
+
+app.use(asyncRoute(async function(req, res, next) {
+  if (! req.user || ! req.dbx) {
+    res.redirect('/');
+    return;
+  }
+  next();
+}));
+
+app.get('/rules', asyncRoute(async function(req, res) {
+  // TODO handle creating sortmybox dir
+  res.render('rules', {
+    user: req.user,
+    title: 'Logged In - Organize your Dropbox',
+    rules: [],
+  });
 }));
 
 export default app;

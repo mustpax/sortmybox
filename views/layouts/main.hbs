@@ -36,15 +36,11 @@
         </p>
       </div>
     </div>
-    {{#if prod}}
-        <script src="{{static '/js/all.js'}}"></script>
-    {{else}}
-        <script src="{{static '/js/underscore.js'}}"></script>
-        <script src="{{static '/js/jquery-1.7.2.js'}}"></script>
-        <script src="{{static '/js/bootstrap.js'}}"></script>
-        <script src="{{static '/js/jquery-ui-1.8.20.custom.js'}}"></script>
-        <script src="{{static '/js/sortbox.js'}}"></script>
-    {{/if}}
+    <script src="{{static '/js/underscore.js'}}"></script>
+    <script src="{{static '/js/jquery-1.7.2.js'}}"></script>
+    <script src="{{static '/js/bootstrap.js'}}"></script>
+    <script src="{{static '/js/jquery-ui-1.8.20.custom.js'}}"></script>
+    <script src="{{static '/js/sortbox.js'}}"></script>
 
     <script>
       window.csrfToken = {{{ escapeJSString ( csrfToken ) }}};
