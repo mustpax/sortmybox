@@ -1,11 +1,11 @@
 import express = require('express');
 
-import { asyncRoute } from './utils';
-import { UserService, User } from './models';
+import { asyncRoute } from '../utils';
+import { UserService } from '../models';
 
 const app: express.Router = express.Router();
 
-import dropbox from './dropbox';
+import dropbox from '../dropbox';
 
 const REDIRECT_URI = 'http://localhost:3000/dropbox/cb';
 
