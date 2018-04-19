@@ -229,10 +229,11 @@
         $.ajax({
             type: 'POST',
             url: '/rules',
-            data: {
-                'rules': JSON.stringify(rules),
-                'authenticityToken' : window.csrfToken
-            },
+            contentType: "application/json",
+            data: JSON.stringify({
+              rules,
+              _csrf: window.csrfToken
+            }),
             success: function(data) {
                 var hasErrors = false,
                     msg       = null;
