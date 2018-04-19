@@ -40,6 +40,17 @@ let hbs = require('express-handlebars')({
         return null;
       }
       return Math.round(date.getTime() / 1e3);
+    },
+    ruleLabel(ruleType?: string) {
+      const labels: any = {
+        NAME_CONTAINS: 'Name contains',
+        EXT_EQ: 'Extension equals',
+        GLOB: 'Name pattern'
+      };
+      if (ruleType && labels[ruleType]) {
+        return labels[ruleType];
+      }
+      return 'Name contains';
     }
   }
 });

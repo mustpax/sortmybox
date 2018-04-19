@@ -59,7 +59,7 @@
    <script id="IntercomSettingsScriptTag">
     window.intercomSettings = {
         {{#if user}}
-            email: {{{ escapeJSString user.email }}}, }},
+            email: {{{ escapeJSString user.email }}},
             created_at: {{ dateToSeconds user.created }},
             name: {{{ escapeJSString user.name }}},
             user_id: {{{ escapeJSString user.id }}},

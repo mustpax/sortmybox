@@ -66,7 +66,5 @@
     </div>
 </div>
 
-#{set 'script'}
-<script src="#{static-path '/public/js/editor.js'/}"></script>
-<script src="#{static-path '/public/js/explorer.js'/}"></script>
-#{/set}
+<script defer src="{{ static '/js/editor.js' }}"></script>
+<script defer src="{{ static '/js/explorer.js' }}"></script>
