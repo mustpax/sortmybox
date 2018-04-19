@@ -1,5 +1,3 @@
-{{> nav }}
-
 
 {{#if initResult.createdSortboxDir }}
 <div class="row">
@@ -36,14 +34,13 @@
         <th></th>
       </thead>
       <tbody>
-          #{list items:rules, as:'rule'}
-              #{rule rule:rule, class:'rule' /}
-          #{/list}
-          #{else}
-              #{rule class:'rule' /}
-          #{/else}
-
-          #{rule class:'rule-template' /}
+        {{#each rules}}
+          {{> rule class='rule' rule=this}}
+        {{/each}}
+        {{#unless rules}}
+          {{> rule class='rule' }}
+        {{/unless}}
+        {{> rule class='rule-template' }}
       </tbody>
       <tfoot>
           <tr class="new-rule-row">
