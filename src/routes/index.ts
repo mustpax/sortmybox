@@ -56,15 +56,8 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
   res.redirect('/');
 }));
 
-const auth = asyncRoute(async function(req, res, next) {
-  if (! req.user || ! req.dbx) {
-    res.redirect('/');
-    return;
-  }
-  next();
-});
 
 import authorizedRoutes from './authorizedRoutes';
-app.use(auth, authorizedRoutes);
+app.use(authorizedRoutes);
 
 export default app;

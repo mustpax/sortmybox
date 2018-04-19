@@ -76,8 +76,15 @@ import routes from './routes';
 app.use(routes);
 
 app.use(raven.errorHandler());
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  let error: any = new Error('Not found');
+  error.status = 404;
+  next(error);
+});
+
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log('Error', err);
+  // TODO display error page
   res.status(err.status || 500).json({
     error: err.message
   });
