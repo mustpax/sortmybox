@@ -86,7 +86,7 @@
             .removeClass('icon-folder-close');
         cell.addClass('exp-active');
     });
-    
+
     $('.exp a[href]').live('click', function(e) {
         var path = $(this).attr('data-path');
         var input = $(this).parents('td').first().find('input');
@@ -116,7 +116,7 @@
                .addClass('icon-folder-close');
         _.delay(clearIfUnfocused, 250, this);
     });
-    
+
     $('input[type="text"]').live('focus', function() {
         $(this).attr('data-focus', 1);
     });
@@ -130,7 +130,7 @@
         if (!typeahead) {
             $(this).typeahead({
                 matcher: function(item) {
-                    // match the part of the query following the last comma 
+                    // match the part of the query following the last comma
                     var query = this.query.substring(this.query.lastIndexOf(',') + 1);
                     return item.toLowerCase().indexOf($.trim(query).toLowerCase()) === 0;
                 },
@@ -185,7 +185,7 @@
             rule.find('.status').addClass('icon-remove');
         }
     }
-    
+
     function updateActivity() {
         $('.moves').empty().append(sortbox.template('moves-loading'));
 
@@ -279,7 +279,7 @@
 
         $('.alert-created').slideDown('slow');
     });
-    
+
     $(function() {
         $('.rule .dest').explorer();
     });
