@@ -15,11 +15,11 @@ const auth = asyncRoute(async function(req, res, next) {
 });
 
 app.get('/rules', auth, asyncRoute(async function(req, res) {
-  // TODO handle creating sortmybox dir
+  let rules = await rs.findByOwner((req.user as User).id as string);
   res.render('rules', {
     user: req.user,
     title: 'Logged In - Organize your Dropbox',
-    rules: [],
+    rules,
   });
 }));
 
@@ -30,17 +30,19 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
-  let rules = [];
-  let i = 0;
+
   let ownerId = (req.user as User).id as string;
-  for (let ruleJson of req.body.rules) {
+
+  // Create rule models from request
+  let rules = req.body.rules.map((ruleJson: any, i: number) => {
     let rule = rs.makeNew(ownerId);
     rule.rank = i++;
     rule.pattern = ruleJson.pattern;
     rule.type = ruleJson.type;
     rule.dest = ruleJson.dest;
-    rules.push(rule);
-  }
+    return rule;
+  });
+
   let errors = rs.validate(rules);
   if (errors) {
     let errorsJson: any[][] = _.range(rules.length).map(() => []);
@@ -56,6 +58,8 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     let rulesToDelete = await rs.findByOwner(ownerId);
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
+    // TODO run rules
+    res.json([]);
   }
 }));
 
