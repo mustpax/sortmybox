@@ -118,9 +118,12 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     return mutationResults.map(mr => mr.key && (mr.key.path[0].id || mr.key.path[0].name));
   }
 
+  customizeError(error: joi.ValidationErrorItem): joi.ValidationErrorItem {
+    return error;
+  }
 
   validate(ts: T[]): joi.ValidationError {
-    return joi.validate(ts,
+    let ret = joi.validate(ts,
       toArraySchema(this.schema),
       {
         abortEarly: false,
@@ -128,6 +131,10 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
           key: '{{label}} '
         }
       }).error;
+    if (ret) {
+      ret.details = ret.details.map(error => this.customizeError(error));
+    }
+    return ret;
   }
 }
 
