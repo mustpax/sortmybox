@@ -1,5 +1,6 @@
 (function($) {
     'use strict';
+    let debug = () => null;
 
      // Extensions for EXT_EQ rule typeahead
      var ext = ['3gp',
@@ -167,7 +168,7 @@
      */
     function addErrors(i, errors) {
         var rule = $('.rules tr.rule').eq(i);
-        console.log('errors', i, rule, errors);
+        debug('errors', i, rule, errors);
 
         // Clear old errors
         rule.find('td').removeClass('error');
@@ -224,7 +225,7 @@
 
     function save() {
         var rules = serialize();
-        console.log('serialed rules', rules);
+        debug('serialed rules', rules);
         loading();
         $.ajax({
             type: 'POST',
@@ -238,7 +239,7 @@
                 var hasErrors = false,
                     msg       = null;
                 doneLoading();
-                console.log('save success');
+                debug('save success');
                 $.each(data, function(i, v) {
                     addErrors(i, v);
                     hasErrors = hasErrors || !! v.length;
