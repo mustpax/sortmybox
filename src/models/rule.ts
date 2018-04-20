@@ -23,6 +23,7 @@ export class RuleKey {
 }
 
 export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
+  MAX_RULES = MAX_RULES;
   schema = {
     type: joi.string().required().only('NAME_CONTAINS', 'GLOB', 'EXT_EQ').label('Rule type'),
     pattern: joi.string().required()

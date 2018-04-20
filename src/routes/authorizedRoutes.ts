@@ -30,6 +30,12 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
+  if (req.body.rules.length > rs.MAX_RULES) {
+    let err: any = new Error('Too many rules');
+    err.status = 400;
+    next(err);
+    return;
+  }
 
   let ownerId = (req.user as User).id as string;
 
