@@ -120,7 +120,14 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
 
 
   validate(ts: T[]): joi.ValidationError {
-    return joi.validate(ts, toArraySchema(this.schema)).error;
+    return joi.validate(ts,
+      toArraySchema(this.schema),
+      {
+        abortEarly: false,
+        language: {
+          key: '{{label}} '
+        }
+      }).error;
   }
 }
 
