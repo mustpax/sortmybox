@@ -24,14 +24,26 @@ export class RuleKey {
 
 export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
   schema = {
-    type: joi.string().required().only('NAME_CONTAINS', 'GLOB', 'EXT_EQ'),
+    type: joi.string().required().only('NAME_CONTAINS', 'GLOB', 'EXT_EQ').label('Rule type'),
     pattern: joi.string().required()
       .regex(/\//, {invert: true}) // disallow slash /
-      .when('type', {is: 'EXT_EQ', then: joi.string().regex(/\./, { invert: true })}), // disallow period . when type is EXT_EQ
+      .when('type', {is: 'EXT_EQ', then: joi.string().regex(/\./, { invert: true })}) // disallow period . when type is EXT_EQ
+      .label('Rule pattern')
+      // .error(() => ({message: 'Pattern is required'} as any))
+      ,
     rank: joi.number().required().min(0),
-    dest: joi.string().required().regex(/^\//),
+    dest: joi.string().required().regex(/^\//).label('Destination'),
     created: joi.date().required()
   };
+  errorOverrides: { [key: string]: { [key: string]: string }} = {
+    dest: {
+      'string.regex.base': 'Destination must start with a slash /'
+    },
+    pattern: {
+      'string.regex.invert.base': 'Pattern cannot contain period . when rule type is Extension Equals'
+    }
+  };
+
   kind = 'Rule';
 
   makeNew(ownerId: string): Rule {
@@ -106,6 +118,13 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
       .order('rank')
       .limit(MAX_RULES);
     return await this.query(q);
+  }
+
+  customizeError(error: joi.ValidationErrorItem): joi.ValidationErrorItem {
+    if (this.errorOverrides[error.path[1]] && this.errorOverrides[error.path[1]][error.type]) {
+      error.message = this.errorOverrides[error.path[1]][error.type];
+    }
+    return error;
   }
 }
 
