@@ -14,8 +14,8 @@ app.use(asyncRoute(async function(req, res, next) {
     if (req.session.userId) {
       let [user] = await UserService.findByIds([req.session.userId]);
       if (user) {
-        (req as any).user = user;
-        (req as any).dbx = dropbox(user.dropboxV2Token);
+        req.user = user;
+        req.dbx = dropbox(user.dropboxV2Token);
       }
     }
   } catch (e) {
@@ -36,7 +36,7 @@ app.get('/', asyncRoute(async function(req, res) {
 
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
-  let url = (dropbox().getAuthenticationUrl as any)(REDIRECT_URI, null, 'code');
+  let url = (dropbox().client.getAuthenticationUrl as any)(REDIRECT_URI, null, 'code');
   res.redirect(url);
 }));
 
@@ -50,7 +50,7 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
   }
   let token = await (dropbox() as any).getAccessTokenFromCode(REDIRECT_URI, code);
   let dbx = dropbox(token);
-  let acct: DropboxTypes.users.FullAccount = await dbx.usersGetCurrentAccount(undefined);
+  let acct: DropboxTypes.users.FullAccount = await dbx.client.usersGetCurrentAccount(undefined);
   let user = await UserService.upsertDropboxAcct(token, acct);
   req.session.userId = user.id;
   res.redirect('/');

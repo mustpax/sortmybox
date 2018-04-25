@@ -1,9 +1,49 @@
 import { Dropbox } from 'dropbox';
+import { User, Rule } from './models';
+import _ = require('underscore');
 
-function dbxClient(token?: string): Dropbox {
-  const ret = new Dropbox({clientId: process.env.DROPBOX_KEY, accessToken: token});
-  (ret as any).setClientSecret(process.env.DROPBOX_SECRET);
-  return ret;
+export class DropboxService {
+  client: Dropbox;
+
+  constructor(token?: string) {
+    this.client = new Dropbox({clientId: process.env.DROPBOX_KEY, accessToken: token});
+    (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
+  }
+
+  async runRules(user: User, rules: Rule[]) {
+    rules = _.sortBy(rules, 'rank');
+    let files = await this.client.filesListFolder({
+      path: (user.sortingFolder as string),
+      limit: 100,
+    });
+    // TODO handle files.has_more
+    // TODO log info
+    let moves = [];
+    for (let file of files.entries) {
+      // Only move files, not folders
+      if (file['.tag'] !== 'file') {
+        continue;
+      }
+      for (let rule of rules) {
+        if (rule.matches(file.name)) {
+          let to_path = (rule.dest as string);
+          moves.push(this.client.filesMoveV2({
+            from_path: (file.path_lower as string),
+            to_path,
+            autorename: true,
+          }));
+          // Once there's a matching rule, move to next file
+          break;
+        }
+      }
+    }
+    // TODO handle conflicts
+    return await Promise.all(moves);
+  }
+}
+
+function dbxClient(token?: string): DropboxService {
+  return new DropboxService(token);
 }
 
 export default dbxClient;

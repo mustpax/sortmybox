@@ -377,4 +377,7 @@ describe("Rule", function() {
     let fromDS = await rs.findByOwner(user.id as string);
     assert.deepEqual(fromDS, rules);
   });
+
+  it("matches()", async function() {
+  });
 });

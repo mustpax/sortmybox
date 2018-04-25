@@ -65,6 +65,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
     // TODO run rules
+    await req.dbx.runRules(req.user, rules);
     res.json([]);
   }
 }));

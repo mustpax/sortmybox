@@ -8,6 +8,20 @@ import joi = require('joi');
 
 export const MAX_RULES = 200;
 
+function globToRegex(globStr: string): RegExp {
+  let replacer = /(\W)/g;
+  let regexifiedStr = globStr.replace(replacer, match => {
+    if (match === '*') {
+      return '.*';
+    }
+    if (match === '?') {
+      return '.?';
+    }
+    return '\\\\' + match;
+  });
+  return RegExp(regexifiedStr, 'gi');
+}
+
 export class Rule implements Model<RuleKey> {
   id?: RuleKey;
   type?: string;
@@ -15,6 +29,27 @@ export class Rule implements Model<RuleKey> {
   dest?: string;
   rank?: number;
   created?: Date;
+
+  matches(fileName: string): boolean {
+    if (! this.pattern) {
+      return false;
+    }
+
+    switch (this.type) {
+    case 'NAME_CONTAINS':
+      return fileName.toLowerCase().indexOf(this.pattern.toLowerCase()) > -1;
+    case 'GLOB':
+      return !! globToRegex(this.pattern).exec(fileName);
+    case 'EXT_EQ':
+      let parts = fileName.split('.');
+      if (parts.length < 2) {
+        return false;
+      }
+      let ext = parts[parts.length - 1];
+      return ext.toLowerCase() === this.pattern.toLowerCase();
+    }
+    return false;
+  }
 }
 
 export class RuleKey {
@@ -50,10 +85,9 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
   makeNew(ownerId: string): Rule {
     let id = new RuleKey();
     id.ownerId = ownerId;
-    let ret: Rule = {
-      created: new Date(),
-      id
-    };
+    let ret: Rule = new Rule();
+    ret.created = new Date();
+    ret.id = id;
     return ret;
   }
 
