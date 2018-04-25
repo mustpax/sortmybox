@@ -1,5 +1,5 @@
 import { Dropbox } from 'dropbox';
-import { User, Rule } from './models';
+import { User, Rule, RuleService as rs } from './models';
 import _ = require('underscore');
 
 export class DropboxService {
@@ -25,7 +25,7 @@ export class DropboxService {
         continue;
       }
       for (let rule of rules) {
-        if (rule.matches(file.name)) {
+        if (rs.matches(rule, file.name)) {
           let to_path = (rule.dest as string);
           moves.push(this.client.filesMoveV2({
             from_path: (file.path_lower as string),

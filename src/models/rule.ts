@@ -29,27 +29,6 @@ export class Rule implements Model<RuleKey> {
   dest?: string;
   rank?: number;
   created?: Date;
-
-  matches(fileName: string): boolean {
-    if (! this.pattern) {
-      return false;
-    }
-
-    switch (this.type) {
-    case 'NAME_CONTAINS':
-      return fileName.toLowerCase().indexOf(this.pattern.toLowerCase()) > -1;
-    case 'GLOB':
-      return !! globToRegex(this.pattern).exec(fileName);
-    case 'EXT_EQ':
-      let parts = fileName.split('.');
-      if (parts.length < 2) {
-        return false;
-      }
-      let ext = parts[parts.length - 1];
-      return ext.toLowerCase() === this.pattern.toLowerCase();
-    }
-    return false;
-  }
 }
 
 export class RuleKey {
@@ -160,6 +139,27 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
       error.message = this.errorOverrides[error.path[1]][error.type];
     }
     return error;
+  }
+
+  matches(rule: Rule, fileName: string): boolean {
+    if (! rule.pattern) {
+      return false;
+    }
+
+    switch (rule.type) {
+    case 'NAME_CONTAINS':
+      return fileName.toLowerCase().indexOf(rule.pattern.toLowerCase()) > -1;
+    case 'GLOB':
+      return !! globToRegex(rule.pattern).exec(fileName);
+    case 'EXT_EQ':
+      let parts = fileName.split('.');
+      if (parts.length < 2) {
+        return false;
+      }
+      let ext = parts[parts.length - 1];
+      return ext.toLowerCase() === rule.pattern.toLowerCase();
+    }
+    return false;
   }
 }
 
