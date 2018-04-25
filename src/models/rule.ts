@@ -17,7 +17,7 @@ function globToRegex(globStr: string): RegExp {
     if (match === '?') {
       return '.?';
     }
-    return '\\\\' + match;
+    return '\\' + match;
   });
   return RegExp(regexifiedStr, 'gi');
 }
@@ -152,11 +152,15 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
     case 'GLOB':
       return !! globToRegex(rule.pattern).exec(fileName);
     case 'EXT_EQ':
-      let parts = fileName.split('.');
-      if (parts.length < 2) {
+      let idx = fileName.lastIndexOf('.');
+      // if idx is 0 the file starts with a period . so we consider it to be dotfile
+      // with no extensions
+      // if idx is negative there's no period . so file has no extension
+      if (idx < 1) {
         return false;
       }
-      let ext = parts[parts.length - 1];
+      // Add one to idx to skip the period .
+      let ext = fileName.substr(idx + 1);
       return ext.toLowerCase() === rule.pattern.toLowerCase();
     }
     return false;

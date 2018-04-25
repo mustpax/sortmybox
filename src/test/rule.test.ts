@@ -378,6 +378,115 @@ describe("Rule", function() {
     assert.deepEqual(fromDS, rules);
   });
 
-  it("matches()", async function() {
+  it("matches() EXT_EQ works basic case", async function() {
+    let rule: Rule = {
+      type: 'EXT_EQ',
+      pattern: 'f',
+    };
+    function test() {
+      assert.isTrue(rs.matches(rule, 'testing.f'));
+      assert.isTrue(rs.matches(rule, 'testing.F'));
+      assert.isTrue(rs.matches(rule, 'test ing.f'));
+      assert.isTrue(rs.matches(rule, 'test ing.F'));
+    }
+    test();
+    rule.pattern = 'F';
+    test();
+  });
+
+  it("matches() EXT_EQ doesn't match files with no extension", async function() {
+    let rule: Rule = {
+      type: 'EXT_EQ',
+      pattern: 'f',
+    };
+    function test() {
+      assert.isFalse(rs.matches(rule, 'f'));
+      assert.isFalse(rs.matches(rule, 'F'));
+      // we don't consider dotfiles to have file extensions
+      assert.isFalse(rs.matches(rule, '.f'));
+      assert.isFalse(rs.matches(rule, '.F'));
+    }
+    test();
+    rule.pattern = 'F';
+    test();
+  });
+
+  it("matches() EXT_EQ works for files with multiple dots in their name", async function() {
+    let rule: Rule = {
+      type: 'EXT_EQ',
+      pattern: 'f',
+    };
+    function test() {
+      assert.isTrue(rs.matches(rule, 'testing.there.f'));
+      assert.isTrue(rs.matches(rule, 'testing.there.F'));
+      assert.isTrue(rs.matches(rule, '.testing.there.F'));
+      assert.isTrue(rs.matches(rule, '.testing.there.f'));
+    }
+    test();
+    rule.pattern = 'F';
+    test();
+  });
+
+  it("matches() GLOB behaves same as name contains when no control chars are used", async function() {
+    let rule: Rule = {
+      type: 'GLOB',
+      pattern: 'sup',
+    };
+    assert.isTrue(rs.matches(rule, 'heysup'));
+    assert.isTrue(rs.matches(rule, 'heySup'));
+    assert.isFalse(rs.matches(rule, 'up'));
+    assert.isFalse(rs.matches(rule, ''));
+  });
+
+  it("matches() GLOB escapes regex control chars", async function() {
+    let rule: Rule = {
+      type: 'GLOB',
+      pattern: '.',
+    };
+    assert.isTrue(rs.matches(rule, 'a.b'));
+    assert.isFalse(rs.matches(rule, 'ab'));
+  });
+
+  it("matches() GLOB star", async function() {
+    let rule: Rule = {
+      type: 'GLOB',
+      pattern: 'Hi*There',
+    };
+    assert.isTrue(rs.matches(rule, 'hithere'));
+    assert.isTrue(rs.matches(rule, 'hitHEre'));
+    assert.isTrue(rs.matches(rule, 'hi   tHEre'));
+    assert.isTrue(rs.matches(rule, 'hi .x! tHEre'));
+    assert.isTrue(rs.matches(rule, 'xhi .x! tHErex'));
+    assert.isFalse(rs.matches(rule, 'ithere'));
+    assert.isFalse(rs.matches(rule, 'h ithere'));
+  });
+
+  it("matches() GLOB question mark", async function() {
+    let rule: Rule = {
+      type: 'GLOB',
+      pattern: 'Hi?There',
+    };
+    assert.isTrue(rs.matches(rule, 'hithere'));
+    assert.isTrue(rs.matches(rule, 'hitHEre'));
+    assert.isTrue(rs.matches(rule, 'hi tHEre'));
+    assert.isTrue(rs.matches(rule, 'hixtHEre'));
+    assert.isTrue(rs.matches(rule, 'xhi.tHErex'));
+    assert.isFalse(rs.matches(rule, 'ithere'));
+    assert.isFalse(rs.matches(rule, 'h ithere'));
+  });
+
+  it("matches() NAME_CONTAINS", async function() {
+    let rule: Rule = {
+      type: 'NAME_CONTAINS',
+      pattern: 'AbC',
+    };
+    assert.isTrue(rs.matches(rule, 'abc'));
+    assert.isTrue(rs.matches(rule, 'AbC'));
+    assert.isTrue(rs.matches(rule, 'aBc '));
+    assert.isTrue(rs.matches(rule, ' AbC '));
+    assert.isTrue(rs.matches(rule, 'x abC .pdf'));
+    assert.isTrue(rs.matches(rule, 'x Abc .pdfAbC'));
+    assert.isFalse(rs.matches(rule, 'bc'));
+    assert.isFalse(rs.matches(rule, 'a bc'));
   });
 });
