@@ -9,35 +9,36 @@
       <dd>{{user.fileMoves}}</dd>
       <dt>Periodic sort</dt>
       <dd class="periodicSort">
-        #{if user.periodicSort}
-        #{form @settings(), method:'POST' }
-            <button class="btn disabled">Enabled</button>
-            <input type="hidden" name="periodicSort" value="0">
-            <button type="submit" class="btn btn-danger">Disable</button>
-        #{/form}
-        #{/if}
-        #{else}
-        #{form @settings(), method:'POST' }
-            <input type="hidden" name="periodicSort" value="1">
-            <button type="submit" class="btn btn-primary">Enable</button>
-            <button class="btn disabled">Disabled</button>
-        #{/form}
-        #{/else}
+        {{#if user.periodicSort}}
+        <form action="/account/settings" method="post">
+          {{> formCsrf }}
+          <button class="btn disabled">Enabled</button>
+          <input type="hidden" name="periodicSort" value="0">
+          <button type="submit" class="btn btn-danger">Disable</button>
+        </form>
+        {{else}}
+        <form action="/account/settings" method="post">
+          {{> formCsrf }}
+          <input type="hidden" name="periodicSort" value="1">
+          <button type="submit" class="btn btn-primary">Enable</button>
+          <button class="btn disabled">Disable</button>
+        </form>
+        {{/if}}
       </dd>
       <dt>Sorting folder</dt>
       <dd>
-        #{form @sortingFolder(), method:'POST', class:'form-inline' }
+        <form action="/account/sortingFolder" method="post" class="form-inline">
+          {{> formCsrf }}
           <input type="text" name="folder" value="{{user.sortingFolder}}">
           <input type="submit" class="btn" value="Update">
-        #{/form}
+        </form>
       </dd>
       <dt>Last sync</dt>
-      #{if user.lastSync}
-      <dd>#{if user.lastSync}{{since user.lastSync}}#{/if}#{else}<em>None yet</em>#{/else}</dd>
-      #{/if}
-      #{else}
+      {{#if user.lastSync}}
+      <dd>{{#if user.lastSync}}{{since user.lastSync}}{{else}}<em>None yet</em>{{/if}}</dd>
+      {{else}}
       <dd><em>None yet</em></dd>
-      #{/else}
+      {{/if}}
       <dt>Last login</dt>
       <dd>{{since user.lastLogin}}</dd>
       <dt>Created date</dt>
