@@ -3,7 +3,7 @@ const app: express.Router = express.Router();
 export default app;
 
 import _ = require('underscore');
-import { asyncRoute } from '../utils';
+import asyncRoute from '../asyncRoute';
 import { User, RuleService as rs } from '../models';
 
 const auth = asyncRoute(async function(req, res, next) {

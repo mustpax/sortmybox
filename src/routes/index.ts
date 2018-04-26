@@ -1,6 +1,6 @@
 import express = require('express');
 
-import { asyncRoute } from '../utils';
+import  asyncRoute from '../asyncRoute';
 import { UserService } from '../models';
 
 const app: express.Router = express.Router();
