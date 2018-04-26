@@ -3,7 +3,7 @@ import moment = require('moment');
 import _ = require('underscore');
 
 import asyncRoute from '../asyncRoute';
-import { User, RuleService as rs, FileMoveService as fms } from '../models';
+import { User, UserService as us, RuleService as rs, FileMoveService as fms } from '../models';
 
 const app: express.Router = express.Router();
 export default app;
@@ -122,6 +122,14 @@ app.get('/account/settings', asyncRoute(async function(req, res) {
     accountSettings: 'active',
     user: req.user,
   });
+}));
+
+app.post('/account/periodicSort', asyncRoute(async function(req, res) {
+  let periodicSort = req.body.periodicSort === '1';
+  console.log(`Setting periodic sort for user ${req.user.id} to ${periodicSort}`);
+  req.user.periodicSort = periodicSort;
+  await us.save([req.user]);
+  res.redirect('/account/settings');
 }));
 
 app.get('/account/delete', asyncRoute(async function(req, res) {
