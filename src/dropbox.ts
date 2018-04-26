@@ -1,6 +1,13 @@
 import { Dropbox } from 'dropbox';
 import { User, Rule, RuleService as rs } from './models';
 import _ = require('underscore');
+import { endsWithCaseInsensitive } from './utils';
+
+export interface MoveResult {
+  fileName: string;
+  fullDestPath: string;
+  conflict: boolean;
+}
 
 export class DropboxService {
   client: Dropbox;
@@ -10,7 +17,7 @@ export class DropboxService {
     (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
   }
 
-  async runRules(user: User, rules: Rule[]) {
+  async runRules(user: User, rules: Rule[]): Promise<MoveResult[]> {
     rules = _.sortBy(rules, 'rank');
     let files = await this.client.filesListFolder({
       path: (user.sortingFolder as string),
@@ -38,7 +45,18 @@ export class DropboxService {
       }
     }
     // TODO handle conflicts
-    return await Promise.all(moves);
+    let responses = await Promise.all(moves);
+    return responses.map((resp, i) => {
+      let fileName = files.entries[i].name as string;
+      let fullDestPath = resp.metadata.path_display as string;
+      let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
+      let ret: MoveResult = {
+        fileName,
+        fullDestPath,
+        conflict
+      };
+      return ret;
+    });
   }
 }
 
