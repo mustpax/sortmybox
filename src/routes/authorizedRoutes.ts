@@ -1,10 +1,12 @@
 import express = require('express');
+import moment = require('moment');
+import _ = require('underscore');
+
+import asyncRoute from '../asyncRoute';
+import { User, RuleService as rs, FileMoveService as fms } from '../models';
+
 const app: express.Router = express.Router();
 export default app;
-
-import _ = require('underscore');
-import asyncRoute from '../asyncRoute';
-import { User, RuleService as rs } from '../models';
 
 const auth = asyncRoute(async function(req, res, next) {
   if (! req.user || ! req.dbx) {
@@ -64,10 +66,31 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     let rulesToDelete = await rs.findByOwner(ownerId);
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
-    // TODO run rules
-    await req.dbx.runRules(req.user, rules);
+    let moveResult = await req.dbx.runRules(req.user, rules);
+    let now = new Date();
+    let fileMoves = moveResult.map(mv => {
+      let ret = fms.makeNew(req.user.id as string);
+      ret.fromFile = mv.fileName;
+      ret.hasCollision = mv.conflict;
+      let destParts = mv.fullDestPath.split('/');
+      let destFileName = destParts.pop();
+      ret.toDir = destParts.join('/');
+      ret.resolvedName = ret.hasCollision ? destFileName : undefined;
+      ret.when = now;
+      return ret;
+    });
+    await fms.save(fileMoves);
     res.json([]);
   }
+}));
+
+
+app.get('/activity', auth, asyncRoute(async function(req, res) {
+  let fileMoves = await fms.findByOwner(req.user.id as string);
+  res.json(fileMoves.map(fm => {
+    (fm as any).when = moment(fm.when).fromNow();
+    return fm;
+  }));
 }));
 
 app.get('/logout', auth, asyncRoute(async function(req, res) {
