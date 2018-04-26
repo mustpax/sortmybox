@@ -1,0 +1,49 @@
+{{> accountHeader }}
+
+<div class="row">
+  <div class="span8 offset2">
+    <dl class="dl-horizontal account-info ">
+      <dt>User name</dt>
+      <dd>${user.name}</dd>
+      <dt>Total file moves</dt>
+      <dd>${user.fileMoves}</dd>
+      <dt>Periodic sort</dt>
+      <dd class="periodicSort">
+        #{if user.periodicSort}
+        #{form @settings(), method:'POST' }
+            <button class="btn disabled">Enabled</button>
+            <input type="hidden" name="periodicSort" value="0">
+            <button type="submit" class="btn btn-danger">Disable</button>
+        #{/form}
+        #{/if}
+        #{else}
+        #{form @settings(), method:'POST' }
+            <input type="hidden" name="periodicSort" value="1">
+            <button type="submit" class="btn btn-primary">Enable</button>
+            <button class="btn disabled">Disabled</button>
+        #{/form}
+        #{/else}
+      </dd>
+      <dt>Sorting folder</dt>
+      <dd>
+        #{form @sortingFolder(), method:'POST', class:'form-inline' }
+          <input type="text" name="folder" value="${user.sortingFolder}">
+          <input type="submit" class="btn" value="Update">
+        #{/form}
+      </dd>
+      <dt>Last sync</dt>
+      #{if user.lastSync}
+      <dd>#{if user.lastSync}${user.lastSync.since()}#{/if}#{else}<em>None yet</em>#{/else}</dd>
+      #{/if}
+      #{else}
+      <dd><em>None yet</em></dd>
+      #{/else}
+      <dt>Last login</dt>
+      <dd>${user.lastLogin.since()}</dd>
+      <dt>Created date</dt>
+      <dd>${user.created}</dd>
+      <dt>Last modified</dt>
+      <dd>${user.modified}</dd>
+    </dl>
+  </div>
+</div>

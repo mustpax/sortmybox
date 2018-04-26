@@ -115,6 +115,14 @@ app.get('/activity', auth, asyncRoute(async function(req, res) {
   }));
 }));
 
+app.get('/account/settings', asyncRoute(async function(req, res) {
+  res.render('account/settings', {
+    title: 'Account Settings',
+    accountSettings: 'active',
+    user: req.user,
+  });
+}));
+
 app.get('/logout', auth, asyncRoute(async function(req, res) {
   req.session.userId = null;
   res.redirect('/');
