@@ -119,6 +119,18 @@ export class UserSchema extends AbstractModelService<string, User> {
     user.id = id;
     return user;
   }
+
+  async save(users: User[]): Promise<(string|undefined)[]> {
+    let now = new Date();
+    return await super.save(users.map(user => {
+      // If the user already has an id (i.e. exists in datastore)
+      // update modified timestamp
+      if (user.id) {
+        user.modified = now;
+      }
+      return user;
+    }));
+  }
 }
 
 export let UserService = new UserSchema();

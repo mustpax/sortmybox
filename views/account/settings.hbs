@@ -35,16 +35,16 @@
       </dd>
       <dt>Last file move</dt>
       {{#if user.lastSync}}
-      <dd>{{#if user.lastSync}}{{since user.lastSync}}{{else}}<em>None yet</em>{{/if}}</dd>
+      <dd>{{#if user.lastSync}}{{formatDateSince user.lastSync}}{{else}}<em>None yet</em>{{/if}}</dd>
       {{else}}
       <dd><em>None yet</em></dd>
       {{/if}}
       <dt>Last login</dt>
-      <dd>{{since user.lastLogin}}</dd>
-      <dt>Created date</dt>
-      <dd>{{user.created}}</dd>
+      <dd>{{formatDateSince user.lastLogin}}</dd>
+      <dt>Registration</dt>
+      <dd>{{formatDate user.created}}</dd>
       <dt>Last modified</dt>
-      <dd>{{user.modified}}</dd>
+      <dd>{{formatDate user.modified}}</dd>
     </dl>
   </div>
 </div>

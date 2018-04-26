@@ -53,8 +53,14 @@ let hbs = require('express-handlebars')({
       }
       return 'Name contains';
     },
-    since(date: any) {
+    formatDateSince(date: any) {
       return moment(date).fromNow();
+    },
+    formatDate(date: any) {
+      return moment(date).format('MMMM D, YYYY');
+    },
+    formatDateTime(date: any) {
+      return moment(date).format('MMMM D YYYY, h:mm:ss a');
     }
   }
 });
