@@ -1,26 +1,23 @@
-#{extends 'Accounts/header.html' /}
-#{set title:'Delete Account'/}
-#{set delete:'active'/}
-
+{{> accountHeader}}
 <div class="row">
     <div class="span8 offset2">
-      <form class="well" action="@{delete()}" method="POST">
-        #{authenticityToken/}
-        <h3>Are you sure you want to delete your Sortbox account?</h3></br>
+      <form class="well" action="/account/delete" method="POST">
+        {{> formCsrf}}
+        <h3>Are you sure you want to delete your SortMyBox account?</h3></br>
         <p>
             If you think we might be able to help
-            <a href="mailto: ${contact}">please contact us</a>.
-            We love getting feedback and your help would let us make Sortbox
+            <a href="mailto:contact@sortmybox.com">please contact us</a>.
+            We love getting feedback and your help would let us make SortMyBox
             better.
         </p>
         <p>
-            Are you sure you want to delete your Sortbox account?
+            Are you sure you want to delete your SortMyBox account?
             Your sorting rules and activity history will be deleted permanently.
             This action cannot be undone.
         </p>
         </br>
-        <button type="submit" class="btn btn-danger">Delete this account</button>
-        <a class="btn" href="@{settings()}">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete my account</button>
+        <a class="btn" href="/account/settings">Cancel</a>
       </form>
     </div>
 </div>

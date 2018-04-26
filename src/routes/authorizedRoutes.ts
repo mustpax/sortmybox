@@ -124,6 +124,14 @@ app.get('/account/settings', asyncRoute(async function(req, res) {
   });
 }));
 
+app.get('/account/delete', asyncRoute(async function(req, res) {
+  res.render('account/delete', {
+    title: 'Delete My Account',
+    accountDelete: 'active',
+    user: req.user,
+  });
+}));
+
 app.get('/logout', auth, asyncRoute(async function(req, res) {
   req.session.userId = null;
   res.redirect('/');
