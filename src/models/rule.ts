@@ -1,6 +1,6 @@
 import { Entity, Model, AbstractModelService, DatastoreUtil as dutil } from './base';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
-import { UserService } from './user';
+import { User, UserService } from './user';
 
 import datastore from './datastore';
 
@@ -61,12 +61,15 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
 
   kind = 'Rule';
 
-  makeNew(ownerId: string): Rule {
+  makeNew(ownerId: string, props?: any): Rule {
     let id = new RuleKey();
     id.ownerId = ownerId;
     let ret: Rule = new Rule();
     ret.created = new Date();
     ret.id = id;
+    if (props) {
+      Object.assign(ret, props);
+    }
     return ret;
   }
 
@@ -164,6 +167,16 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
       return ext.toLowerCase() === rule.pattern.toLowerCase();
     }
     return false;
+  }
+
+  async createCannedRules(user: User) {
+    let rules: Rule[] = [
+      this.makeNew(user.id as string, {type: 'EXT_EQ', pattern: 'jpg, png, gif', dest: '/Photos', rank: 0}),
+      this.makeNew(user.id as string, {type: 'NAME_CONTAINS', pattern: 'Essay', dest: '/Documents', rank: 1}),
+      this.makeNew(user.id as string, {type: 'GLOB', pattern: 'Prince*.mp3', dest: '/Music/Prince', rank: 2}),
+    ];
+    await this.save(rules);
+    return rules;
   }
 }
 

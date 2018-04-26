@@ -17,11 +17,31 @@ const auth = asyncRoute(async function(req, res, next) {
 });
 
 app.get('/rules', auth, asyncRoute(async function(req, res) {
+  let initResult = {
+    createdSortboxDir: false,
+    createdCannedRules: false
+  };
+
   let rules = await rs.findByOwner((req.user as User).id as string);
+
+  // TODO also assert that sortingfolder is a folder
+  if (! await req.dbx.exists(req.user.sortingFolder as string)) {
+    console.log(`User doesn't have sorting folder creating: ${req.user.sortingFolder}`);
+    await req.dbx.client.filesCreateFolderV2({ path: req.user.sortingFolder as string });
+    initResult.createdSortboxDir = true;
+    if (rules.length === 0) {
+      console.log(`User doesn't have any rules, creating canned rules`);
+      rules = await rs.createCannedRules(req.user);
+      initResult.createdCannedRules = true;
+    }
+  }
+
   res.render('rules', {
+    accountType: 'Dropbox',
     user: req.user,
     title: 'Logged In - Organize your Dropbox',
     rules,
+    initResult,
   });
 }));
 
@@ -40,7 +60,6 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
   }
 
   let ownerId = (req.user as User).id as string;
-
   // Create rule models from request
   let rules = req.body.rules.map((ruleJson: any, i: number) => {
     let rule = rs.makeNew(ownerId);
@@ -53,6 +72,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
 
   let errors = rs.validate(rules);
   if (errors) {
+    console.log(`Not saving rules, there were ${errors.details.length} validation errors`);
     let errorsJson: any[][] = _.range(rules.length).map(() => []);
     for (let error of errors.details) {
       let msg = error.message;
@@ -64,6 +84,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     res.json(errorsJson);
   } else {
     let rulesToDelete = await rs.findByOwner(ownerId);
+    console.log(`Deleting ${rulesToDelete.length} rules and replacing with ${rules.length} new rules`);
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
     let moveResult = await req.dbx.runRules(req.user, rules);
@@ -79,6 +100,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
       ret.when = now;
       return ret;
     });
+    console.log(`Performed ${fileMoves.length} moves, saving FileMoves`);
     await fms.save(fileMoves);
     res.json([]);
   }

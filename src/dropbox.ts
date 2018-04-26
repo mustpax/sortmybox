@@ -58,6 +58,21 @@ export class DropboxService {
       return ret;
     });
   }
+
+  async exists(path: string): Promise<boolean> {
+    try {
+      await this.client.filesGetMetadata({ path });
+      return true;
+    } catch (e) {
+      // Dropbox API has no explitic way of checking if a file exists or not
+      // so we have to get metadata and expect a specific type of error
+      // so we can infer that the file is missing
+      if (e.error.error.path && e.error.error.path['.tag'] === 'not_found') {
+        return false;
+      }
+      throw e;
+    }
+  }
 }
 
 function dbxClient(token?: string): DropboxService {
