@@ -101,6 +101,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
       return ret;
     });
     console.log(`Performed ${fileMoves.length} moves, saving FileMoves`);
+    // TODO update lastSync and file move count
     await fms.save(fileMoves);
     res.json([]);
   }
