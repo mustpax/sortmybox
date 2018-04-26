@@ -48,7 +48,7 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
-  let token = await (dropbox() as any).getAccessTokenFromCode(REDIRECT_URI, code);
+  let token = await (dropbox().client as any).getAccessTokenFromCode(REDIRECT_URI, code);
   let dbx = dropbox(token);
   let acct: DropboxTypes.users.FullAccount = await dbx.client.usersGetCurrentAccount(undefined);
   let user = await UserService.upsertDropboxAcct(token, acct);
