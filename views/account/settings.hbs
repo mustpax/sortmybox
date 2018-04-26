@@ -29,7 +29,7 @@
       <dd>
         <form action="/account/sortingFolder" method="post" class="form-inline">
           {{> formCsrf }}
-          <input type="text" name="folder" value="{{user.sortingFolder}}">
+          <input type="text" name="sortingFolder" value="{{user.sortingFolder}}" required pattern="^/.*" title="Must start with a slash /">
           <input type="submit" class="btn" value="Update">
         </form>
       </dd>

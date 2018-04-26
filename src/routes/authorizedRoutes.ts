@@ -132,6 +132,37 @@ app.post('/account/periodicSort', asyncRoute(async function(req, res) {
   res.redirect('/account/settings');
 }));
 
+app.post('/account/sortingFolder', asyncRoute(async function(req, res, next) {
+  let { sortingFolder } = req.body;
+  // TODO use flash here
+  if (! sortingFolder || sortingFolder[0] !== '/') {
+    let err: any = new Error(`Invalid sorting folder: ${sortingFolder}`);
+    err.status = 400;
+    next(err);
+    return;
+  }
+  try {
+    let meta = await req.dbx.client.filesGetMetadata({ path: sortingFolder });
+    if (meta['.tag'] !== 'folder') {
+      let err: any = new Error(`Error: Sorting folder conflicts with a file that has the same name ${sortingFolder}`);
+      err.status = 400;
+      next(err);
+      return;
+    }
+  } catch (e) {
+    // If the sorting folder is missing, create it
+    if (e.error.error.path && e.error.error.path['.tag'] === 'not_found') {
+      console.log(`Creating sorting folder ${sortingFolder}`);
+      await req.dbx.client.filesCreateFolderV2({ path: sortingFolder });
+    } else {
+      throw e;
+    }
+  }
+  req.user.sortingFolder = sortingFolder;
+  await us.save([req.user]);
+  res.redirect('/account/settings');
+}));
+
 app.get('/account/delete', asyncRoute(async function(req, res) {
   res.render('account/delete', {
     title: 'Delete My Account',
