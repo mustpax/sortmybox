@@ -26,7 +26,7 @@ export class DropboxService {
       }
       for (let rule of rules) {
         if (rs.matches(rule, file.name)) {
-          let to_path = (rule.dest as string);
+          let to_path = [rule.dest, file.name].join('/');
           moves.push(this.client.filesMoveV2({
             from_path: (file.path_lower as string),
             to_path,
