@@ -9,6 +9,7 @@ import { validate } from './env';
 validate();
 
 import express = require('express');
+import moment = require('moment');
 
 let app = express();
 app.enable('trust proxy');
@@ -51,6 +52,9 @@ let hbs = require('express-handlebars')({
         return labels[ruleType];
       }
       return 'Name contains';
+    },
+    since(date: any) {
+      return moment(date).fromNow();
     }
   }
 });

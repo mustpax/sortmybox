@@ -4,9 +4,9 @@
   <div class="span8 offset2">
     <dl class="dl-horizontal account-info ">
       <dt>User name</dt>
-      <dd>${user.name}</dd>
+      <dd>{{user.name}}</dd>
       <dt>Total file moves</dt>
-      <dd>${user.fileMoves}</dd>
+      <dd>{{user.fileMoves}}</dd>
       <dt>Periodic sort</dt>
       <dd class="periodicSort">
         #{if user.periodicSort}
@@ -27,23 +27,23 @@
       <dt>Sorting folder</dt>
       <dd>
         #{form @sortingFolder(), method:'POST', class:'form-inline' }
-          <input type="text" name="folder" value="${user.sortingFolder}">
+          <input type="text" name="folder" value="{{user.sortingFolder}}">
           <input type="submit" class="btn" value="Update">
         #{/form}
       </dd>
       <dt>Last sync</dt>
       #{if user.lastSync}
-      <dd>#{if user.lastSync}${user.lastSync.since()}#{/if}#{else}<em>None yet</em>#{/else}</dd>
+      <dd>#{if user.lastSync}{{since user.lastSync}}#{/if}#{else}<em>None yet</em>#{/else}</dd>
       #{/if}
       #{else}
       <dd><em>None yet</em></dd>
       #{/else}
       <dt>Last login</dt>
-      <dd>${user.lastLogin.since()}</dd>
+      <dd>{{since user.lastLogin}}</dd>
       <dt>Created date</dt>
-      <dd>${user.created}</dd>
+      <dd>{{user.created}}</dd>
       <dt>Last modified</dt>
-      <dd>${user.modified}</dd>
+      <dd>{{user.modified}}</dd>
     </dl>
   </div>
 </div>
