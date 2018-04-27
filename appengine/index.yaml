@@ -1,0 +1,14 @@
+indexes:
+  - kind: FileMove
+    ancestor: true
+    properties:
+      - name: when
+        direction: desc
+  - kind: Rule
+    ancestor: true
+    properties:
+      - name: rank
+  - kind: User
+    properties:
+      - name: periodicSort
+      - name: dropboxV2Migrated
