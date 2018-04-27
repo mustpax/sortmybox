@@ -64,6 +64,13 @@ app.get('/faq', asyncRoute(async function(req, res) {
   });
 }));
 
+app.get('/terms', asyncRoute(async function(req, res) {
+  res.render('terms', {
+    user: req.user,
+    title: 'Terms of Service',
+  });
+}));
+
 import authorizedRoutes from './authorizedRoutes';
 app.use(authorizedRoutes);
 
