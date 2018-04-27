@@ -105,8 +105,20 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log('Error', err);
-  // TODO display error page
-  res.status(err.status || 500).json({
+  res.status(err.status || 500);
+
+  if (req.accepts('html')) {
+    let template = 'generic';
+    if (err.status === 404) {
+      template = '404';
+    }
+    res.render('errors/' + template, {
+      error: err
+    });
+    return;
+  }
+
+  res.json({
     error: err.message
   });
 });
