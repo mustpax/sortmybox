@@ -78,6 +78,13 @@ app.get('/privacy', asyncRoute(async function(req, res) {
   });
 }));
 
+app.get('/press', asyncRoute(async function(req, res) {
+  res.render('press', {
+    user: req.user,
+    title: 'Press Coverage',
+  });
+}));
+
 import authorizedRoutes from './authorizedRoutes';
 app.use(authorizedRoutes);
 
