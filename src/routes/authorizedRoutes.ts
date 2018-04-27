@@ -171,6 +171,19 @@ app.get('/account/delete', asyncRoute(async function(req, res) {
   });
 }));
 
+app.post('/account/delete', asyncRoute(async function(req, res) {
+  let fileMoves = await fms.findByOwner(req.user.id as string);
+  console.log(`Deleting ${fileMoves.length} file moves for user ${req.user.id}`);
+  await fms.remove(fileMoves);
+  let rules = await rs.findByOwner(req.user.id as string);
+  console.log(`Deleting ${rules.length} rules for user ${req.user.id}`);
+  await rs.remove(rules);
+  console.log(`Deleting user ${req.user.id}`);
+  req.session.userId = null;
+  // TODO flash delete message
+  res.redirect('/');
+}));
+
 app.get('/logout', auth, asyncRoute(async function(req, res) {
   req.session.userId = null;
   res.redirect('/');
