@@ -71,6 +71,13 @@ app.get('/terms', asyncRoute(async function(req, res) {
   });
 }));
 
+app.get('/privacy', asyncRoute(async function(req, res) {
+  res.render('privacy', {
+    user: req.user,
+    title: 'Privacy Policy',
+  });
+}));
+
 import authorizedRoutes from './authorizedRoutes';
 app.use(authorizedRoutes);
 
