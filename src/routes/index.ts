@@ -56,6 +56,13 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
   res.redirect('/');
 }));
 
+app.get('/faq', asyncRoute(async function(req, res) {
+  res.render('faq', {
+    faqTab: 'active',
+    user: req.user,
+    title: 'FAQ',
+  });
+}));
 
 import authorizedRoutes from './authorizedRoutes';
 app.use(authorizedRoutes);
