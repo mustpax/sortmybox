@@ -4,7 +4,7 @@
     "dev": "nodemon",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "mocha --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
-    "deploy": "gcloud app deploy"
+    "deploy": "gcloud app deploy --no-promote"
   },
   "engines": {
     "node": ">=8.1"
