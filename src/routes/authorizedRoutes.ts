@@ -116,7 +116,7 @@ app.get('/activity', auth, asyncRoute(async function(req, res) {
   }));
 }));
 
-app.get('/account/settings', asyncRoute(async function(req, res) {
+app.get('/account/settings', auth, asyncRoute(async function(req, res) {
   res.render('account/settings', {
     title: 'Account Settings',
     accountSettings: 'active',
@@ -124,7 +124,7 @@ app.get('/account/settings', asyncRoute(async function(req, res) {
   });
 }));
 
-app.post('/account/periodicSort', asyncRoute(async function(req, res) {
+app.post('/account/periodicSort', auth, asyncRoute(async function(req, res) {
   let periodicSort = req.body.periodicSort === '1';
   console.log(`Setting periodic sort for user ${req.user.id} to ${periodicSort}`);
   req.user.periodicSort = periodicSort;
@@ -132,7 +132,7 @@ app.post('/account/periodicSort', asyncRoute(async function(req, res) {
   res.redirect('/account/settings');
 }));
 
-app.post('/account/sortingFolder', asyncRoute(async function(req, res, next) {
+app.post('/account/sortingFolder', auth, asyncRoute(async function(req, res, next) {
   let { sortingFolder } = req.body;
   // TODO use flash here
   if (! sortingFolder || sortingFolder[0] !== '/') {
@@ -163,7 +163,7 @@ app.post('/account/sortingFolder', asyncRoute(async function(req, res, next) {
   res.redirect('/account/settings');
 }));
 
-app.get('/account/delete', asyncRoute(async function(req, res) {
+app.get('/account/delete', auth, asyncRoute(async function(req, res) {
   res.render('account/delete', {
     title: 'Delete My Account',
     accountDelete: 'active',
@@ -171,7 +171,7 @@ app.get('/account/delete', asyncRoute(async function(req, res) {
   });
 }));
 
-app.post('/account/delete', asyncRoute(async function(req, res) {
+app.post('/account/delete', auth, asyncRoute(async function(req, res) {
   let fileMoves = await fms.findByOwner(req.user.id as string);
   console.log(`Deleting ${fileMoves.length} file moves for user ${req.user.id}`);
   await fms.remove(fileMoves);
