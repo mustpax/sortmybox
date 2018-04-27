@@ -116,6 +116,26 @@ app.get('/activity', auth, asyncRoute(async function(req, res) {
   }));
 }));
 
+
+app.get('/dirs', asyncRoute(async function(req, res) {
+  let { path } = req.query;
+  if (! path) {
+    res.status(400).send('Missing path parameter');
+    return;
+  }
+  // Dropbox expects root folder to be represented as empty string
+  if (path === '/') {
+    path = '';
+  }
+  let response = await req.dbx.client.filesListFolder({ path });
+  let files = response.entries
+    .filter(entry => entry['.tag'] === 'folder')
+    .map(entry => {
+      return entry.path_display;
+    });
+  res.json(files);
+}));
+
 app.get('/account/settings', auth, asyncRoute(async function(req, res) {
   res.render('account/settings', {
     title: 'Account Settings',
