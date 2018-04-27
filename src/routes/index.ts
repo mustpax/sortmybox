@@ -34,6 +34,9 @@ app.get('/', asyncRoute(async function(req, res) {
   });
 }));
 
+app.get('/error', asyncRoute(async function(req, res) {
+  throw new Error('Test error');
+}));
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
   let url = (dropbox().client.getAuthenticationUrl as any)(REDIRECT_URI, null, 'code');
