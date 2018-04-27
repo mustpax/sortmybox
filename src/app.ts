@@ -104,7 +104,9 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 });
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.log('Error', err);
+  if (err.status !== 404) {
+    console.log('Error', err);
+  }
   res.status(err.status || 500);
 
   if (req.accepts('html')) {
