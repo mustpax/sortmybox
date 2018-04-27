@@ -7,8 +7,6 @@ const app: express.Router = express.Router();
 
 import dropbox from '../dropbox';
 
-const REDIRECT_URI = 'http://localhost:3000/dropbox/cb';
-
 app.use(asyncRoute(async function(req, res, next) {
   try {
     if (req.session.userId) {
@@ -25,6 +23,7 @@ app.use(asyncRoute(async function(req, res, next) {
 }));
 
 app.get('/', asyncRoute(async function(req, res) {
+  console.log('host', `${req.protocol}://${req.get('host')}/dropbox/cb`);
   if (req.user) {
     res.redirect('/rules');
     return;
@@ -39,7 +38,8 @@ app.get('/error', asyncRoute(async function(req, res) {
 }));
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
-  let url = (dropbox().client.getAuthenticationUrl as any)(REDIRECT_URI, null, 'code');
+  let redirectURL = `${req.protocol}://${req.get('host')}/dropbox/cb`;
+  let url = (dropbox().client.getAuthenticationUrl as any)(redirectURL, null, 'code');
   res.redirect(url);
 }));
 
@@ -51,7 +51,8 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
-  let token = await (dropbox().client as any).getAccessTokenFromCode(REDIRECT_URI, code);
+  let redirectURL = `${req.protocol}://${req.get('host')}/dropbox/cb`;
+  let token = await (dropbox().client as any).getAccessTokenFromCode(redirectURL, code);
   let dbx = dropbox(token);
   let acct: DropboxTypes.users.FullAccount = await dbx.client.usersGetCurrentAccount(undefined);
   let user = await UserService.upsertDropboxAcct(token, acct);
