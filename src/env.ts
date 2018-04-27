@@ -3,6 +3,8 @@
 const required = ['GOOGLE_CLOUD_PROJECT', 'SECRET', 'DROPBOX_KEY', 'DROPBOX_SECRET', 'RAVEN_DSN'];
 const requiredDev = ['GOOGLE_APPLICATION_CREDENTIALS'];
 
+export const DEV = process.env.NODE_ENV !== 'production';
+
 export function validate() {
   required.forEach(varName => {
     if (! process.env[varName]) {
@@ -11,7 +13,7 @@ export function validate() {
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (DEV) {
     requiredDev.forEach(varName => {
       if (! process.env[varName]) {
         console.error('Environment DEV-ONLY variable missing', varName);

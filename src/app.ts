@@ -5,7 +5,7 @@ require('dotenv').config();
 import fetch = require('node-fetch');
 (global as any).fetch = fetch;
 
-import { validate } from './env';
+import { validate, DEV } from './env';
 validate();
 
 import express = require('express');
@@ -113,7 +113,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
       template = '404';
     }
     res.render('errors/' + template, {
-      error: err
+      dev: DEV,
+      error: err,
     });
     return;
   }

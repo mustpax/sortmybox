@@ -13,6 +13,19 @@
 </style>
 
 <div class="center main">
+
+{{#if dev}}
+<div style="text-align: left">
+  <h2>
+    Error: {{error.message}}
+  </h2>
+  <h2>
+    Status: {{error.status}}
+  </h2>
+  <pre>{{error.stack}}</pre>
+</div>
+{{/if}}
+
 <h1>Uh oh! Something went wrong</h1>
 
 <p>
