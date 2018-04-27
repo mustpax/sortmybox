@@ -33,6 +33,11 @@ app.get('/', asyncRoute(async function(req, res) {
   });
 }));
 
+
+app.get('/_ah/health', asyncRoute(async function(req, res) {
+  res.send('OK');
+}));
+
 app.get('/error', asyncRoute(async function(req, res) {
   throw new Error('Test error');
 }));
