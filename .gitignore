@@ -4,5 +4,5 @@ npm-debug.log
 public/bundle.js
 .env*
 env*.sh
-google-creds.json
+google-creds*.json
 tmp/
