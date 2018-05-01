@@ -1,5 +1,6 @@
 import _ = require('underscore');
 import { assert } from 'chai';
+import { AsyncIterator } from '../models';
 
 let lastIndex = 0;
 
@@ -37,12 +38,7 @@ function gen(max: number): Iterable<Promise<number>> {
   return ret;
 }
 
-interface AsyncIterable<T> {
-  next(): Promise<T|undefined>;
-  hasNext(): Promise<boolean>;
-}
-
-function getIterable(max: number): AsyncIterable<number> {
+function getIterable(max: number): AsyncIterator<number> {
   let curBatch: number[];
   let curIndex = 0;
   let produced = 0;

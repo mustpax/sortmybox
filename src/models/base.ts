@@ -1,4 +1,4 @@
-import { Query } from '@google-cloud/datastore/query';
+import { Query, QueryInfo } from '@google-cloud/datastore/query';
 import { DatastoreKey } from '@google-cloud/datastore/entity';
 import joi = require('joi');
 import datastore from './datastore';
@@ -25,11 +25,22 @@ export interface Schema {
   kind: string;
 }
 
+export interface QueryResult<T> {
+  results: T[];
+  info: QueryInfo;
+}
+
+export interface AsyncIterator<T> {
+  next(): Promise<T|undefined>;
+  hasNext(): Promise<boolean>;
+}
+
 export interface ModelService<K, T extends Model<K>> extends Schema {
   findByIds(ids: K[]): Promise<T[]>;
   fromEntity(e: object): T;
   toEntity(t: T): object;
   query(q: Query): Promise<T[]>;
+  queryIter(q: Query): AsyncIterator<T>;
   keyFromId(id: K): DatastoreKey;
   idFromKey(key: DatastoreKey): K|undefined;
   all(): Query;
@@ -54,11 +65,46 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     return entities.map(e => this.fromEntity(e));
   }
 
-
   async query(q: Query) {
     let resp = await datastore.runQuery(q);
     let results = resp[0];
     return results.map(e => this.fromEntity(e));
+  }
+
+  queryIter(q: Query): AsyncIterator<T> {
+    const batchSize = 100;
+    let batch: T[];
+    let batchIndex = 0;
+    q = q.limit(batchSize);
+    let lastCursor: string|undefined;
+    let hasNext = true;
+    let self = this;
+
+    async function ensureBatch() {
+      if ((! batch) || (batchIndex >= batch.length)) {
+        if (lastCursor) {
+          q = q.start(lastCursor);
+        }
+        let [results, info] = await datastore.runQuery(q);
+        batch = results.map(e => self.fromEntity(e));
+        batchIndex = 0;
+        lastCursor = info.endCursor;
+        hasNext = info.moreResults !== 'NO_MORE_RESULTS';
+      }
+    }
+
+    return {
+      async next(): Promise<T|undefined> {
+        await ensureBatch();
+        let ret = batch[batchIndex];
+        batchIndex++;
+        return ret;
+      },
+      async hasNext(): Promise<boolean> {
+        await ensureBatch();
+        return hasNext;
+      }
+    };
   }
 
   all(): Query {
