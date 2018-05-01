@@ -3,6 +3,6 @@ npm-debug.log
 .DS_Store
 public/bundle.js
 .env*
-env.*sh
+env*.sh
 google-creds.json
 tmp/
