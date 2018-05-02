@@ -31,7 +31,7 @@
     "cookie-session": "2.0.0-beta.3",
     "csurf": "1.9.0",
     "dotenv": "5.0.1",
-    "dropbox": "4.0.1",
+    "dropbox": "4.0.x",
     "express": "4.14.x",
     "express-handlebars": "3.0.x",
     "joi": "13.1.2",
