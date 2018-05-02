@@ -34,19 +34,32 @@ export class DropboxService {
       for (let rule of rules) {
         if (rs.matches(rule, file.name)) {
           let to_path = [rule.dest, file.name].join('/');
-          moves.push(this.client.filesMoveV2({
+          moves.push({
             from_path: (file.path_lower as string),
             to_path,
-            autorename: true,
-          }));
+          });
           // Once there's a matching rule, move to next file
           break;
         }
       }
     }
     // TODO handle conflicts
-    let responses = await Promise.all(moves);
-    return responses.map((resp, i) => {
+    let response: any = await this.client.filesMoveBatch({
+      entries: moves,
+      autorename: true,
+    });
+
+    if (response['.tag'] !== 'complete') {
+      console.log('Job in progress', response);
+      let jobId = response.async_job_id;
+      while (response['.tag'] !== 'complete') {
+        response = await this.client.filesMoveBatchCheck({
+          async_job_id: jobId
+        });
+      }
+    }
+    // TODO resp is actually a File Metadata type, we shouldn't use any here
+    return response.entries.map((resp: any, i: number) => {
       let fileName = files.entries[i].name as string;
       let fullDestPath = resp.metadata.path_display as string;
       let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
