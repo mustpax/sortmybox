@@ -5,7 +5,7 @@
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "./check_not_prod.js && mocha --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
     "deploy": "./check_not_prod.js && gcloud app deploy --no-promote",
-    "checkconn": "ts-node src/google/checkConn"
+    "ts": "ts-node"
   },
   "engines": {
     "node": ">=8.1"
