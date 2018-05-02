@@ -106,17 +106,18 @@ export class UserSchema extends AbstractModelService<string, User> {
     let [user] = await this.query(q);
     if (user) {
       user.lastLogin = new Date();
-      await this.save([user]);
-      return user;
+    } else {
+      user = this.makeNew();
     }
-    user = this.makeNew();
     user.name = account.name.display_name;
     user.nameLower = user.name && user.name.toLowerCase();
     user.email = account.email;
     user.dropboxV2Id = dbxId;
     user.dropboxV2Token = token;
     let [id] = await this.save([user]);
-    user.id = id;
+    if (id) {
+      user.id = id;
+    }
     return user;
   }
 
