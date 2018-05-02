@@ -95,7 +95,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
       ret.hasCollision = mv.conflict;
       let destParts = mv.fullDestPath.split('/');
       let destFileName = destParts.pop();
-      ret.toDir = destParts.join('/');
+      ret.toDir = '/' + destParts.filter(x => x).join('/');
       ret.resolvedName = ret.hasCollision ? destFileName : undefined;
       ret.when = now;
       return ret;
