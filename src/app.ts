@@ -110,7 +110,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err.status !== 404) {
-    console.log('Error', err);
+    console.log('Error', JSON.stringify(err, null, 2));
   }
   res.status(err.status || 500);
 
