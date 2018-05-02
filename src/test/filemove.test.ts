@@ -38,6 +38,18 @@ describe("FileMove", function() {
     assert.notOk(error);
   });
 
+  it('validation: object with null optional field is valid', function() {
+    let fm: any = {
+      fromFile: 'a',
+      toDir: 'a',
+      when: new Date(),
+      hasCollision: true,
+      resolvedName: null
+    };
+    let error = fms.validate([fm]);
+    assert.notOk(error);
+  });
+
   it('validation: object with all fields is valid', function() {
     let fm: FileMove = {
       fromFile: 'a',
