@@ -1,3 +1,6 @@
+// These tests do not test any functionality, they exist to explore options
+// for building async iterables
+
 import _ = require('underscore');
 import { assert } from 'chai';
 import { AsyncIterator } from '../models';
