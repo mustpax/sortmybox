@@ -89,7 +89,7 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
         batch = results.map(e => self.fromEntity(e));
         batchIndex = 0;
         lastCursor = info.endCursor;
-        hasNext = info.moreResults !== 'NO_MORE_RESULTS';
+        hasNext = batch.length > 0 && info.moreResults !== 'NO_MORE_RESULTS';
       }
     }
 

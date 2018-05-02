@@ -1,5 +1,6 @@
 import { datastore as ds, User, UserService as us } from '../models';
 import { assert } from 'chai';
+import _ = require('underscore');
 
 function testUser(id?: string) {
   let user = us.makeNew();
@@ -301,5 +302,27 @@ describe('User', function() {
     [user.id] = await us.save([user]);
     let fromDS = await us.findByDropboxId(dropboxId);
     assert.deepEqual(fromDS, user);
+  });
+
+  it("queryIter()", async function() {
+    let users = [];
+    let name = '' + Math.random();
+    name = 'testName_' + name.split('.')[1];
+    for (let i = 0; i < 202; i++) {
+      let user = testUser();
+      user.name = name;
+      users.push(user);
+    }
+    let ids = await us.save(users);
+    for (let i = 0; i < ids.length; i++) {
+      users[i].id = ids[i];
+    }
+    let actualUsers = [];
+    let q = us.all().filter('name', name);
+    let results = us.queryIter(q);
+    while (await results.hasNext()) {
+      actualUsers.push(await results.next());
+    }
+    assert.deepEqual(_.sortBy(actualUsers, 'id'), _.sortBy(users, 'id'));
   });
 });
