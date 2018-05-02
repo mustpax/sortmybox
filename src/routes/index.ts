@@ -33,7 +33,6 @@ app.get('/', asyncRoute(async function(req, res) {
   });
 }));
 
-
 app.get('/_ah/health', asyncRoute(async function(req, res) {
   res.send('OK');
 }));

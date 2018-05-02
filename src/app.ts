@@ -71,7 +71,13 @@ import raven = require('raven');
 raven.config(process.env.RAVEN_DSN).install();
 app.use(raven.requestHandler());
 
-app.use(require('morgan')('tiny'));
+app.use(express.static('public'));
+app.use(require('morgan')('tiny', {
+  skip(req: any, res: any) {
+    // skip
+    return req.url === '/_ah/health';
+  }
+}));
 
 import cookieSession = require('cookie-session');
 app.use(cookieSession({
@@ -91,7 +97,6 @@ app.use((req: any, res: express.Response, next: express.NextFunction) => {
   next();
 });
 
-app.use(express.static('public'));
 
 import routes from './routes';
 app.use(routes);
