@@ -41,6 +41,21 @@ describe('User', function() {
     assert.notOk(error);
   });
 
+  it('validation: user with null optional fields', function() {
+    let user = {} as User;
+    user.id = '123';
+    user.periodicSort = true;
+    user.modified = user.created = user.lastLogin = new Date();
+    user.sortingFolder = 'test';
+    user.accountType = 'BOX';
+    user.fileMoves = 0;
+    (user.name as any) = null;
+    (user.nameLower as any) = null;
+    (user.email as any) = null;
+    let error = us.validate([user]);
+    assert.notOk(error);
+  });
+
   it('validation: invalid account type', function() {
     let user = us.makeNew();
     user.accountType = 'inval';
