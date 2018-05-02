@@ -71,8 +71,8 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     return results.map(e => this.fromEntity(e));
   }
 
-  queryIter(q: Query): AsyncIterator<T> {
-    const batchSize = 100;
+  queryIter(q: Query, batchSize?: number): AsyncIterator<T> {
+    batchSize = batchSize || 100;
     let batch: T[];
     let batchIndex = 0;
     q = q.limit(batchSize);
