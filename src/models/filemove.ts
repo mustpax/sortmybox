@@ -96,8 +96,10 @@ export class FileMoveSchema extends AbstractModelService<FileMoveKey, FileMove> 
   }
 
   async findByOwner(ownerId: string): Promise<FileMove[]> {
+    // TODO turn into method that returns query
     let q = this.all()
       .hasAncestor(UserService.keyFromId(ownerId))
+      .limit(10)
       .order('when', {descending: true});
     return await this.query(q);
   }
