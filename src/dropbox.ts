@@ -43,7 +43,12 @@ export class DropboxService {
         }
       }
     }
-    // TODO handle conflicts
+    if (moves.length === 0) {
+      console.log('No matching files. Skipping moves');
+      return [];
+    }
+
+    console.log(`Moving ${moves.length} files.`);
     let response: any = await this.client.filesMoveBatch({
       entries: moves,
       autorename: true,
@@ -58,6 +63,7 @@ export class DropboxService {
         });
       }
     }
+    console.log(`Moved ${moves.length} files, creating FileMoves`);
     // TODO resp is actually a File Metadata type, we shouldn't use any here
     return response.entries.map((resp: any, i: number) => {
       let fileName = files.entries[i].name as string;
