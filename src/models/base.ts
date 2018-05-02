@@ -136,7 +136,22 @@ export abstract class AbstractModelService<K, T extends Model<K>> implements Mod
     };
   }
 
+  logUnregisteredKeys(e: any) {
+    let myKeys = new Set(Object.keys(this.schema));
+    let otherKeys = new Set(Object.keys(e));
+    let diff = [];
+    for (let k of otherKeys) {
+      if (! myKeys.has(k)) {
+        diff.push(k);
+      }
+    }
+    if (diff.length > 0) {
+      console.log('Warning. Entity has keys not in schema', diff, e);
+    }
+  }
+
   fromEntity(e: any) {
+    this.logUnregisteredKeys(e);
     let ret = {} as any;
     let key: DatastoreKey = e[datastore.KEY];
     ret.id = this.idFromKey(key);

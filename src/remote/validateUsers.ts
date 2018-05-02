@@ -5,6 +5,7 @@ import { UserService as us } from '../models';
 
 async function main() {
   let qr = us.queryIter(us.all());
+  let count = 0;
   while (await qr.hasNext()) {
     let user = await qr.next();
     if (user) {
@@ -13,6 +14,10 @@ async function main() {
         console.log('Error validating', err.details.map(e => e.message), user);
         return;
       }
+    }
+    count++;
+    if ((count % 100) === 0) {
+      process.stdout.write('.');
     }
   }
 }

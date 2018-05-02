@@ -62,6 +62,7 @@ export class UserSchema extends AbstractModelService<string, User> {
   }
 
   fromEntity(e: any) {
+    this.logUnregisteredKeys(e);
     let ret = {} as any;
     ret.id = this.idFromKey(e[datastore.KEY]);
     for (let f of Object.keys(this.schema)) {
