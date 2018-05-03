@@ -2,9 +2,6 @@
 
 require('dotenv').config();
 
-import fetch = require('node-fetch');
-(global as any).fetch = fetch;
-
 import { validate, DEV } from './env';
 validate();
 

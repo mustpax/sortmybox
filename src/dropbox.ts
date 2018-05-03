@@ -3,6 +3,10 @@ import { User, Rule, RuleService as rs } from './models';
 import _ = require('underscore');
 import { endsWithCaseInsensitive } from './utils';
 
+// Dropbox SDK relies on fetch, so we add it to global environment
+import fetch = require('node-fetch');
+(global as any).fetch = fetch;
+
 export interface MoveResult {
   fileName: string;
   fullDestPath: string;
