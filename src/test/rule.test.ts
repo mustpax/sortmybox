@@ -421,10 +421,33 @@ describe("Rule", function() {
       assert.isTrue(rs.matches(rule, 'testing.there.F'));
       assert.isTrue(rs.matches(rule, '.testing.there.F'));
       assert.isTrue(rs.matches(rule, '.testing.there.f'));
+      assert.isFalse(rs.matches(rule, '.testing.there.f.x'));
+      assert.isFalse(rs.matches(rule, '.testing.there.f.xy'));
     }
     test();
     rule.pattern = 'F';
     test();
+  });
+
+  it("matches() EXT_EQ matches extensions with comma", async function() {
+    let rule: Rule = {
+      type: 'EXT_EQ',
+      pattern: '   a, Bc ,dEf',
+    };
+    assert.isTrue(rs.matches(rule, 'there.a'));
+    assert.isTrue(rs.matches(rule, 'testing.there.A'));
+    assert.isTrue(rs.matches(rule, '.testing.there.A'));
+    assert.isTrue(rs.matches(rule, 'there.bc'));
+    assert.isTrue(rs.matches(rule, 'testing.there.bC'));
+    assert.isTrue(rs.matches(rule, '.testing.there.BC'));
+    assert.isTrue(rs.matches(rule, 'there.def'));
+    assert.isTrue(rs.matches(rule, 'testing.there.dEf'));
+    assert.isTrue(rs.matches(rule, '.testing.there.DEF'));
+    assert.isFalse(rs.matches(rule, 'test.a,Bc,dEf'));
+    assert.isFalse(rs.matches(rule, 'test.de'));
+    assert.isFalse(rs.matches(rule, 'test.ef'));
+    assert.isFalse(rs.matches(rule, 'test.b'));
+    assert.isFalse(rs.matches(rule, 'test.c'));
   });
 
   it("matches() GLOB behaves same as name contains when no control chars are used", async function() {

@@ -164,7 +164,9 @@ export class RuleSchema extends AbstractModelService<RuleKey, Rule> {
       }
       // Add one to idx to skip the period .
       let ext = fileName.substr(idx + 1);
-      return ext.toLowerCase() === rule.pattern.toLowerCase();
+      // Handle multiple extensions in a pattern with commas
+      let patternExts = rule.pattern.split(',').map(s => s.trim());
+      return patternExts.some(pat => ext.toLowerCase() === pat.toLowerCase());
     }
     return false;
   }
