@@ -37,7 +37,13 @@ export class DropboxService {
       }
       for (let rule of rules) {
         if (rs.matches(rule, file.name)) {
-          let to_path = [rule.dest, file.name].join('/');
+          let destParts = (rule.dest as string).split('/');
+          // We normalize paths by filtering empty splits
+          // /a/b//c/ will map to ['', 'a', 'b', '', 'c'' ,''] and .filter(x => x)
+          // will remove empty strings
+          destParts = destParts.filter(x => x);
+          destParts.push(file.name);
+          let to_path = '/' + destParts.join('/');
           moves.push({
             from_path: (file.path_lower as string),
             to_path,
