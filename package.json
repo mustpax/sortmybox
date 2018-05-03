@@ -3,7 +3,7 @@
     "start": "ts-node src/app",
     "dev": "nodemon",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "./check_not_prod.js && mocha --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
+    "test": "./check_not_prod.js && mocha --timeout 10000 --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
     "deploy": "gcloud app deploy --no-promote",
     "ts": "ts-node"
   },
