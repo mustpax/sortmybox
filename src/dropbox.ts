@@ -1,4 +1,4 @@
-import { Dropbox } from 'dropbox';
+import { Dropbox, files } from 'dropbox';
 import { Rule, RuleService as rs } from './models';
 import _ = require('underscore');
 import { endsWithCaseInsensitive } from './utils';
@@ -30,6 +30,7 @@ export class DropboxService {
     // TODO handle files.has_more
     // TODO log info
     let moves = [];
+    let matchedFiles: files.MetadataReference[] = [];
     for (let file of files.entries) {
       // Only move files, not folders
       if (file['.tag'] !== 'file') {
@@ -44,6 +45,7 @@ export class DropboxService {
           destParts = destParts.filter(x => x);
           destParts.push(file.name);
           let to_path = '/' + destParts.join('/');
+          matchedFiles.push(file);
           moves.push({
             from_path: (file.path_lower as string),
             to_path,
@@ -76,7 +78,7 @@ export class DropboxService {
     console.log(`Moved ${moves.length} files, creating FileMoves`);
     // TODO resp is actually a File Metadata type, we shouldn't use any here
     return response.entries.map((resp: any, i: number) => {
-      let fileName = files.entries[i].name as string;
+      let fileName = matchedFiles[i].name as string;
       let fullDestPath = resp.metadata.path_display as string;
       let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
       let ret: MoveResult = {

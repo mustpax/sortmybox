@@ -42,7 +42,7 @@ app.get('/error', asyncRoute(async function(req, res) {
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
   let redirectURL = `${req.protocol}://${req.get('host')}/dropbox/cb`;
-  let url = (dropbox().client.getAuthenticationUrl as any)(redirectURL, null, 'code');
+  let url = dropbox().client.getAuthenticationUrl(redirectURL, 'code');
   res.redirect(url);
 }));
 

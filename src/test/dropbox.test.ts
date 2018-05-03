@@ -1,10 +1,9 @@
-import { UserService as us, User, RuleService as rs, Rule } from '../models';
+import { RuleService as rs, Rule } from '../models';
 import dropbox, { MoveResult } from '../dropbox';
 import _ = require('underscore');
 import { assert } from 'chai';
 
 const {
-  DROPBOX_TEST_USER,
   DROPBOX_TEST_TOKEN,
  } = process.env;
 
