@@ -23,7 +23,6 @@ app.use(asyncRoute(async function(req, res, next) {
 }));
 
 app.get('/', asyncRoute(async function(req, res) {
-  console.log('host', `${req.protocol}://${req.get('host')}/dropbox/cb`);
   if (req.user) {
     res.redirect('/rules');
     return;
