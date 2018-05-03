@@ -69,7 +69,7 @@ raven.config(process.env.RAVEN_DSN).install();
 app.use(raven.requestHandler());
 
 app.use(express.static('public'));
-app.use(require('morgan')('tiny', {
+app.use(require('morgan')('short', {
   skip(req: any, res: any) {
     // skip
     return req.url === '/_ah/health';
