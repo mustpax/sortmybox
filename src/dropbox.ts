@@ -1,5 +1,5 @@
 import { Dropbox } from 'dropbox';
-import { User, Rule, RuleService as rs } from './models';
+import { Rule, RuleService as rs } from './models';
 import _ = require('underscore');
 import { endsWithCaseInsensitive } from './utils';
 
@@ -21,10 +21,10 @@ export class DropboxService {
     (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
   }
 
-  async runRules(user: User, rules: Rule[]): Promise<MoveResult[]> {
+  async runRules(sortingFolder: string, rules: Rule[]): Promise<MoveResult[]> {
     rules = _.sortBy(rules, 'rank');
     let files = await this.client.filesListFolder({
-      path: (user.sortingFolder as string),
+      path: sortingFolder,
       limit: 100,
     });
     // TODO handle files.has_more

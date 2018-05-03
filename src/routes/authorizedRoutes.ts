@@ -87,7 +87,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     console.log(`Deleting ${rulesToDelete.length} rules and replacing with ${rules.length} new rules`);
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
-    let moveResult = await req.dbx.runRules(req.user, rules);
+    let moveResult = await req.dbx.runRules(req.user.sortingFolder as string, rules);
     let now = new Date();
     let fileMoves = moveResult.map(mv => {
       let ret = fms.makeNew(req.user.id as string);
