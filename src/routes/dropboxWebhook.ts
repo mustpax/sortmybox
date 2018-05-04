@@ -14,16 +14,12 @@ app.get('/dropbox/webhook', function(req, res) {
 });
 
 import crypto = require('crypto');
-app.post('/dropbox/webhook', function(req, res) {
+app.post('/dropbox/webhook', function(req, res, next) {
   let chunks: Buffer[] = [];
   req.on('data', function(chunk) {
     chunks.push(chunk as Buffer);
   });
   req.on('end', async function() {
-    // We respond right away to keep Dropbox happy, we're not really done
-    // procesing the request
-    res.send('OK');
-
     const body = Buffer.concat(chunks).toString('utf8');
     let hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET as string);
     hmac.update(body);
@@ -31,8 +27,14 @@ app.post('/dropbox/webhook', function(req, res) {
     let sig = req.header('X-Dropbox-Signature');
     if (expectedSig !== sig) {
       res.status(401).send('Bad signature');
+      let err: any = new Error('Bad signature');
+      err.status = 401;
+      next(err);
       return;
     }
+    // We respond right away to keep Dropbox happy, we're not really done
+    // procesing the request
+    res.send('OK');
 
     const json = JSON.parse(body);
     console.log('Good sig!', json);
