@@ -40,21 +40,24 @@ app.post('/dropbox/webhook', function(req, res, next) {
     console.log('Good sig!', json);
     let ids: string[] = json.list_folder.accounts;
     console.log('ids', ids);
-    let user = await UserService.findByDropboxId(ids[0]);
-    if (user) {
-      let dbx = dropbox(user.dropboxV2Token);
-      let cursor = user.dropboxCursor;
-      let res: any;
-      if (cursor) {
-        res = await dbx.client.filesListFolderContinue({
-          cursor
-        });
-      } else {
-        res = await dbx.client.filesListFolder({ path: user.sortingFolder as string });
+    for (let id of ids) {
+      let user = await UserService.findByDropboxId(id);
+      if (user) {
+        let dbx = dropbox(user.dropboxV2Token);
+        let cursor = user.dropboxCursor;
+        let res: any;
+        if (cursor) {
+          res = await dbx.client.filesListFolderContinue({
+            cursor
+          });
+        } else {
+          res = await dbx.client.filesListFolder({ path: user.sortingFolder as string });
+        }
+        user.dropboxCursor = res.cursor;
+        await UserService.save([user]);
+        let entries: any[] = res.entries.filter((entry: any) => entry['.tag'] === 'file');
+        console.log(id, res);
       }
-      user.dropboxCursor = res.cursor;
-      await UserService.save([user]);
-      console.log(res);
     }
   });
 });
