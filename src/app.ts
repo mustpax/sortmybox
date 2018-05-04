@@ -82,6 +82,9 @@ app.use(cookieSession({
   keys: [process.env.SECRET as string]
 }));
 
+import dropboxWebhookRoutes from './routes/dropboxWebhook';
+app.use(dropboxWebhookRoutes);
+
 import bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
