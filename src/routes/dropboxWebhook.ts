@@ -20,6 +20,10 @@ app.post('/dropbox/webhook', function(req, res) {
     chunks.push(chunk as Buffer);
   });
   req.on('end', async function() {
+    // We respond right away to keep Dropbox happy, we're not really done
+    // procesing the request
+    res.send('OK');
+
     const body = Buffer.concat(chunks).toString('utf8');
     let hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET as string);
     hmac.update(body);
@@ -37,10 +41,19 @@ app.post('/dropbox/webhook', function(req, res) {
     let user = await UserService.findByDropboxId(ids[0]);
     if (user) {
       let dbx = dropbox(user.dropboxV2Token);
-      let res = await dbx.client.filesListFolder({ path: user.sortingFolder as string });
+      let cursor = user.dropboxCursor;
+      let res: any;
+      if (cursor) {
+        res = await dbx.client.filesListFolderContinue({
+          cursor
+        });
+      } else {
+        res = await dbx.client.filesListFolder({ path: user.sortingFolder as string });
+      }
+      user.dropboxCursor = res.cursor;
+      await UserService.save([user]);
       console.log(res);
     }
-    res.send('OK');
   });
 });
 
