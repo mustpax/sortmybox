@@ -16,14 +16,15 @@ function testUser(id?: string) {
   user.email = 'x';
   user.lastSync = new Date();
   user.lastLogin = new Date();
-  user.token = 'x';
-  user.secret = 'x';
+  user.token = 'some tok';
+  user.secret = 'secrrr';
   user.sortingFolder = 'x';
   user.tokenExpiration = new Date();
-  user.refreshToken = 'x';
-  user.dropboxV2Token = 'x';
-  user.dropboxV2Id = 'x';
+  user.refreshToken = 'refresh';
+  user.dropboxV2Token = 'tok';
+  user.dropboxV2Id = 'x2';
   user.dropboxV2Migrated = false;
+  user.dropboxCursor = "some cursor here";
   user.accountType = 'BOX';
   return user;
 }
@@ -184,7 +185,8 @@ describe('User', function() {
       dropboxV2Token: 'y',
       dropboxV2Id: 'z',
       dropboxV2Migrated: true,
-      accountType: 'DROPBOX'
+      dropboxCursor: 'cursoooR',
+      accountType: 'DROPBOX',
     };
     let user = us.fromEntity(entity);
     // Delete key and replace with id field to convert to user from entity
@@ -216,6 +218,7 @@ describe('User', function() {
     user.dropboxV2Token = 'x';
     user.dropboxV2Id = 'x';
     user.dropboxV2Migrated = false;
+    user.dropboxCursor = 'supppp';
     user.accountType = 'BOX';
     let entity = us.toEntity(user);
     delete user.id;

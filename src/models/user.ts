@@ -24,6 +24,7 @@ export class User implements Model<string> {
   dropboxV2Token?: string;
   dropboxV2Id?: string;
   dropboxV2Migrated?: boolean;
+  dropboxCursor?: string;
   accountType?: string;
 }
 
@@ -45,6 +46,7 @@ export class UserSchema extends AbstractModelService<string, User> {
     refreshToken: joi.string().allow(null),
     dropboxV2Token: joi.string().allow(null),
     dropboxV2Id: joi.string().allow(null),
+    dropboxCursor: joi.string().allow(null),
     dropboxV2Migrated: joi.boolean().allow(null),
     accountType: joi.string().required().only('DROPBOX', 'BOX'),
   };
