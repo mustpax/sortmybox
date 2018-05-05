@@ -13,7 +13,9 @@ app.get('/dropbox/webhook', function(req, res) {
   res.send(req.query.challenge || 'OK');
 });
 
+import {} from '../redis';
 import crypto = require('crypto');
+
 app.post('/dropbox/webhook', function(req, res, next) {
   let chunks: Buffer[] = [];
   req.on('data', function(chunk) {
@@ -56,7 +58,7 @@ app.post('/dropbox/webhook', function(req, res, next) {
         user.dropboxCursor = res.cursor;
         await UserService.save([user]);
         let entries: any[] = res.entries.filter((entry: any) => entry['.tag'] === 'file');
-        console.log(id, res);
+        console.log(id, entries);
       }
     }
   });

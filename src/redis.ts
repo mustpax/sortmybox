@@ -3,13 +3,12 @@ import moment = require('moment');
 
 const client = new Redis();
 
-export interface QueueItem {
+interface QueueItem {
   item: string;
   timestamp: Date;
 }
 
-// TODO limit items returned
-export async function dequeue(queue: string, delaySecs: number): Promise<QueueItem|undefined> {
+async function dequeue(queue: string, delaySecs: number): Promise<QueueItem|undefined> {
   // There are items to process
   let resp = await client
     .multi()
@@ -38,6 +37,62 @@ export async function dequeue(queue: string, delaySecs: number): Promise<QueueIt
 }
 
 export async function enqueue(queue: string, item: string) {
-  let timestamp = moment().valueOf();
+  let timestamp = Date.now();
   return await client.zadd(queue, String(timestamp), item);
+}
+
+const queueIntervalMs = 1e3; // 5 seconds
+const queueName = 'sortqueue';
+const minTimeBetweenSortSec = 5;
+
+let queueProcessorInterval: NodeJS.Timer|undefined;
+
+import EventEmitter = require("events");
+const eventEmitter = new EventEmitter();
+
+const eventName = 'sortuser';
+
+export function onUserReadyForSort(callback: ((userDbxId: string) => void)) {
+  eventEmitter.on(eventName, callback);
+}
+
+export function startQueueProcessor() {
+  if (! queueProcessorInterval) {
+    queueProcessorInterval = setInterval(async function() {
+      console.log('No items to process');
+      let item = await dequeue(queueName, minTimeBetweenSortSec);
+      let maxBatch = 100;
+      while (item && maxBatch > 0) {
+        eventEmitter.emit(eventName, item.item);
+        item = await dequeue(queueName, minTimeBetweenSortSec);
+        maxBatch--;
+      }
+    }, queueIntervalMs);
+  }
+}
+
+export function stopQueueProcessor() {
+  if (queueProcessorInterval) {
+    clearInterval(queueProcessorInterval);
+    queueProcessorInterval = undefined;
+  }
+}
+
+// Returns true if the given Dropbox user should be processed (i.e. their files
+// sorted) right now.
+// If the user has been processed too recently, they'll be queued up to be
+// processed
+export async function shouldSortUser(userDbxId: string): Promise<boolean> {
+  const key = `sortlock|${userDbxId}`;
+  let result = await client.set(key, true, 'nx');
+  if (result) {
+    // We took the lock, prevent user from being processed for the next N
+    // seconds
+    await client.expire(key, minTimeBetweenSortSec);
+    return true;
+  } else {
+    // Enqueue the user to be processed later
+    await enqueue(queueName, userDbxId);
+    return false;
+  }
 }
