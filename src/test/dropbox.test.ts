@@ -62,7 +62,7 @@ describe("Dropbox", function() {
   });
 
   it("End to end test", async function() {
-    let moves = await dbx.runRules(testSortingFolder, rules());
+    let moveResult = await dbx.runRules(testSortingFolder, rules());
     let expected: MoveResult[] = [];
     rule1Files.forEach(f => {
       expected.push({
@@ -80,7 +80,7 @@ describe("Dropbox", function() {
       });
     });
 
-    moves = _.sortBy(moves, 'fullDestPath');
+    let moves = _.sortBy(moveResult.results, 'fullDestPath');
     expected = _.sortBy(expected, 'fullDestPath');
     assert.deepEqual(moves, expected);
   });

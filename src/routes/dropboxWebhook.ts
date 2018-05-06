@@ -53,21 +53,7 @@ app.post('/dropbox/webhook', function(req, res, next) {
       let user = await UserService.findByDropboxId(id);
       if (user) {
         let dbx = dropbox(user.dropboxV2Token);
-        let cursor = user.dropboxCursor;
-        let res: any;
-        if (cursor) {
-          res = await dbx.client.filesListFolderContinue({
-            cursor
-          });
-        } else {
-          res = await dbx.client.filesListFolder({ path: user.sortingFolder as string });
-        }
-        let entries: any[] = res.entries.filter((entry: any) => entry['.tag'] === 'file');
-        console.log('New files to process for user', id, entries);
-
-        // TODO process user
-        user.dropboxCursor = res.cursor;
-        await UserService.save([user]);
+        await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
       }
     }
   });
@@ -75,7 +61,14 @@ app.post('/dropbox/webhook', function(req, res, next) {
 
 
 onUserReadyForSort(async function(userId) {
-  // TODO process user
+  console.log(`Processing ${userId} from queue`);
+  let user = await UserService.findByDropboxId(userId);
+  if (user) {
+    let dbx = dropbox(user.dropboxV2Token);
+    await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
+  }
 });
+
+startQueueProcessor();
 
 export default app;

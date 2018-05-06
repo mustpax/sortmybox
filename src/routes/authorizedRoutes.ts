@@ -87,22 +87,7 @@ app.post('/rules', auth, asyncRoute(async function(req, res, next) {
     console.log(`Deleting ${rulesToDelete.length} rules and replacing with ${rules.length} new rules`);
     await rs.removeById(rulesToDelete.map(rule => rule.id));
     await rs.save(rules);
-    let moveResult = await req.dbx.runRules(req.user.sortingFolder as string, rules);
-    let now = new Date();
-    let fileMoves = moveResult.map(mv => {
-      let ret = fms.makeNew(req.user.id as string);
-      ret.fromFile = mv.fileName;
-      ret.hasCollision = mv.conflict;
-      let destParts = mv.fullDestPath.split('/');
-      let destFileName = destParts.pop();
-      ret.toDir = destParts.join('/');
-      ret.resolvedName = ret.hasCollision ? destFileName : undefined;
-      ret.when = now;
-      return ret;
-    });
-    console.log(`Performed ${fileMoves.length} moves, saving FileMoves`);
-    // TODO update lastSync and file move count
-    await fms.save(fileMoves);
+    await req.dbx.runRulesAndUpdateUserAndFileMoves(req.user, false);
     res.json([]);
   }
 }));

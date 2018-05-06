@@ -1,11 +1,22 @@
 import { Dropbox, files } from 'dropbox';
-import { Rule, RuleService as rs } from './models';
+import {
+  Rule, RuleService as rs,
+  User, UserService as us,
+  FileMoveService as fms,
+} from './models';
 import _ = require('underscore');
-import { endsWithCaseInsensitive } from './utils';
+import {
+  endsWithCaseInsensitive
+} from './utils';
 
 // Dropbox SDK relies on fetch, so we add it to global environment
 import fetch = require('node-fetch');
 (global as any).fetch = fetch;
+
+export interface MoveResults {
+  cursor: string;
+  results: MoveResult[];
+}
 
 export interface MoveResult {
   fileName: string;
@@ -21,12 +32,22 @@ export class DropboxService {
     (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
   }
 
-  async runRules(sortingFolder: string, rules: Rule[]): Promise<MoveResult[]> {
+  /**
+   * Run sorting rules for given user
+   */
+  async runRules(sortingFolder: string, rules: Rule[], cursor?: string): Promise<MoveResults> {
     rules = _.sortBy(rules, 'rank');
-    let files = await this.client.filesListFolder({
-      path: sortingFolder,
-      limit: 100,
-    });
+    let files: DropboxTypes.files.ListFolderResult;
+    // TODO limit fetch size?
+    if (cursor) {
+      files = await this.client.filesListFolderContinue({
+        cursor,
+      });
+    } else {
+      files = await this.client.filesListFolder({
+        path: sortingFolder,
+      });
+    }
     // TODO handle files.has_more
     // TODO log info
     let moves = [];
@@ -57,10 +78,14 @@ export class DropboxService {
     }
     if (moves.length === 0) {
       console.log('No matching files. Skipping moves');
-      return [];
+      return {
+        results: [],
+        cursor: files.cursor,
+      };
     }
 
     console.log(`Moving ${moves.length} files.`);
+    // TODO remove any when Dropbox fixes their type annotations
     let response: any = await this.client.filesMoveBatch({
       entries: moves,
       autorename: true,
@@ -75,19 +100,54 @@ export class DropboxService {
         });
       }
     }
+
     console.log(`Moved ${moves.length} files, creating FileMoves`);
-    // TODO resp is actually a File Metadata type, we shouldn't use any here
-    return response.entries.map((resp: any, i: number) => {
-      let fileName = matchedFiles[i].name as string;
-      let fullDestPath = resp.metadata.path_display as string;
-      let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
-      let ret: MoveResult = {
-        fileName,
-        fullDestPath,
-        conflict
-      };
+    return {
+      cursor: files.cursor,
+      results: response.entries.map((resp: any, i: number) => {
+          let fileName = matchedFiles[i].name as string;
+          let fullDestPath = resp.metadata.path_display as string;
+          let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
+          return {
+            fileName,
+            fullDestPath,
+            conflict,
+          };
+        }),
+    };
+  }
+
+  /**
+   * Run rules for given user and update datastore
+   */
+  async runRulesAndUpdateUserAndFileMoves(user: User, useCursor: boolean, rules?: Rule[]) {
+    if (! rules) {
+      rules = await rs.findByOwner(user.id as string);
+    }
+    console.log(`Running rules for user ${user.id} useCursor: ${useCursor} rules: ${rules.length}`);
+    let moveResults = await this.runRules(
+      user.sortingFolder as string,
+      rules,
+      useCursor ? user.dropboxCursor : undefined
+    );
+    let now = new Date();
+    let fileMoves = moveResults.results.map(mv => {
+      let ret = fms.makeNew(user.id as string);
+      ret.fromFile = mv.fileName;
+      ret.hasCollision = mv.conflict;
+      let destParts = mv.fullDestPath.split('/');
+      let destFileName = destParts.pop();
+      ret.toDir = destParts.join('/');
+      ret.resolvedName = ret.hasCollision ? destFileName : undefined;
+      ret.when = now;
       return ret;
     });
+    console.log(`Performed ${fileMoves.length} moves, saving FileMoves`);
+    await fms.save(fileMoves);
+    user.fileMoves = (user.fileMoves || 0) + fileMoves.length;
+    user.lastSync = new Date();
+    user.dropboxCursor = moveResults.cursor;
+    await us.save([user]);
   }
 
   async exists(path: string): Promise<boolean> {

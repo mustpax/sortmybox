@@ -58,6 +58,7 @@ export function onUserReadyForSort(callback: ((userDbxId: string) => void)) {
 
 export function startQueueProcessor() {
   if (! queueProcessorInterval) {
+    console.log(`Starting sorting queue processor with ${queueIntervalMs}ms interval`);
     queueProcessorInterval = setInterval(async function() {
       console.log('No items to process');
       let item = await dequeue(queueName, minTimeBetweenSortSec);
@@ -72,16 +73,19 @@ export function startQueueProcessor() {
 }
 
 export function stopQueueProcessor() {
+  console.log('Stopping sorting queue processor');
   if (queueProcessorInterval) {
     clearInterval(queueProcessorInterval);
     queueProcessorInterval = undefined;
   }
 }
 
-// Returns true if the given Dropbox user should be processed (i.e. their files
-// sorted) right now.
-// If the user has been processed too recently, they'll be queued up to be
-// processed
+/**
+ * Returns true if the given Dropbox user should be processed (i.e. their files
+ * sorted) right now.
+ * If the user has been processed too recently, they'll be queued up to be
+ * processed.
+ */
 export async function shouldSortUser(userDbxId: string): Promise<boolean> {
   const key = `sortlock|${userDbxId}`;
   let result = await client.set(key, true, 'nx');
