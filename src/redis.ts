@@ -1,7 +1,11 @@
 import Redis = require('ioredis');
 import moment = require('moment');
 
-const client = new Redis();
+const client = new Redis({
+  port: parseInt(process.env.REDIS_PORT as string),
+  host: process.env.REDIS_HOST,
+  password: process.env.REDIS_PASSWORD,
+});
 
 interface QueueItem {
   item: string;
@@ -41,7 +45,7 @@ export async function enqueue(queue: string, item: string) {
   return await client.zadd(queue, String(timestamp), item);
 }
 
-const queueIntervalMs = 1e3; // 5 seconds
+const queueIntervalMs = 3000;
 const queueName = 'sortqueue';
 const minTimeBetweenSortSec = 5;
 
@@ -60,10 +64,10 @@ export function startQueueProcessor() {
   if (! queueProcessorInterval) {
     console.log(`Starting sorting queue processor with ${queueIntervalMs}ms interval`);
     queueProcessorInterval = setInterval(async function() {
-      console.log('No items to process');
       let item = await dequeue(queueName, minTimeBetweenSortSec);
       let maxBatch = 100;
       while (item && maxBatch > 0) {
+        console.log(`Sorting queue is processing ${item}`);
         eventEmitter.emit(eventName, item.item);
         item = await dequeue(queueName, minTimeBetweenSortSec);
         maxBatch--;

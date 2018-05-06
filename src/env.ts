@@ -7,6 +7,7 @@ const required = [
   'DROPBOX_SECRET',
   'RAVEN_DSN',
   'REDIS_HOST',
+  'REDIS_PORT',
   'REDIS_PASSWORD',
 ];
 const requiredDev = [
@@ -17,7 +18,7 @@ export const DEV = process.env.NODE_ENV !== 'production';
 
 export function validate() {
   required.forEach(varName => {
-    if (! process.env[varName]) {
+    if (! process.env.hasOwnProperty(varName)) {
       console.error('Environment variable missing', varName);
       process.exit(1);
     }
