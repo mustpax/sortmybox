@@ -24,6 +24,12 @@ export interface MoveResult {
   conflict: boolean;
 }
 
+function sleep(waitMs: number): Promise<void> {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, waitMs);
+  });
+}
+
 export class DropboxService {
   client: Dropbox;
 
@@ -92,12 +98,13 @@ export class DropboxService {
     });
 
     if (response['.tag'] !== 'complete') {
-      console.log('Job in progress', response);
       let jobId = response.async_job_id;
       while (response['.tag'] !== 'complete') {
+        console.log('Job in progress', jobId);
         response = await this.client.filesMoveBatchCheck({
           async_job_id: jobId
         });
+        await sleep(500);
       }
     }
 
