@@ -67,7 +67,7 @@ export function startQueueProcessor() {
       let item = await dequeue(queueName, minTimeBetweenSortSec);
       let maxBatch = 100;
       while (item && maxBatch > 0) {
-        console.log(`Sorting queue is processing ${item}`);
+        console.log(`Sorting queue is processing`, item);
         eventEmitter.emit(eventName, item.item);
         item = await dequeue(queueName, minTimeBetweenSortSec);
         maxBatch--;
