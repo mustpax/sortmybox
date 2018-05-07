@@ -1,5 +1,6 @@
 runtime: nodejs
 env: flex
+service: background
 threadsafe: true
 
 # This sample incurs costs to run on the App Engine flexible environment.
