@@ -1,5 +1,21 @@
 "use strict";
 
+export const DEV = process.env.NODE_ENV !== 'production';
+
+import dotenv = require('dotenv');
+
+if (process.env.GOOGLE_CLOUD_PROJECT === 'moosepax-1248') {
+  console.log('Staging environment detected. Loading configs from .env.staging');
+  dotenv.config({
+    path: '.env.staging'
+  });
+} else if (process.env.GOOGLE_CLOUD_PROJECT === 'sortmybox-hrd') {
+  console.log('Prod environment detected. Loading configs from .env.prod');
+  dotenv.config({
+    path: '.env.prod'
+  });
+}
+
 const required = [
   'GOOGLE_CLOUD_PROJECT',
   'SECRET',
@@ -13,8 +29,6 @@ const required = [
 const requiredDev = [
   'GOOGLE_APPLICATION_CREDENTIALS',
 ];
-
-export const DEV = process.env.NODE_ENV !== 'production';
 
 export function validate() {
   required.forEach(varName => {
