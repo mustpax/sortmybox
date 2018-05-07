@@ -22,6 +22,31 @@ import crypto = require('crypto');
 
 import { reportError } from '../raven';
 
+async function processUser(userDbxId: string) {
+  let user = await UserService.findByDropboxId(userDbxId);
+  if (user) {
+    let dbx = dropbox(user.dropboxV2Token);
+    try {
+      if (user.periodicSort) {
+        await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
+      } else {
+        console.error(`Not sorting user, periodic sort disabled: ${user.id}`);
+      }
+    } catch (e) {
+      if (dbx.isNotFoundError(e)) {
+        console.log(`Sorting folder missing for user ${user.id}, disabling periodic sync`);
+        user.periodicSort = false;
+        await UserService.save([user]);
+      } else {
+        throw e;
+      }
+    }
+  } else {
+    console.error(`Attempting to sort user that is not in our Database: ${userDbxId}`);
+  }
+}
+
+
 app.post('/dropbox/webhook', function(req, res, next) {
   let chunks: Buffer[] = [];
   req.on('data', function(chunk) {
@@ -52,29 +77,14 @@ app.post('/dropbox/webhook', function(req, res, next) {
         console.log(`Not processing users ${id}, throttled.`);
         return;
       }
-      let user = await UserService.findByDropboxId(id);
-      if (user) {
-        if (user.periodicSort) {
-          let dbx = dropbox(user.dropboxV2Token);
-          await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
-        } else {
-          console.error(`Not sorting user, periodic sort disabled: ${id}`);
-        }
-      } else {
-        console.error(`Attempting to sort user that is not in our Database: ${id}`);
-      }
+      await processUser(id);
     }
   }));
 });
 
-
 onUserReadyForSort(reportError(async function(userId) {
   console.log(`Processing ${userId} from queue`);
-  let user = await UserService.findByDropboxId(userId);
-  if (user) {
-    let dbx = dropbox(user.dropboxV2Token);
-    await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
-  }
+  await processUser(userId);
 }));
 
 startQueueProcessor();

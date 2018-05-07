@@ -165,11 +165,25 @@ export class DropboxService {
       // Dropbox API has no explitic way of checking if a file exists or not
       // so we have to get metadata and expect a specific type of error
       // so we can infer that the file is missing
-      if (e.error.error.path && e.error.error.path['.tag'] === 'not_found') {
+      if (this.isNotFoundError(e)) {
         return false;
       }
       throw e;
     }
+  }
+
+  isNotFoundError(e: any): boolean {
+    // Dropbox nests these path errors deeply, so we unnest them then check
+    // the innermost one
+    let innerMostError = e;
+    while (innerMostError.error) {
+      innerMostError = innerMostError.error;
+    }
+    return (
+      innerMostError &&
+      innerMostError.path &&
+      innerMostError.path['.tag'] === 'not_found'
+    );
   }
 }
 
