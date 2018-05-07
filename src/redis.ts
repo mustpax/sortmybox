@@ -1,10 +1,17 @@
 import Redis = require('ioredis');
 import moment = require('moment');
 
+const {
+  REDIS_PORT,
+  REDIS_HOST,
+  REDIS_PASSWORD,
+} = process.env;
+
+console.log(`Connecting to Redis. Host: ${REDIS_HOST} Port: ${REDIS_PORT}`);
 const client = new Redis({
-  port: parseInt(process.env.REDIS_PORT as string),
-  host: process.env.REDIS_HOST,
-  password: process.env.REDIS_PASSWORD,
+  port: parseInt(REDIS_PORT as string),
+  host: REDIS_HOST,
+  password: REDIS_PASSWORD,
 });
 
 interface QueueItem {
