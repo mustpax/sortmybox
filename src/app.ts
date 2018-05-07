@@ -1,7 +1,5 @@
 "use strict";
 
-require('dotenv').config();
-
 import { validate, DEV } from './env';
 validate();
 
