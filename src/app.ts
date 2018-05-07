@@ -62,8 +62,7 @@ let hbs = require('express-handlebars')({
 app.engine('hbs', hbs);
 app.set('view engine', 'hbs');
 
-import raven = require('raven');
-raven.config(process.env.RAVEN_DSN).install();
+import { raven } from './raven';
 app.use(raven.requestHandler());
 
 app.use(express.static('public'));
