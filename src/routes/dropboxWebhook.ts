@@ -52,8 +52,14 @@ app.post('/dropbox/webhook', function(req, res, next) {
       }
       let user = await UserService.findByDropboxId(id);
       if (user) {
-        let dbx = dropbox(user.dropboxV2Token);
-        await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
+        if (user.periodicSort) {
+          let dbx = dropbox(user.dropboxV2Token);
+          await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
+        } else {
+          console.error(`Not sorting user, periodic sort disabled: ${id}`);
+        }
+      } else {
+        console.error(`Attempting to sort user that is not in our Database: ${id}`);
       }
     }
   });
