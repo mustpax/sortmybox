@@ -1,5 +1,12 @@
 "use strict";
 
+import Promise = require("bluebird");
+Promise.config({
+  longStackTraces: true,
+  warnings: true,
+});
+global.Promise = Promise;
+
 export const DEV = process.env.NODE_ENV !== 'production';
 
 import dotenv = require('dotenv');

@@ -9,7 +9,7 @@ import moment = require('moment');
 let app = express();
 app.enable('trust proxy');
 
-app.locals.prod = (process.env.NODE_ENV === 'production');
+app.locals.prod = ! DEV;
 
 // TODO export config values to the templates
 // email
