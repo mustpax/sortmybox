@@ -8,6 +8,11 @@ import { User, UserService as us, RuleService as rs, FileMoveService as fms } fr
 const app: express.Router = express.Router();
 export default app;
 
+import {
+  disableSorting,
+  enableSorting,
+} from '../redis';
+
 const auth = asyncRoute(async function(req, res, next) {
   if (! req.user || ! req.dbx) {
     res.redirect('/');
@@ -26,7 +31,7 @@ app.get('/rules', auth, asyncRoute(async function(req, res) {
 
   // TODO also assert that sortingfolder is a folder
   if (! await req.dbx.exists(req.user.sortingFolder as string)) {
-    console.log(`User doesn't have sorting folder creating: ${req.user.sortingFolder}`);
+    console.log(`User doesn't have sorting folder, creating folder: ${req.user.sortingFolder}`);
     await req.dbx.client.filesCreateFolderV2({ path: req.user.sortingFolder as string });
     initResult.createdSortboxDir = true;
     if (rules.length === 0) {
@@ -131,6 +136,11 @@ app.get('/account/settings', auth, asyncRoute(async function(req, res) {
 
 app.post('/account/periodicSort', auth, asyncRoute(async function(req, res) {
   let periodicSort = req.body.periodicSort === '1';
+  if (periodicSort) {
+    await enableSorting(req.user.dropboxV2Id as string);
+  } else {
+    await disableSorting(req.user.dropboxV2Id as string);
+  }
   console.log(`Setting periodic sort for user ${req.user.id} to ${periodicSort}`);
   req.user.periodicSort = periodicSort;
   await us.save([req.user]);

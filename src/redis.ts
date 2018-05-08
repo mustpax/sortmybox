@@ -98,6 +98,10 @@ export function stopQueueProcessor() {
  * processed.
  */
 export async function shouldSortUser(userDbxId: string): Promise<boolean> {
+  if (! await isSortingEnabled(userDbxId)) {
+    return false;
+  }
+
   const key = `sortlock|${userDbxId}`;
   let result = await client.set(key, true, 'nx');
   if (result) {
@@ -110,4 +114,24 @@ export async function shouldSortUser(userDbxId: string): Promise<boolean> {
     await enqueue(queueName, userDbxId);
     return false;
   }
+}
+
+function getDisabledKey(userDbxId: string): string {
+  return `sortdisabled|${userDbxId}`;
+}
+
+export async function isSortingEnabled(userDbxId: string): Promise<boolean> {
+  let k = getDisabledKey(userDbxId);
+  let result = await client.get(k);
+  return result !== 'true';
+}
+
+export async function enableSorting(userDbxId: string): Promise<void> {
+  let k = getDisabledKey(userDbxId);
+  await client.del(k);
+}
+
+export async function disableSorting(userDbxId: string): Promise<void> {
+  let k = getDisabledKey(userDbxId);
+  await client.set(k, 'true');
 }

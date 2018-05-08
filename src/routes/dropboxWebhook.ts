@@ -17,6 +17,7 @@ import {
   shouldSortUser,
   startQueueProcessor,
   onUserReadyForSort,
+  disableSorting,
 } from '../redis';
 import crypto = require('crypto');
 
@@ -32,10 +33,12 @@ async function processUser(userDbxId: string) {
       } else {
         // TODO debug message
         // console.error(`Not sorting user, periodic sort disabled: ${user.id}`);
+        await disableSorting(userDbxId);
       }
     } catch (e) {
       if (dbx.isNotFoundError(e)) {
         console.log(`Sorting folder missing for user ${user.id}, disabling periodic sync`);
+        await disableSorting(userDbxId);
         user.periodicSort = false;
         await UserService.save([user]);
       } else {
