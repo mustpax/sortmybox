@@ -30,7 +30,8 @@ async function processUser(userDbxId: string) {
       if (user.periodicSort) {
         await dbx.runRulesAndUpdateUserAndFileMoves(user, true);
       } else {
-        console.error(`Not sorting user, periodic sort disabled: ${user.id}`);
+        // TODO debug message
+        // console.error(`Not sorting user, periodic sort disabled: ${user.id}`);
       }
     } catch (e) {
       if (dbx.isNotFoundError(e)) {
@@ -74,7 +75,8 @@ app.post('/dropbox/webhook', function(req, res, next) {
     let ids: string[] = json.list_folder.accounts;
     for (let id of ids) {
       if (! await shouldSortUser(id)) {
-        console.log(`Not processing users ${id}, throttled.`);
+        // TODO debug log this
+        // console.log(`Not processing users ${id}, throttled.`);
         return;
       }
       await processUser(id);
