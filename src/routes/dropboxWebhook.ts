@@ -47,6 +47,7 @@ async function processUser(userDbxId: string) {
     }
   } else {
     console.error(`Attempting to sort user that is not in our Database: ${userDbxId}`);
+    await disableSorting(userDbxId);
   }
 }
 
