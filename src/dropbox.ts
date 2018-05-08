@@ -91,6 +91,7 @@ export class DropboxService {
     }
 
     console.log(`Moving ${moves.length} files.`);
+    // TODO if there's only a single file to move, do not use batch
     // TODO remove any when Dropbox fixes their type annotations
     let response: any = await this.client.filesMoveBatch({
       entries: moves,
