@@ -36,6 +36,31 @@ export class DropboxService {
   constructor(token?: string) {
     this.client = new Dropbox({clientId: process.env.DROPBOX_KEY, accessToken: token});
     (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
+    this.wrapErrors();
+  }
+
+  wrapErrors() {
+    let client: any = this.client;
+    for (let key of Object.keys(this.client)) {
+      let val: any = client[key];
+      if (val instanceof Function) {
+        client[key] = async function(...args: any[]) {
+          try {
+            return await val.apply(client, args);
+          } catch (e) {
+            if (e instanceof Error) {
+              throw e;
+            }
+            let newErr: any = new Error(`[${key}] ` + (e && e.error && e.error.error_summary));
+            Object.assign(newErr, e);
+            newErr.dropboxStatus = newErr.status;
+            newErr.status = 500;
+            newErr.arguments = args;
+            throw newErr;
+          }
+        };
+      }
+    }
   }
 
   /**

@@ -21,6 +21,11 @@ const auth = asyncRoute(async function(req, res, next) {
   next();
 });
 
+app.get('/error/dropbox', auth, asyncRoute(async function(req, res) {
+  await req.dbx.client.filesListFolder({ path: '/nosuch' });
+  res.json({ sup: true });
+}));
+
 app.get('/rules', auth, asyncRoute(async function(req, res) {
   let initResult = {
     createdSortboxDir: false,
