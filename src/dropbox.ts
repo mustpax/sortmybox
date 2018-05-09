@@ -51,7 +51,11 @@ export class DropboxService {
             if (e instanceof Error) {
               throw e;
             }
-            let newErr: any = new Error(`[${key}] ` + (e && e.error && e.error.error_summary));
+            let message = e && e.error && e.error.error_summary;
+            if (!message && (e.error instanceof String)) {
+              message = e.error;
+            }
+            let newErr: any = new Error(`[${key}] ${message}`);
             Object.assign(newErr, e);
             newErr.dropboxStatus = newErr.status;
             newErr.status = 500;
