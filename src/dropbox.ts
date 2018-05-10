@@ -52,7 +52,7 @@ export class DropboxService {
               throw e;
             }
             let message = e && e.error && e.error.error_summary;
-            if (!message && (e.error instanceof String)) {
+            if (!message && ((typeof e.error) === 'string')) {
               message = e.error;
             }
             let newErr: any = new Error(`[${key}] ${message}`);
