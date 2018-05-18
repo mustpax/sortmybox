@@ -8,4 +8,6 @@ threadsafe: true
 # for production use. For more information, see:
 # https://cloud.google.com/appengine/docs/flexible/python/configuring-your-app-with-app-yaml
 manual_scaling:
-  instances: 1
+  instances: 2
+resources:
+  cpu: 0.25
