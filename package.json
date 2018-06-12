@@ -11,7 +11,7 @@
     "heroku-prebuild": "./heroku-setup.sh"
   },
   "engines": {
-    "node": ">=8.1"
+    "node": "8.11.x"
   },
   "license": "UNLICENSED",
   "dependencies": {
