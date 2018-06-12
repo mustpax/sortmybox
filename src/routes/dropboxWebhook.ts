@@ -93,6 +93,10 @@ onUserReadyForSort(reportError(async function(userId) {
   await processUser(userId);
 }));
 
-startQueueProcessor();
+if (process.env.DROPBOX_REDIS_QUEUE_ENABLED === 'true') {
+  startQueueProcessor();
+} else {
+  console.log('Dropbox sort redis queue processor disabled.');
+}
 
 export default app;
