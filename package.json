@@ -8,7 +8,7 @@
     "ts": "ts-node",
     "redis": "redis-cli -h $REDIS_HOST -p $REDIS_PORT -a $REDIS_PASSWORD",
     "tail": "gcloud app logs tail -s default",
-    "heroku-prebuild": "./heroku-setup.sh"
+    "heroku-prebuild": "heroku/heroku-setup.sh"
   },
   "engines": {
     "node": "8.11.x"
