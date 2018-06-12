@@ -7,7 +7,8 @@
     "deploy": "gcloud app deploy --no-promote",
     "ts": "ts-node",
     "redis": "redis-cli -h $REDIS_HOST -p $REDIS_PORT -a $REDIS_PASSWORD",
-    "tail": "gcloud app logs tail -s default"
+    "tail": "gcloud app logs tail -s default",
+    "heroku-prebuild": "./heroku-setup.sh"
   },
   "engines": {
     "node": ">=8.1"
