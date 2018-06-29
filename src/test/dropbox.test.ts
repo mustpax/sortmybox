@@ -34,6 +34,13 @@ describe("Dropbox", function() {
   function rules(): Rule[] {
     let ret: Rule[] = [];
     let rule = rs.makeNew('user' + uniqueId);
+    // This first rule should be skipped since the destination is the sorting
+    // folder
+    rule.type = 'EXT_EQ';
+    rule.pattern = 'json';
+    rule.dest = testSortingFolder; // << not allowed!
+    ret.push(rule);
+    rule = rs.makeNew('user' + uniqueId);
     rule.type = 'NAME_CONTAINS';
     rule.pattern = 'testf';
     rule.dest = testFolder + '/rule1';

@@ -30,6 +30,18 @@ function sleep(waitMs: number): Promise<void> {
   });
 }
 
+function normalizePath(path: string, fileName?: string): string {
+  let parts = path.toLowerCase().split('/');
+  // We normalize paths by filtering empty splits
+  // /a/b//c/ will map to ['', 'a', 'b', '', 'c'' ,''] and .filter(x => x)
+  // will remove empty strings
+  parts = parts.filter(x => x);
+  if (fileName) {
+    parts.push(fileName);
+  }
+  return '/' + parts.join('/');
+}
+
 export class DropboxService {
   client: Dropbox;
 
@@ -93,14 +105,13 @@ export class DropboxService {
         continue;
       }
       for (let rule of rules) {
+        if (normalizePath(rule.dest as string) === normalizePath(sortingFolder)) {
+          // Do not permit moving files to sorting folder
+          console.log('Skipping rule, destination is sorting folder', rule);
+          continue;
+        }
         if (rs.matches(rule, file.name)) {
-          let destParts = (rule.dest as string).split('/');
-          // We normalize paths by filtering empty splits
-          // /a/b//c/ will map to ['', 'a', 'b', '', 'c'' ,''] and .filter(x => x)
-          // will remove empty strings
-          destParts = destParts.filter(x => x);
-          destParts.push(file.name);
-          let to_path = '/' + destParts.join('/');
+          let to_path = normalizePath(rule.dest as string, file.name);
           matchedFiles.push(file);
           moves.push({
             from_path: (file.path_lower as string),
