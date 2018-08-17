@@ -56,7 +56,7 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
-  let protocol = ENV ? 'http' : 'https';
+  let protocol = DEV ? 'http' : 'https';
   let redirectURL = `${protocol}://${req.get('host')}/dropbox/cb`;
   let token = await (dropbox().client as any).getAccessTokenFromCode(redirectURL, code);
   let dbx = dropbox(token);
