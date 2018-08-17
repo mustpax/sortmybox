@@ -3,8 +3,6 @@ import express = require('express');
 import  asyncRoute from '../asyncRoute';
 import { UserService } from '../models';
 
-import { DEV } from '../env';
-
 const app: express.Router = express.Router();
 
 import dropbox from '../dropbox';
@@ -43,7 +41,7 @@ app.get('/error', asyncRoute(async function(req, res) {
 }));
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
-  let redirectURL = `${req.protocol}://${req.get('host')}/dropbox/cb`;
+  let redirectURL = dropbox().getRedirectUrl(req.get('host'));
   let url = (dropbox().client.getAuthenticationUrl as any)(redirectURL, null, 'code');
   res.redirect(url);
 }));
@@ -56,8 +54,7 @@ app.get('/dropbox/cb', asyncRoute(async function(req, res, next) {
     next(err);
     return;
   }
-  let protocol = DEV ? 'http' : 'https';
-  let redirectURL = `${protocol}://${req.get('host')}/dropbox/cb`;
+  let redirectURL = dropbox().getRedirectUrl(req.get('host'));
   let token = await (dropbox().client as any).getAccessTokenFromCode(redirectURL, code);
   let dbx = dropbox(token);
   let acct: DropboxTypes.users.FullAccount = await dbx.client.usersGetCurrentAccount(undefined);

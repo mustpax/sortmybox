@@ -9,6 +9,8 @@ import {
   endsWithCaseInsensitive
 } from './utils';
 
+import { DEV } from './env';
+
 // Dropbox SDK relies on fetch, so we add it to global environment
 import fetch = require('node-fetch');
 (global as any).fetch = fetch;
@@ -225,6 +227,11 @@ export class DropboxService {
       innerMostError.path &&
       innerMostError.path['.tag'] === 'not_found'
     );
+  }
+
+  getRedirectUrl(host?: string) {
+    let protocol = DEV ? 'http' : 'https';
+    return `${protocol}://${host}/dropbox/cb`;
   }
 }
 
