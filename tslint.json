@@ -56,6 +56,7 @@
     "no-trailing-whitespace": true,
     "no-null-keyword": false,
     "jsdoc-format": true,
-    "triple-equals": true
+    "triple-equals": true,
+    "no-conditional-assignment": true
   }
 }
