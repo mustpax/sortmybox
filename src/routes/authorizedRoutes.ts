@@ -22,7 +22,7 @@ const auth = asyncRoute(async function(req, res, next) {
 });
 
 app.get('/error/dropbox', auth, asyncRoute(async function(req, res) {
-  await req.dbx.client.filesListFolder({ path: '/nosuch' });
+  await req.dbx.listFolder('/nosuch');
   res.json({ sup: true });
 }));
 
@@ -118,11 +118,7 @@ app.get('/dirs', asyncRoute(async function(req, res) {
     res.status(400).send('Missing path parameter');
     return;
   }
-  // Dropbox expects root folder to be represented as empty string
-  if (path === '/') {
-    path = '';
-  }
-  let response = await req.dbx.client.filesListFolder({ path });
+  let response = await req.dbx.listFolder(path);
   let files = response.entries
     .filter(entry => entry['.tag'] === 'folder')
     .map(entry => {

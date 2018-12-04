@@ -81,6 +81,16 @@ export class DropboxService {
     }
   }
 
+  async listFolder(path: string): Promise<DropboxTypes.files.ListFolderResult> {
+    // Dropbox expects root folder to be represented as empty string
+    if (path === '/') {
+      path = '';
+    }
+    return await this.client.filesListFolder({
+      path
+    });
+  }
+
   /**
    * Run sorting rules for given user
    */
@@ -93,9 +103,7 @@ export class DropboxService {
         cursor,
       });
     } else {
-      files = await this.client.filesListFolder({
-        path: sortingFolder,
-      });
+      files = await this.listFolder(sortingFolder);
     }
     // TODO handle files.has_more
     // TODO log info
