@@ -23,7 +23,7 @@ export class FileMoveKey {
 export class FileMoveSchema extends AbstractModelService<FileMoveKey, FileMove> {
   schema = {
     fromFile: joi.string().required(),
-    toDir: joi.string().required(),
+    toDir: joi.string().allow('').required(),
     when: joi.date().required(),
     hasCollision: joi.boolean().required(),
     resolvedName: joi.string().allow(null)

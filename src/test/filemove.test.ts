@@ -30,7 +30,7 @@ describe("FileMove", function() {
   it('validation: object with only required fields is valid', function() {
     let fm: FileMove = {
       fromFile: 'a',
-      toDir: 'a',
+      toDir: '',
       when: new Date(),
       hasCollision: true
     };
