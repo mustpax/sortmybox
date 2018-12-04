@@ -24,12 +24,13 @@ const required = [
   'RAVEN_DSN',
   'REDIS_HOST',
   'REDIS_PORT',
-  'REDIS_PASSWORD',
 ];
 const requiredDev = [
   'GOOGLE_APPLICATION_CREDENTIALS',
 ];
-
+const requiredProd = [
+  'REDIS_PASSWORD',
+];
 export function validate() {
   required.forEach(varName => {
     if (! process.env.hasOwnProperty(varName)) {
@@ -42,6 +43,13 @@ export function validate() {
     requiredDev.forEach(varName => {
       if (! process.env[varName]) {
         console.error('Environment DEV-ONLY variable missing', varName);
+        process.exit(1);
+      }
+    });
+  } else {
+    requiredProd.forEach(varName => {
+      if (! process.env[varName]) {
+        console.error('Environment PROD-ONLY variable missing', varName);
         process.exit(1);
       }
     });
