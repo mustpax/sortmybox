@@ -37,7 +37,9 @@ app.get('/_ah/health', asyncRoute(async function(req, res) {
 }));
 
 app.get('/error', asyncRoute(async function(req, res) {
-  throw new Error('Test error');
+  let err = new Error('Test error') as any;
+  err.foo = { 'obj': 'test' };
+  throw err;
 }));
 
 app.get('/dropbox/login', asyncRoute(async function(req, res) {
