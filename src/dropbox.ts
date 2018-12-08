@@ -15,6 +15,9 @@ import { DEV } from './env';
 import fetch = require('node-fetch');
 (global as any).fetch = fetch;
 
+import debugLib = require('debug');
+const debug = debugLib('sortmybox:dropbox');
+
 export interface MoveResults {
   cursor: string;
   results: MoveResult[];
@@ -74,6 +77,7 @@ export class DropboxService {
             newErr.dropboxStatus = newErr.status;
             newErr.status = 500;
             newErr.arguments = args;
+            debug(`Dropbox error [${key}]: ${message}`, JSON.stringify(e));
             throw newErr;
           }
         };
