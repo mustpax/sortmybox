@@ -6,6 +6,9 @@ validate();
 import express = require('express');
 import moment = require('moment');
 
+import debugLib = require('debug');
+const debug = debugLib('sortmybox:app');
+
 let app = express();
 app.enable('trust proxy');
 
@@ -66,12 +69,7 @@ import { raven } from './raven';
 app.use(raven.requestHandler());
 
 app.use(express.static('public'));
-app.use(require('morgan')('short', {
-  skip(req: any, res: any) {
-    // skip
-    return req.url === '/_ah/health';
-  }
-}));
+app.use(require('morgan')('short'));
 
 import cookieSession = require('cookie-session');
 app.use(cookieSession({
@@ -107,7 +105,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err.status !== 404) {
-    console.log('Error', JSON.stringify(err, null, 2));
+    debug('Express error route triggered:', JSON.stringify(err));
   }
   res.status(err.status || 500);
 
