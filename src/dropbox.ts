@@ -15,8 +15,8 @@ import { DEV } from './env';
 import fetch = require('node-fetch');
 (global as any).fetch = fetch;
 
-import debugLib = require('debug');
-const debug = debugLib('sortmybox:dropbox');
+import debugLib from './debug';
+const debug = debugLib.extend('dropbox');
 
 export interface MoveResults {
   cursor: string;
@@ -100,6 +100,7 @@ export class DropboxService {
    */
   async runRules(sortingFolder: string, rules: Rule[], cursor?: string): Promise<MoveResults> {
     rules = _.sortBy(rules, 'rank');
+    let dbg = debug.extend('runRules');
     let files: DropboxTypes.files.ListFolderResult;
     // TODO limit fetch size?
     if (cursor) {
@@ -121,7 +122,7 @@ export class DropboxService {
       for (let rule of rules) {
         if (normalizePath(rule.dest as string) === normalizePath(sortingFolder)) {
           // Do not permit moving files to sorting folder
-          console.log('Skipping rule, destination is sorting folder', rule);
+          dbg('Skipping rule, destination is sorting folder', rule);
           continue;
         }
         if (rs.matches(rule, file.name)) {
@@ -137,14 +138,14 @@ export class DropboxService {
       }
     }
     if (moves.length === 0) {
-      console.log('No matching files. Skipping moves');
+      dbg('No matching files. Skipping moves');
       return {
         results: [],
         cursor: files.cursor,
       };
     }
 
-    console.log(`Moving ${moves.length} files.`);
+    dbg(`Moving ${moves.length} files.`);
     // TODO if there's only a single file to move, do not use batch
     // TODO remove any when Dropbox fixes their type annotations
     let response: any = await this.client.filesMoveBatch({
@@ -155,15 +156,15 @@ export class DropboxService {
     if (response['.tag'] !== 'complete') {
       let jobId = response.async_job_id;
       while (response['.tag'] !== 'complete') {
-        console.log('Job in progress', jobId);
+        dbg('Job in progress', jobId);
         response = await this.client.filesMoveBatchCheck({
           async_job_id: jobId
         });
-        await sleep(500);
+        await sleep(1000);
       }
     }
 
-    console.log(`Moved ${moves.length} files, creating FileMoves`);
+    dbg(`Moved ${moves.length} files, creating FileMoves`);
     return {
       cursor: files.cursor,
       results: response.entries.map((resp: any, i: number) => {
@@ -186,7 +187,7 @@ export class DropboxService {
     if (! rules) {
       rules = await rs.findByOwner(user.id as string);
     }
-    console.log(`Running rules for user ${user.id} useCursor: ${useCursor} rules: ${rules.length}`);
+    debug(`Running rules for user ${user.id} useCursor: ${useCursor} rules: ${rules.length}`);
     let moveResults = await this.runRules(
       user.sortingFolder as string,
       rules,
@@ -204,7 +205,7 @@ export class DropboxService {
       ret.when = now;
       return ret;
     });
-    console.log(`Performed ${fileMoves.length} moves, saving FileMoves`);
+    debug(`Performed ${fileMoves.length} moves, saving FileMoves`);
     await fms.save(fileMoves);
     user.fileMoves = (user.fileMoves || 0) + fileMoves.length;
     user.lastSync = new Date();
