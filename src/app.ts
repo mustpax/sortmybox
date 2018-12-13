@@ -6,8 +6,8 @@ validate();
 import express = require('express');
 import moment = require('moment');
 
-import debugLib = require('debug');
-const debug = debugLib('sortmybox:app');
+import debugLib from './debug';
+const debug = debugLib.extend('app');
 
 let app = express();
 app.enable('trust proxy');
