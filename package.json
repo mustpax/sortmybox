@@ -4,7 +4,6 @@
     "dev": "nodemon",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "./check_not_prod.js && mocha --timeout 10000 --slow 500 --exit --require ts-node/register src/test/**/*.test.ts",
-    "deploy": "gcloud app deploy --no-promote",
     "ts": "ts-node",
     "redis": "redis-cli -h $REDIS_HOST -p $REDIS_PORT -a $REDIS_PASSWORD",
     "tail": "gcloud app logs tail -s default",
