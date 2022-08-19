@@ -1,22 +1,22 @@
-import { Dropbox, files } from 'dropbox';
+import { Dropbox, files } from "dropbox";
 import {
-  Rule, RuleService as rs,
-  User, UserService as us,
+  Rule,
+  RuleService as rs,
+  User,
+  UserService as us,
   FileMoveService as fms,
-} from './models';
-import _ = require('underscore');
-import {
-  endsWithCaseInsensitive
-} from './utils';
+} from "./models";
+import _ = require("underscore");
+import { endsWithCaseInsensitive } from "./utils";
 
-import { DEV } from './env';
+import { DEV } from "./env";
 
 // Dropbox SDK relies on fetch, so we add it to global environment
-import fetch = require('node-fetch');
+import fetch = require("node-fetch");
 (global as any).fetch = fetch;
 
-import debugLib from './debug';
-const debug = debugLib.extend('dropbox');
+import debugLib from "./debug";
+const debug = debugLib.extend("dropbox");
 
 export interface MoveResults {
   cursor: string;
@@ -30,28 +30,31 @@ export interface MoveResult {
 }
 
 function sleep(waitMs: number): Promise<void> {
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     setTimeout(resolve, waitMs);
   });
 }
 
 function normalizePath(path: string, fileName?: string): string {
-  let parts = path.toLowerCase().split('/');
+  let parts = path.toLowerCase().split("/");
   // We normalize paths by filtering empty splits
   // /a/b//c/ will map to ['', 'a', 'b', '', 'c'' ,''] and .filter(x => x)
   // will remove empty strings
-  parts = parts.filter(x => x);
+  parts = parts.filter((x) => x);
   if (fileName) {
     parts.push(fileName);
   }
-  return '/' + parts.join('/');
+  return "/" + parts.join("/");
 }
 
 export class DropboxService {
   client: Dropbox;
 
   constructor(token?: string) {
-    this.client = new Dropbox({clientId: process.env.DROPBOX_KEY, accessToken: token});
+    this.client = new Dropbox({
+      clientId: process.env.DROPBOX_KEY,
+      accessToken: token,
+    });
     (this.client as any).setClientSecret(process.env.DROPBOX_SECRET);
     this.wrapErrors();
   }
@@ -61,7 +64,7 @@ export class DropboxService {
     for (let key of Object.keys(this.client)) {
       let val: any = client[key];
       if (val instanceof Function) {
-        client[key] = async function(...args: any[]) {
+        client[key] = async function (...args: any[]) {
           try {
             return await val.apply(client, args);
           } catch (e) {
@@ -69,7 +72,7 @@ export class DropboxService {
               throw e;
             }
             let message = e && e.error && e.error.error_summary;
-            if (!message && ((typeof e.error) === 'string')) {
+            if (!message && typeof e.error === "string") {
               message = e.error;
             }
             let newErr: any = new Error(`[${key}] ${message}`);
@@ -77,7 +80,10 @@ export class DropboxService {
             newErr.dropboxStatus = newErr.status;
             newErr.status = 500;
             newErr.arguments = args;
-            debug(`Dropbox error [${key}]: ${message}`, JSON.stringify(e));
+            console.log(
+              `Dropbox error [${key}]: ${message}`,
+              JSON.stringify(e)
+            );
             throw newErr;
           }
         };
@@ -87,20 +93,24 @@ export class DropboxService {
 
   async listFolder(path: string): Promise<DropboxTypes.files.ListFolderResult> {
     // Dropbox expects root folder to be represented as empty string
-    if (path === '/') {
-      path = '';
+    if (path === "/") {
+      path = "";
     }
     return await this.client.filesListFolder({
-      path
+      path,
     });
   }
 
   /**
    * Run sorting rules for given user
    */
-  async runRules(sortingFolder: string, rules: Rule[], cursor?: string): Promise<MoveResults> {
-    rules = _.sortBy(rules, 'rank');
-    let dbg = debug.extend('runRules');
+  async runRules(
+    sortingFolder: string,
+    rules: Rule[],
+    cursor?: string
+  ): Promise<MoveResults> {
+    rules = _.sortBy(rules, "rank");
+    let dbg = debug.extend("runRules");
     let files: DropboxTypes.files.ListFolderResult;
     // TODO limit fetch size?
     if (cursor) {
@@ -116,20 +126,22 @@ export class DropboxService {
     let matchedFiles: files.MetadataReference[] = [];
     for (let file of files.entries) {
       // Only move files, not folders
-      if (file['.tag'] !== 'file') {
+      if (file[".tag"] !== "file") {
         continue;
       }
       for (let rule of rules) {
-        if (normalizePath(rule.dest as string) === normalizePath(sortingFolder)) {
+        if (
+          normalizePath(rule.dest as string) === normalizePath(sortingFolder)
+        ) {
           // Do not permit moving files to sorting folder
-          dbg('Skipping rule, destination is sorting folder', rule);
+          dbg("Skipping rule, destination is sorting folder", rule);
           continue;
         }
         if (rs.matches(rule, file.name)) {
           let to_path = normalizePath(rule.dest as string, file.name);
           matchedFiles.push(file);
           moves.push({
-            from_path: (file.path_lower as string),
+            from_path: file.path_lower as string,
             to_path,
           });
           // Once there's a matching rule, move to next file
@@ -138,7 +150,7 @@ export class DropboxService {
       }
     }
     if (moves.length === 0) {
-      dbg('No matching files. Skipping moves');
+      dbg("No matching files. Skipping moves");
       return {
         results: [],
         cursor: files.cursor,
@@ -153,12 +165,12 @@ export class DropboxService {
       autorename: true,
     });
 
-    if (response['.tag'] !== 'complete') {
+    if (response[".tag"] !== "complete") {
       let jobId = response.async_job_id;
-      while (response['.tag'] !== 'complete') {
-        dbg('Job in progress', jobId);
+      while (response[".tag"] !== "complete") {
+        dbg("Job in progress", jobId);
         response = await this.client.filesMoveBatchCheck({
-          async_job_id: jobId
+          async_job_id: jobId,
         });
         await sleep(1000);
       }
@@ -168,39 +180,45 @@ export class DropboxService {
     return {
       cursor: files.cursor,
       results: response.entries.map((resp: any, i: number) => {
-          let fileName = matchedFiles[i].name as string;
-          let fullDestPath = resp.metadata.path_display as string;
-          let conflict = ! endsWithCaseInsensitive(fullDestPath, fileName);
-          return {
-            fileName,
-            fullDestPath,
-            conflict,
-          };
-        }),
+        let fileName = matchedFiles[i].name as string;
+        let fullDestPath = resp.metadata.path_display as string;
+        let conflict = !endsWithCaseInsensitive(fullDestPath, fileName);
+        return {
+          fileName,
+          fullDestPath,
+          conflict,
+        };
+      }),
     };
   }
 
   /**
    * Run rules for given user and update datastore
    */
-  async runRulesAndUpdateUserAndFileMoves(user: User, useCursor: boolean, rules?: Rule[]) {
-    if (! rules) {
+  async runRulesAndUpdateUserAndFileMoves(
+    user: User,
+    useCursor: boolean,
+    rules?: Rule[]
+  ) {
+    if (!rules) {
       rules = await rs.findByOwner(user.id as string);
     }
-    debug(`Running rules for user ${user.id} useCursor: ${useCursor} rules: ${rules.length}`);
+    debug(
+      `Running rules for user ${user.id} useCursor: ${useCursor} rules: ${rules.length}`
+    );
     let moveResults = await this.runRules(
       user.sortingFolder as string,
       rules,
       useCursor ? user.dropboxCursor : undefined
     );
     let now = new Date();
-    let fileMoves = moveResults.results.map(mv => {
+    let fileMoves = moveResults.results.map((mv) => {
       let ret = fms.makeNew(user.id as string);
       ret.fromFile = mv.fileName;
       ret.hasCollision = mv.conflict;
-      let destParts = mv.fullDestPath.split('/');
+      let destParts = mv.fullDestPath.split("/");
       let destFileName = destParts.pop();
-      ret.toDir = destParts.join('/');
+      ret.toDir = destParts.join("/");
       ret.resolvedName = ret.hasCollision ? destFileName : undefined;
       ret.when = now;
       return ret;
@@ -238,12 +256,12 @@ export class DropboxService {
     return (
       innerMostError &&
       innerMostError.path &&
-      innerMostError.path['.tag'] === 'not_found'
+      innerMostError.path[".tag"] === "not_found"
     );
   }
 
   getRedirectUrl(host?: string) {
-    let protocol = DEV ? 'http' : 'https';
+    let protocol = DEV ? "http" : "https";
     return `${protocol}://${host}/dropbox/cb`;
   }
 }

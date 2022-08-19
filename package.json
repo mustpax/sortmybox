@@ -36,7 +36,7 @@
     "csurf": "1.9.0",
     "debug": "4.1.0",
     "dotenv": "5.0.1",
-    "dropbox": "4.0.x",
+    "dropbox": "^5",
     "express": "4.14.x",
     "express-handlebars": "3.0.x",
     "ioredis": "3.2.2",
