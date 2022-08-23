@@ -47,7 +47,7 @@
     "morgan": "1.9.0",
     "node-fetch": "2.1.2",
     "raven": "2.5.0",
-    "ts-node": "5.0.1",
+    "ts-node": "^5.0.1",
     "tslint": "5.9.1",
     "typescript": "2.7.2",
     "underscore": "1.8.3"
